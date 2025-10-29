@@ -6,6 +6,7 @@ services:
     branch: main
     plan: free
     numInstances: 1
+    rootDir: server
 
     buildCommand: |
       pip install --upgrade pip
@@ -17,5 +18,4 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.1
-
 # TODO: add a service for dev
