@@ -4,7 +4,7 @@ services:
     runtime: python
     region: frankfurt
     branch: main
-    plan: starter
+    plan: free
     numInstances: 1
 
     buildCommand: |
