@@ -12,7 +12,7 @@ services:
       pip install pipenv
       pipenv install --deploy --ignore-pipfile
 
-    startCommand: pipenv run prod # TODO: fixme later
+    startCommand: pipenv run prod # TODO: fixme later -
 
     envVars:
       - key: PYTHON_VERSION
