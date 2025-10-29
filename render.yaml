@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: crowd-sourced-travel-planner-backend
+    name: backend-prod
     runtime: python
     region: frankfurt
     branch: main
@@ -18,4 +18,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.1
+      # TODO: specify node version
 # TODO: add a service for dev
