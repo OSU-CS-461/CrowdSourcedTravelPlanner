@@ -17,3 +17,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.1
+
+# TODO: add a service for dev
