@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: crowd-sourced-travel-planner-backend
+    runtime: python
+    region: frankfurt
+    branch: main
+    plan: starter
+    numInstances: 1
+
+    buildCommand: |
+      pip install --upgrade pip
+      pip install pipenv
+      pipenv install --deploy --ignore-pipfile
+
+    startCommand: pipenv run gunicorn app:app
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
