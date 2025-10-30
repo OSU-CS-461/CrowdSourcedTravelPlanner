@@ -27,7 +27,11 @@ projects:
               rm -rf ../server/public/*
               cp -r ./dist/* ../server/public
 
-            startCommand: npm start
+            startCommand: |
+              echo "Starting service..."
+              pwd
+              npm start
+              echo "Service started"
         databases:
           - name: db-prod
             plan: basic-256mb # $6/month + also, can only have 1 free DB
