@@ -3,10 +3,10 @@ import "./index.css";
 import App from "./App.tsx";
 
 if (import.meta.env.DEV) {
-  console.log("Is dev mode");
+  console.log("Dev");
   console.log(import.meta.env);
 } else {
-  console.log("Is prod mode");
+  console.log("Prod");
   console.log(import.meta.env);
 }
 
