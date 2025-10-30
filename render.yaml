@@ -13,6 +13,16 @@ services:
       pip install pipenv
       pipenv install --deploy --ignore-pipfile
 
+    # build client and place it in public for backend to serve
+    # so it can hydrate the session on first render
+    preDeployCommand: |
+      cd ../client
+      npm ci
+      npm run build
+      mkdir ../server/public
+      rm -rf ../server/public/*
+      cp -r ./dist/* ../server/public
+
     startCommand: pipenv run prod # TODO: fixme later -
 
     envVars:
