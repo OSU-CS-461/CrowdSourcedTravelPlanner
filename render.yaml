@@ -22,10 +22,10 @@ projects:
               # so it can hydrate the session on first render
               cd ../client
               npm ci
-              npm run build
-              mkdir ../server/static
-              rm -rf ../server/static/*
-              cp -r ./dist/* ../server/static
+              npm run buildy
+              mkdir ../server/public
+              rm -rf ../server/public/*
+              cp -r ./dist/* ../server/public
 
             startCommand: npm start
         databases:
@@ -55,9 +55,9 @@ projects:
               cd ../client
               npm ci
               npm run build
-              mkdir ../server/static
-              rm -rf ../server/static/*
-              cp -r ./dist/* ../server/static
+              mkdir ../server/public
+              rm -rf ../server/public/*
+              cp -r ./dist/* ../server/public
 
             startCommand: npm start # TODO: fixme later -
         databases:
