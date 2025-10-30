@@ -18,6 +18,8 @@ function App() {
   return (
     <>
       <div>
+        <p>Response: {response}</p>
+
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
