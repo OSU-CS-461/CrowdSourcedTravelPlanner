@@ -25,9 +25,9 @@ projects:
               cd ../client
               npm ci
               npm run build
-              mkdir ../server/public
-              rm -rf ../server/public/*
-              cp -r ./dist/* ../server/public
+              mkdir ../server/static
+              rm -rf ../server/static/*
+              cp -r ./dist/* ../server/static
 
             startCommand: pipenv run prod # TODO: fixme later -
 
@@ -61,9 +61,9 @@ projects:
               cd ../client
               npm ci
               npm run build
-              mkdir ../server/public
-              rm -rf ../server/public/*
-              cp -r ./dist/* ../server/public
+              mkdir ../server/static
+              rm -rf ../server/static/*
+              cp -r ./dist/* ../server/static
 
             startCommand: pipenv run prod # TODO: fixme later -
 
