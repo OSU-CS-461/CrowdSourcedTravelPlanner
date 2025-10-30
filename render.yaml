@@ -46,9 +46,7 @@ projects:
             rootDir: server
 
             buildCommand: |
-              pip install --upgrade pip
-              pip install pipenv
-              pipenv install --deploy --ignore-pipfile
+              npm ci
 
               # build client and place it in public for backend to serve
               # so it can hydrate the session on first render
