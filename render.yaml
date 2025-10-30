@@ -1,11 +1,13 @@
 projects:
   - name: Crowd Sourced Travel Planner
     environments:
-      # Prod
-      - name: prod
+      # Production
+      - name: Production
+        permissions:
+          protection: enabled
         services:
           - type: web
-            name: server-prod
+            name: server-production
             runtime: python
             region: frankfurt
             branch: main
@@ -37,11 +39,13 @@ projects:
             plan: free
             region: oregon
 
-      # Dev
-      - name: dev
+      # Development
+      - name: Development
+        permissions:
+          protection: enabled
         services:
           - type: web
-            name: server-dev
+            name: server-development
             runtime: python
             region: frankfurt
             branch: dev
