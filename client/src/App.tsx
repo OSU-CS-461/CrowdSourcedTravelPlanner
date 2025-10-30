@@ -10,8 +10,8 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      const response = await axios.get(import.meta.env.VITE_API_URL);
-      setResponse(response.data);
+      const response = await axios.get("/api/hello");
+      setResponse(response.data.message);
     })();
   }, []);
 
