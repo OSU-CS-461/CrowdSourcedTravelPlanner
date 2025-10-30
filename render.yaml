@@ -3,6 +3,8 @@ projects:
     environments:
       # Production
       - name: Production
+        permissions:
+          protection: enabled
         services:
           - type: web
             name: server-prod
