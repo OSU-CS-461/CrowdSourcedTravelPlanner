@@ -1,29 +1,50 @@
-services:
-  - type: web
-    name: server-prod
-    runtime: python
-    region: frankfurt
-    branch: main
-    plan: free
-    numInstances: 1
-    rootDir: server
+projects:
+  - name: Crowd Sourced Travel Planner
+    environments:
+      # Prod
+      - name: prod
+        services:
+          - type: web
+            name: server-prod
+            runtime: python
+            region: frankfurt
+            branch: main
+            plan: free
+            numInstances: 1
+            rootDir: server
 
-    buildCommand: |
-      pip install --upgrade pip
-      pip install pipenv
-      pipenv install --deploy --ignore-pipfile
+            buildCommand: |
+              pip install --upgrade pip
+              pip install pipenv
+              pipenv install --deploy --ignore-pipfile
 
-      # build client and place it in public for backend to serve
-      # so it can hydrate the session on first render
-      cd ../client
-      npm ci
-      npm run build
-      mkdir ../server/public
-      rm -rf ../server/public/*
-      cp -r ./dist/* ../server/public
+              # build client and place it in public for backend to serve
+              # so it can hydrate the session on first render
+              cd ../client
+              npm ci
+              npm run build
+              mkdir ../server/public
+              rm -rf ../server/public/*
+              cp -r ./dist/* ../server/public
 
-    startCommand: pipenv run prod # TODO: fixme later -
+            startCommand: pipenv run prod # TODO: fixme later -
 
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.1
+            envVars:
+              - key: PYTHON_VERSION
+                value: 3.10.1
+        databases:
+          - name: db-prod
+            plan: free
+            region: oregon
+
+      # Staging
+      - name: staging
+        services:
+          - type: web
+            name: server-prod
+            runtime: python
+            plan: free
+        databases:
+          - name: db-staging
+            previewPlan: free
+            region: oregon
