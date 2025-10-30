@@ -37,14 +37,14 @@ projects:
             plan: free
             region: oregon
 
-      # Staging
-      - name: staging
+      # Dev
+      - name: dev
         services:
           - type: web
-            name: server-staging
+            name: server-dev
             runtime: python
             region: frankfurt
-            branch: main
+            branch: dev
             plan: free
             numInstances: 1
             rootDir: server
