@@ -14,6 +14,9 @@ projects:
             plan: starter # $7/month (otherwise, the server can have downtime)
             numInstances: 1
             rootDir: server
+            envVars:
+              - key: NODE_VERSION
+                value: 23.10.0
 
             buildCommand: |
               npm ci
@@ -49,6 +52,9 @@ projects:
             plan: free
             numInstances: 1
             rootDir: server
+            envVars:
+              - key: NODE_VERSION
+                value: 23.10.0
 
             buildCommand: |
               npm ci
