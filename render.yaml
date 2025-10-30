@@ -22,7 +22,7 @@ projects:
               # so it can hydrate the session on first render
               cd ../client
               npm ci
-              npm run buildy
+              npm run build
               mkdir ../server/public
               rm -rf ../server/public/*
               cp -r ./dist/* ../server/public
