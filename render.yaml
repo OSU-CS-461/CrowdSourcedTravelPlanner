@@ -3,8 +3,6 @@ projects:
     environments:
       # Production
       - name: Production
-        permissions:
-          protection: enabled
         services:
           - type: web
             name: server-production
@@ -41,8 +39,6 @@ projects:
 
       # Development
       - name: Development
-        permissions:
-          protection: enabled
         services:
           - type: web
             name: server-development
