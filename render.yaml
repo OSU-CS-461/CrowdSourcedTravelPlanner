@@ -17,6 +17,7 @@ projects:
 
             buildCommand: |
               npm ci
+              npx prisma generate
 
               # build client and place it in public for the server to serve
               # so it can hydrate the session on first render
@@ -51,6 +52,7 @@ projects:
 
             buildCommand: |
               npm ci
+              npx prisma generate
 
               # build client and place it in public for backend to serve
               # so it can hydrate the session on first render
