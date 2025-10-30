@@ -18,5 +18,3 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.1
-      # TODO: specify node version
-# TODO: add a service for dev
