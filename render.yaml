@@ -7,7 +7,7 @@ projects:
           - type: web
             name: server-prod
             runtime: python
-            region: frankfurt
+            region: oregon
             branch: main
             plan: starter # $7/month (otherwise, the server can have downtime)
             numInstances: 1
@@ -43,7 +43,7 @@ projects:
           - type: web
             name: server-dev
             runtime: python
-            region: frankfurt
+            region: oregon
             branch: dev
             plan: free
             numInstances: 1
