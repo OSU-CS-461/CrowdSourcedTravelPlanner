@@ -2,23 +2,33 @@ import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
-import { exampleRequest } from "./services/api.service";
+import { exampleRequest, usersExampleRequest } from "./services/api.service";
 
 function App() {
   const [count, setCount] = useState(0);
   const [response, setResponse] = useState(null);
+  const [users, setUsers] = useState<{ id: number }[]>([]);
 
   useEffect(() => {
     (async () => {
       const response = await exampleRequest();
       setResponse(response);
     })();
+
+    (async () => {
+      const users = await usersExampleRequest();
+      setResponse(users);
+    })();
   }, []);
 
   return (
     <>
       <div>
-        <p>Response: {response}</p>
+        <p>Example API Response: {response}</p>
+        <p>Example db request for users: </p>
+        {users.map((user) => (
+          <p>id: {user.id}</p>
+        ))}
 
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />

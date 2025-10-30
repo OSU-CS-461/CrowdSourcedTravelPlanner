@@ -8,3 +8,8 @@ export const exampleRequest = async () => {
   const response = await axios.get(API_BASE + "/hello");
   return response.data.message;
 };
+
+export const usersExampleRequest = async () => {
+  const response = await axios.get(API_BASE + "/users");
+  return response.data.users;
+};
