@@ -1,14 +1,19 @@
+import "dotenv/config";
 import express, { Request, Response } from "express";
 import path from "path";
+import morgan from "morgan";
+import { PrismaClient } from "./generated/prisma/client";
 
 const app = express();
-const port = 10000;
+app.use(morgan("dev"));
+const PORT = 10000;
+
+const prisma = new PrismaClient();
 
 app.use(express.static("public"));
 
 app.get("/", (req: Request, res: Response) => {
   const spaFilePath = path.resolve(__dirname, "..", "public");
-  console.log(spaFilePath);
   res.sendFile(spaFilePath);
 });
 
@@ -16,6 +21,16 @@ app.get("/api/hello", (req: Request, res: Response) => {
   res.json({ message: "Hello World!" });
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Example app listening on port http://localhost:${port}`);
+app.get("/api/users", async (req: Request, res: Response) => {
+  const userCount = await prisma.user.count();
+  if (userCount < 10) {
+    // create empty user
+    await prisma.user.create({});
+  }
+  const users = await prisma.user.findMany();
+  res.json({ users });
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Example app listening on port http://localhost:${PORT}`);
 });

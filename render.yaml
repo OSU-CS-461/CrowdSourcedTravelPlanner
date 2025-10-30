@@ -61,7 +61,7 @@ projects:
               rm -rf ../server/public/*
               cp -r ./dist/* ../server/public
 
-            startCommand: npm start # TODO: fixme later -
+            startCommand: npm start
         databases:
           - name: db-dev
             region: oregon
