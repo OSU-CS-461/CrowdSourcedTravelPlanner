@@ -17,7 +17,7 @@ function App() {
 
     (async () => {
       const users = await usersExampleRequest();
-      setResponse(users);
+      setUsers(users);
     })();
   }, []);
 
