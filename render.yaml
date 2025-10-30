@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: backend-prod
+    name: server-prod
     runtime: python
     region: frankfurt
     branch: main
