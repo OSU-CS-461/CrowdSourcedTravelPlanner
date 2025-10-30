@@ -13,9 +13,8 @@ services:
       pip install pipenv
       pipenv install --deploy --ignore-pipfile
 
-    # build client and place it in public for backend to serve
-    # so it can hydrate the session on first render
-    preDeployCommand: |
+      # build client and place it in public for backend to serve
+      # so it can hydrate the session on first render
       cd ../client
       npm ci
       npm run build
