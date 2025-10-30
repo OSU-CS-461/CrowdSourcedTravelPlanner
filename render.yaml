@@ -5,11 +5,11 @@ projects:
       - name: Production
         services:
           - type: web
-            name: server-production
+            name: server-prod
             runtime: python
             region: frankfurt
             branch: main
-            plan: free
+            plan: starter # $7/month (otherwise, the server can have downtime)
             numInstances: 1
             rootDir: server
 
@@ -34,14 +34,14 @@ projects:
                 value: 3.10.1
         databases:
           - name: db-prod
-            plan: free
+            plan: basic-256mb # $6/month + also, can only have 1 free DB
             region: oregon
 
       # Development
       - name: Development
         services:
           - type: web
-            name: server-development
+            name: server-dev
             runtime: python
             region: frankfurt
             branch: dev
@@ -69,6 +69,6 @@ projects:
               - key: PYTHON_VERSION
                 value: 3.10.1
         databases:
-          - name: db-staging
+          - name: db-dev
             region: oregon
             plan: free
