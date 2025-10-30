@@ -9,6 +9,7 @@ prod = "flask --app main run --port 10000 --host 0.0.0.0"
 
 [packages]
 flask = "*"
+flask-cors = "6.0.1"
 
 [dev-packages]
 
