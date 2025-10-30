@@ -41,10 +41,34 @@ projects:
       - name: staging
         services:
           - type: web
-            name: server-prod
+            name: server-staging
             runtime: python
+            region: frankfurt
+            branch: main
             plan: free
+            numInstances: 1
+            rootDir: server
+
+            buildCommand: |
+              pip install --upgrade pip
+              pip install pipenv
+              pipenv install --deploy --ignore-pipfile
+
+              # build client and place it in public for backend to serve
+              # so it can hydrate the session on first render
+              cd ../client
+              npm ci
+              npm run build
+              mkdir ../server/public
+              rm -rf ../server/public/*
+              cp -r ./dist/* ../server/public
+
+            startCommand: pipenv run prod # TODO: fixme later -
+
+            envVars:
+              - key: PYTHON_VERSION
+                value: 3.10.1
         databases:
           - name: db-staging
-            previewPlan: free
             region: oregon
+            plan: free
