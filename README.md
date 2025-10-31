@@ -35,4 +35,7 @@ To get started, checkout a branch off the `main` branch:
 
 For example: `git checkout -b drew/readme-updates`
 
-Then commit as usual and then open a pull request against the main branch in Github when you're ready to merge your changes.
+Then commit as usual. Once you're ready to open a pull request, push your branch up to Github:
+`git push -u origin <your-name>/<branch-name>`
+
+Then open a pull request against the main branch in Github when you're ready to merge your changes.
