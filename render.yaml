@@ -38,5 +38,5 @@ projects:
               echo "Service started"
         databases:
           - name: db-prod
-            plan: free # $6/month + also, can only have 1 free DB
+            plan: basic-256mb # $6/month + also, can only have 1 free DB
             region: oregon
