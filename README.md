@@ -13,7 +13,7 @@ An easy way to manage your node versions is through nvm. This can be installed t
 
 # Local Dev
 
-When developing locally, run the client and the server by following the README.md instructions in the each directory.
+When developing locally, run the client and the server by following the README.md instructions in the each directory (after the shared setup steps here).
 
 # Deployment Info
 
@@ -25,3 +25,14 @@ For more information on deployment, checkout `render.yml`.
 
 - Render: Node application server, PostgreSQL db
 - Cloudflare R2: Object store (for image upload)
+
+# Git Flow
+
+We'll be following a simplified trunk based Git workflow for simplicity (plus, we don't need an incredibly stable product, since it's just a college project).
+
+To get started, checkout a branch off the `main` branch:
+`git checkout -b <your-name>/<branch-name>`
+
+For example: `git checkout -b drew/readme-updates`
+
+Then commit as usual and then open a pull request against the main branch in Github when you're ready to merge your changes.
