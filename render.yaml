@@ -1,7 +1,6 @@
 projects:
   - name: Crowd Sourced Travel Planner
     environments:
-      # Production
       - name: Production
         permissions:
           protection: enabled
@@ -41,38 +40,3 @@ projects:
           - name: db-prod
             plan: basic-256mb # $6/month + also, can only have 1 free DB
             region: oregon
-
-      # Development
-      - name: Development
-        services:
-          - type: web
-            name: server-dev
-            runtime: node
-            region: oregon
-            branch: dev
-            plan: free
-            numInstances: 1
-            rootDir: server
-            envVars:
-              - key: NODE_VERSION
-                value: 23.10.0
-
-            buildCommand: |
-              npm ci
-              npx prisma generate
-              npx prisma migrate dev
-
-              # build client and place it in public for backend to serve
-              # so it can hydrate the session on first render
-              cd ../client
-              npm ci
-              npm run build
-              mkdir ../server/public
-              rm -rf ../server/public/*
-              cp -r ./dist/* ../server/public
-
-            startCommand: npm start
-        databases:
-          - name: db-dev
-            region: oregon
-            plan: free
