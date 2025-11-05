@@ -2,10 +2,12 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import path from "path";
 import morgan from "morgan";
+import cors from "cors";
 import { PrismaClient } from "./generated/prisma/client";
 
 const app = express();
 app.use(morgan("dev"));
+app.use(cors());
 const PORT = 10000;
 
 const prisma = new PrismaClient();
