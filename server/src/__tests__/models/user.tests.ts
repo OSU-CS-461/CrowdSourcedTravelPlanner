@@ -21,6 +21,13 @@ describe("User", () => {
     expect(errors.fieldErrors.username).toBeTruthy();
   });
 
+  it("lowercases emails", () => {
+    const mixedCase = { ...VALID_USER_SIGNUP(), email: "DREW@Example.COM" };
+    const parsed = UserSignUp.safeParse(mixedCase);
+    expect(parsed.success).toBeTruthy();
+    expect(parsed.data!.email).toBe("drew@example.com");
+  });
+
   it("requires an email", () => {
     const { email: _omit, ...noEmail } = VALID_USER_SIGNUP();
     const user = UserSignUp.safeParse(noEmail);
