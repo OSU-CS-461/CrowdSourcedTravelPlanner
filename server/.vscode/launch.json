@@ -11,6 +11,25 @@
       "args": ["run", "${relativeFile}"],
       "smartStep": true,
       "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Current Integration Test File",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "${relativeFile}",
+        "--config",
+        "vitest.integration.config.ts"
+      ],
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "smartStep": true,
+      "console": "integratedTerminal"
     }
   ]
 }
