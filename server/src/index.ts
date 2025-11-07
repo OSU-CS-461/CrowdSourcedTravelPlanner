@@ -27,7 +27,7 @@ app.get("/api/users", async (req: Request, res: Response) => {
   const userCount = await prisma.user.count();
   if (userCount < 10) {
     // create empty user
-    await prisma.user.create({});
+    // await prisma.user.create({});
   }
   const users = await prisma.user.findMany();
   res.json({ users });

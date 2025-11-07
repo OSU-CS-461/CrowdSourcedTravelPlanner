@@ -28,6 +28,7 @@
     "prisma": "^6.18.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
+    "vitest-mock-extended": "^3.1.0",
     "zod": "^4.1.12"
   }
 }
