@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "test": "vitest --reporter=verbose"
+    "test": "NODE_ENV=test vitest --run",
+    "test:watch": "NODE_ENV=test vitest --reporter=verbose",
+    "test:coverage": "NODE_ENV=test vitest run --coverage",
+    "test:integration": "NODE_ENV=test vitest --config vitest.integration.config.ts"
   },
   "keywords": [],
   "author": "",
