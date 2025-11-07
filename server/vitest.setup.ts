@@ -1,8 +1,8 @@
 import { beforeAll, beforeEach, afterAll } from "vitest";
-import { PrismaClient } from "@prisma/client";
 import { Client as PgClient } from "pg";
 import { execa } from "execa";
 import prisma from "./src/db/prisma";
+import { PrismaClient } from "@prisma/client";
 
 const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ??
@@ -11,23 +11,20 @@ const TEST_DATABASE_URL =
 const worker = process.env.VITEST_WORKER_ID ?? "1";
 const schema = `test_w${worker}`;
 
-// Point Prisma to this schema
+// Prisma uses this (note the ?schema=…)
 process.env.DATABASE_URL = `${TEST_DATABASE_URL}?schema=${schema}`;
 
-// 🔧 Ensures both the role and database exist
 async function ensureRoleAndDatabase(connectionString: string) {
   const url = new URL(connectionString);
   const dbName = url.pathname.slice(1) || "app_test";
 
-  // Connect as your local mac user to default 'postgres' DB
+  // connect as your mac user to default 'postgres'
   const adminConn = `postgresql://${process.env.USER}@${url.hostname}:${
     url.port || 5432
   }/postgres`;
   const admin = new PgClient({ connectionString: adminConn });
   await admin.connect();
-
   try {
-    // Create the postgres role if missing
     await admin.query(`
       DO $$
       BEGIN
@@ -37,14 +34,11 @@ async function ensureRoleAndDatabase(connectionString: string) {
       END
       $$;
     `);
-
-    // Create the test database if missing
-    const res = await admin.query(
+    const exists = await admin.query(
       "SELECT 1 FROM pg_database WHERE datname = $1",
       [dbName]
     );
-    if (res.rowCount === 0) {
-      console.log(`🪄 Creating test database '${dbName}' owned by postgres...`);
+    if (exists.rowCount === 0) {
       await admin.query(`CREATE DATABASE "${dbName}" OWNER postgres`);
     }
   } finally {
@@ -52,28 +46,43 @@ async function ensureRoleAndDatabase(connectionString: string) {
   }
 }
 
-// Optional: truncate between tests
-async function truncateAll(prisma: PrismaClient) {
-  const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
+// ✅ Drop & recreate the per-worker schema to avoid P3009
+async function resetWorkerSchema(connectionString: string, schemaName: string) {
+  const base = new URL(connectionString);
+  // connect to the target DB (not the default 'postgres')
+  const conn = base.toString(); // no ?schema here; we’ll address schema via SQL
+  const client = new PgClient({ connectionString: conn });
+  await client.connect();
+  try {
+    await client.query(`DROP SCHEMA IF EXISTS "${schemaName}" CASCADE;`);
+    await client.query(`CREATE SCHEMA "${schemaName}";`);
+    // optional but harmless: set owner
+    await client.query(`ALTER SCHEMA "${schemaName}" OWNER TO postgres;`);
+  } finally {
+    await client.end();
+  }
+}
+
+// truncate all tables between tests
+async function truncateAll(p: PrismaClient) {
+  const tables = await p.$queryRaw<Array<{ tablename: string }>>`
     SELECT tablename FROM pg_tables WHERE schemaname = current_schema()
   `;
   if (tables.length) {
     const names = tables.map((t) => `"${t.tablename}"`).join(", ");
-    await prisma.$executeRawUnsafe(
+    await p.$executeRawUnsafe(
       `TRUNCATE TABLE ${names} RESTART IDENTITY CASCADE;`
     );
   }
 }
 
-// -----------------------------------------------------------------------------
-// Vitest lifecycle
-// -----------------------------------------------------------------------------
 beforeAll(async () => {
-  // 1. Ensure role + DB exist
   await ensureRoleAndDatabase(TEST_DATABASE_URL);
-
-  // 2. Apply migrations to the per-worker schema
-  await execa("npx", ["prisma", "migrate", "deploy"], { stdio: "inherit" });
+  await resetWorkerSchema(TEST_DATABASE_URL, schema); // 👈 wipe any failed _prisma_migrations state
+  await execa("npx", ["prisma", "migrate", "deploy"], {
+    // then apply real migrations cleanly
+    stdio: "inherit",
+  });
 });
 
 beforeEach(async () => {
