@@ -4,6 +4,8 @@ import { execa } from "execa";
 import prisma from "./src/db/prisma";
 import { PrismaClient } from "@prisma/client";
 
+process.env.JWT_SECRET = "pretend-private-key";
+
 const TEST_DATABASE_URL =
   "postgresql://postgres:postgres@localhost:5432/app_test";
 process.env.DATABASE_URL = TEST_DATABASE_URL; // for prisma client
