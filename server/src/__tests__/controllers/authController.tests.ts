@@ -4,22 +4,11 @@ import app from "../../app";
 import { VALID_USER_SIGNUP } from "../../__fixtures__/userFixtures";
 import prisma from "../../db/prisma";
 
-describe.only("AuthController", () => {
+describe("AuthController", () => {
   let email: string;
   const password = "Password123!";
 
-  // it("logs in an existing user and returns a token", async () => {
-  //   const res = await request(app)
-  //     .post("/auth/login")
-  //     .send({ email, password });
-
-  //   expect([200, 201]).toContain(res.status);
-  //   expect(res.body).toBeDefined();
-  //   expect(res.body).toHaveProperty("token");
-  //   expect(typeof res.body.token).toBe("string");
-  // });
-
-  describe("/api/auth/register", () => {
+  describe("POST /api/auth/register", () => {
     describe("with valid args", async () => {
       it("responds with an authToken cookie", async () => {
         const response = await request
@@ -46,7 +35,7 @@ describe.only("AuthController", () => {
         expect(await prisma.user.count()).toEqual(1);
       });
 
-      it("responds with the correct contract user", async () => {
+      it("responds with the correct contract", async () => {
         const userArgs = VALID_USER_SIGNUP();
 
         const response = await request
@@ -61,6 +50,59 @@ describe.only("AuthController", () => {
           email: userArgs.email,
           username: userArgs.username,
         });
+        expect(await prisma.user.count()).toEqual(1);
+      });
+    });
+
+    describe("with invalid args", () => {
+      it.only("responds 400 and does not set authToken when required fields are missing", async () => {
+        const incomplete = { username: "noemail", password: "Password123!" }; // missing email
+
+        const response = await request
+          .agent(app)
+          .post("/api/auth/register")
+          .send(incomplete)
+          .expect(400);
+
+        expect(response.body).toEqual({ error: "hello world" });
+        const setCookie = response.headers["set-cookie"] as unknown as
+          | string[]
+          | undefined;
+        expect(setCookie).toBeUndefined();
+        expect(await prisma.user.count()).toEqual(0);
+      });
+
+      it("does not create a second user with the same email", async () => {
+        const userArgs = VALID_USER_SIGNUP();
+
+        // create first user
+        await request
+          .agent(app)
+          .post("/api/auth/register")
+          .send(userArgs)
+          .expect(200);
+        expect(await prisma.user.count()).toEqual(1);
+
+        // attempt to create another user with same email
+        const duplicate = {
+          ...VALID_USER_SIGNUP(),
+          email: userArgs.email,
+          username: "othername",
+        };
+        const response = await request
+          .agent(app)
+          .post("/api/auth/register")
+          .send(duplicate)
+          .expect(400);
+
+        const setCookie = response.headers["set-cookie"] as unknown as
+          | string[]
+          | undefined;
+        // ensure no new auth cookie for failed attempt
+        if (setCookie) {
+          expect(setCookie.some((c) => c.match("authToken"))).toBeFalsy();
+        }
+        // still only one user in DB
         expect(await prisma.user.count()).toEqual(1);
       });
     });
