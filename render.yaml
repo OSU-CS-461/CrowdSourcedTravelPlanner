@@ -19,7 +19,7 @@ projects:
 
             buildCommand: |
               npm ci
-              npx prisma generate
+              npx prisma generate --no-engine
               npx prisma migrate dev
 
               # build client and place it in public for the server to serve
