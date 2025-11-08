@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { createUser } from "../services/userService";
 import { sign } from "../services/authTokenService";
-import { ZodError } from "zod";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -13,7 +12,7 @@ export const register = async (req: Request, res: Response) => {
     });
     return res.status(201).json(user);
   } catch (err) {
-    // TODO: add standard format for error messages
-    return res.status(400).json({ error: "Internal server error" });
+    // TODO: @drew add standard format for error messages
+    return res.status(400).json({ error: "Error message todo" });
   }
 };

@@ -5,9 +5,6 @@ import { VALID_USER_SIGNUP } from "../../__fixtures__/userFixtures";
 import prisma from "../../db/prisma";
 
 describe("AuthController", () => {
-  let email: string;
-  const password = "Password123!";
-
   describe("POST /api/auth/register", () => {
     describe("with valid args", async () => {
       it("responds with an authToken cookie", async () => {
@@ -15,7 +12,7 @@ describe("AuthController", () => {
           .agent(app)
           .post("/api/auth/register")
           .send(VALID_USER_SIGNUP())
-          .expect(200);
+          .expect(201);
 
         const setCookie = response.headers["set-cookie"] as unknown as string[];
         expect(Array.isArray(setCookie)).toBeTruthy();
@@ -30,7 +27,7 @@ describe("AuthController", () => {
           .agent(app)
           .post("/api/auth/register")
           .send(userArgs)
-          .expect(200);
+          .expect(201);
 
         expect(await prisma.user.count()).toEqual(1);
       });
@@ -38,11 +35,11 @@ describe("AuthController", () => {
       it("responds with the correct contract", async () => {
         const userArgs = VALID_USER_SIGNUP();
 
-        const response = await request
+        await request
           .agent(app)
           .post("/api/auth/register")
           .send(userArgs)
-          .expect(200);
+          .expect(201);
 
         const { id, passwordDigest, ...storedUser } =
           (await prisma.user.findFirst())!;
@@ -55,7 +52,7 @@ describe("AuthController", () => {
     });
 
     describe("with invalid args", () => {
-      it.only("responds 400 and does not set authToken when required fields are missing", async () => {
+      it("responds 400 and does not set authToken when required fields are missing", async () => {
         const incomplete = { username: "noemail", password: "Password123!" }; // missing email
 
         const response = await request
@@ -64,7 +61,7 @@ describe("AuthController", () => {
           .send(incomplete)
           .expect(400);
 
-        expect(response.body).toEqual({ error: "hello world" });
+        expect(response.body.error).toBeDefined();
         const setCookie = response.headers["set-cookie"] as unknown as
           | string[]
           | undefined;
@@ -80,7 +77,7 @@ describe("AuthController", () => {
           .agent(app)
           .post("/api/auth/register")
           .send(userArgs)
-          .expect(200);
+          .expect(201);
         expect(await prisma.user.count()).toEqual(1);
 
         // attempt to create another user with same email
