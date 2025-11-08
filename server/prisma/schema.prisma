@@ -14,6 +14,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
 model User {
-  id        Int      @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
+  experiences Experience[]
+  reviews     Review[]
+}
+
+model Experience {
+  id              Int           @id @default(autoincrement())
+  createdBy       Int
+  user            User          @relation(fields: [createdBy], references: [id])
+
+  title           String
+  description     String      
+  descriptionEdit String?       
+  dateCreated     DateTime      @default(now())
+  lastUpdated     DateTime      @default(now())
+  country         String
+  adminRegion     String?       
+  city            String?      
+  street          String?       
+  postalCode      String?       
+  latitude        Float?        
+  longitude       Float?        
+  thumbnail       String?       
+  avgRating       Float?       
+  keywords        String[]
+
+  reviews         Review[]
+}
+
+model Review {
+  id            Int           @id @default(autoincrement())
+  rating        Int
+  reviewText    String
+  dateCreated   DateTime      @default(now())
+
+  experienceId  Int 
+  experience    Experience    @relation(fields: [experienceId], references: [id])
+
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
 }

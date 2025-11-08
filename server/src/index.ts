@@ -5,14 +5,25 @@ import morgan from "morgan";
 import cors from "cors";
 import { PrismaClient } from "./generated/prisma/client";
 
-const app = express();
+// ---- Create the app ----
+
+export const app = express();
+
+// ---- Middleware ----
+
+app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
-const PORT = 10000;
 
 const prisma = new PrismaClient();
 
 app.use(express.static("public"));
+
+// --- Endpoints ---
+
+import { default as experienceRouter } from './routes/experiences';
+app.use('/experiences', experienceRouter);
+
 
 app.get("/", (req: Request, res: Response) => {
   const spaFilePath = path.resolve(__dirname, "..", "public");
@@ -33,6 +44,12 @@ app.get("/api/users", async (req: Request, res: Response) => {
   res.json({ users });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Example app listening on port http://localhost:${PORT}`);
-});
+
+// Only start server if this file is run directly 
+// (Allows for testing with supertest)
+if (require.main === module) {
+  const PORT = 10000;
+  app.listen(PORT, () => {
+    console.log(`App listening on http://localhost:${PORT}`);
+  });
+}
