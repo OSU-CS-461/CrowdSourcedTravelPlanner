@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import app from "../../app";
 import { VALID_USER_SIGNUP } from "../../__fixtures__/userFixtures";
 import prisma from "../../db/prisma";
+import { Routes } from "../../routes";
 
 describe("AuthController", () => {
   describe("POST /api/auth/register", () => {
@@ -10,7 +11,7 @@ describe("AuthController", () => {
       it("responds with an authToken cookie", async () => {
         const response = await request
           .agent(app)
-          .post("/api/auth/register")
+          .post(Routes.POST__AUTH_REGISTER)
           .send(VALID_USER_SIGNUP())
           .expect(201);
 
@@ -25,7 +26,7 @@ describe("AuthController", () => {
         expect(await prisma.user.count()).toEqual(0);
         await request
           .agent(app)
-          .post("/api/auth/register")
+          .post(Routes.POST__AUTH_REGISTER)
           .send(userArgs)
           .expect(201);
 
@@ -37,7 +38,7 @@ describe("AuthController", () => {
 
         await request
           .agent(app)
-          .post("/api/auth/register")
+          .post(Routes.POST__AUTH_REGISTER)
           .send(userArgs)
           .expect(201);
 
@@ -57,7 +58,7 @@ describe("AuthController", () => {
 
         const response = await request
           .agent(app)
-          .post("/api/auth/register")
+          .post(Routes.POST__AUTH_REGISTER)
           .send(incomplete)
           .expect(400);
 
@@ -75,7 +76,7 @@ describe("AuthController", () => {
         // create first user
         await request
           .agent(app)
-          .post("/api/auth/register")
+          .post(Routes.POST__AUTH_REGISTER)
           .send(userArgs)
           .expect(201);
         expect(await prisma.user.count()).toEqual(1);
@@ -88,7 +89,7 @@ describe("AuthController", () => {
         };
         const response = await request
           .agent(app)
-          .post("/api/auth/register")
+          .post(Routes.POST__AUTH_REGISTER)
           .send(duplicate)
           .expect(400);
 
