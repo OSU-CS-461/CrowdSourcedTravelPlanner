@@ -14,5 +14,3 @@ export const createUser = async (
   });
   return user;
 };
-
-export const getUser = async () => {};

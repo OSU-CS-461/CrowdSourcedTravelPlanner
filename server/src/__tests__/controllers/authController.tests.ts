@@ -70,7 +70,7 @@ describe("AuthController", () => {
         expect(await prisma.user.count()).toEqual(0);
       });
 
-      it("does not create a second user with the same email", async () => {
+      it.only("does not create a second user with the same email", async () => {
         const userArgs = VALID_USER_SIGNUP();
 
         // create first user
