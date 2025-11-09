@@ -34,7 +34,7 @@ projects:
             startCommand: |
               echo "Starting service..."
               pwd
-              npm start
+              npm start:production
               echo "Service started"
         databases:
           - name: db-prod
