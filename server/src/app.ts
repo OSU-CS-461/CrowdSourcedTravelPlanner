@@ -16,6 +16,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.post(Routes.POST__AUTH_REGISTER, register);
+app.post(Routes.POST__AUTH_LOGIN, login);
 
 app.use(errorHandlerMiddleware);
 
