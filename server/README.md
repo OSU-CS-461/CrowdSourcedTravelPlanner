@@ -13,6 +13,8 @@ Run the following from this directory (server) and be sure you followed the shar
 4. npx prisma dev
    1. This will spin up a Prisma PostgreSQL DB.
    2. Enter `h` and copy the `DATABASE_URL` into your env file. This environment variable is used in on the server to connect to the DB. For example:
+5. `openssl genpkey -algorithm RSA -out jwt-secret.key -pkeyopt rsa_keygen_bits:4096`
+   1. This is for the JWT signing for our auth layer
 
 ```bash
 # .env
@@ -43,3 +45,8 @@ Whenever there are changes to `package.json`, run `npm install` to make sure you
 ## Upon Changes
 
 After you make a change to the schema, generate a migration using `npx migrate dev` and then run `npx prisma generate` to generate types.
+
+# Tests
+
+brew install postgresql
+brew services start postgresql
