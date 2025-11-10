@@ -76,6 +76,11 @@ export default function errorHandlerMiddleware(
           error: "Record not found",
         });
       }
+      case "P5010": {
+        return res.status(500).json({
+          error: "Failed to contact the database.",
+        });
+      }
       default: {
         // Fallback for other Prisma codes
         return res.status(400).json({

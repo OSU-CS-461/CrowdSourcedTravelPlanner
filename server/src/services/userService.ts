@@ -28,8 +28,10 @@ export const getUserByEmailAndPassword = async (
     _emailAndPasswordArgs
   );
   const passwordDigest = await argon2d.hash(emailAndPasswordArgs.password);
-  const user = prisma.user.findFirst({
+  const user = await prisma.user.findFirst({
     where: { email: emailAndPasswordArgs.email, passwordDigest },
   });
-  return user;
+  if (!user) throw new Error("No user found");
+  const { passwordDigest: _omit, ...userWithoutPasswordDigest } = user!;
+  return userWithoutPasswordDigest;
 };

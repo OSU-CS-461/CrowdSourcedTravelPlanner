@@ -3,9 +3,13 @@ import path from "path";
 import { login, register } from "./controllers/authController";
 import { Routes } from "./routes";
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
+import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
 
+app.use(morgan("dev"));
+app.use(cors());
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
