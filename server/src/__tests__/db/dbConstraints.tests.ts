@@ -3,12 +3,13 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import prisma from "../../db/prisma"; // your shared PrismaClient instance
 
 describe("DB Constraints: User", () => {
-  // optional: clear data between tests
   beforeEach(async () => {
     await prisma.user.deleteMany();
   });
 
   afterAll(async () => {
+    // TODO: @drew -- follow up, make sure DB is being cleaned up after tests
+    await prisma.user.deleteMany();
     await prisma.$disconnect();
   });
 
