@@ -2,7 +2,8 @@ import "dotenv/config";
 import app from "./app";
 
 
-// ---- Middleware ----
+import { PrismaClient } from './generated/prisma/client';
+
 
 
 const prisma = new PrismaClient();
@@ -10,7 +11,6 @@ const prisma = new PrismaClient();
 // --- Endpoints ---
 
 import { default as experienceRouter } from './routes/experiences';
-import { PrismaClient } from "@prisma/client";
 app.use('/experiences', experienceRouter);
 
 
