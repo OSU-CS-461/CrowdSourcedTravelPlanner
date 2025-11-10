@@ -12,6 +12,8 @@ const TEST_DATABASE_URL = `postgresql://postgres:postgres@${DB_HOST}:5432/app_te
 const worker = process.env.VITEST_WORKER_ID ?? "1";
 const schema = `test_w${worker}`;
 
+const isCI = process.env.CI || process.env.GITHUB_ACTIONS;
+
 // Prisma uses this (note the ?schema=…)
 process.env.DATABASE_URL = `${TEST_DATABASE_URL}?schema=${schema}`;
 
@@ -20,9 +22,16 @@ async function ensureRoleAndDatabase(connectionString: string) {
   const dbName = url.pathname.slice(1) || "app_test";
 
   // connect as your mac user to default 'postgres'
-  const adminConn = `postgresql://${process.env.USER}@${url.hostname}:${
-    url.port || 5432
-  }/postgres`;
+  const adminConn = isCI
+    ? // user is set by CI
+      `postgresql://postgres:postgres@${url.hostname}:${
+        url.port || 5432
+      }/postgres`
+    : // local default user is your user in postgres mac
+      `postgresql://${process.env.USER}@${url.hostname}:${
+        url.port || 5432
+      }/postgres`;
+
   const admin = new PgClient({ connectionString: adminConn });
   await admin.connect();
   try {
