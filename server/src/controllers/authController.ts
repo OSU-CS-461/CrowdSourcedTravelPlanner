@@ -5,8 +5,9 @@ import { User } from "../generated/prisma/client";
 
 export const register = async (req: Request, res: Response) => {
   const user = await createUser(req.body);
+  const { passwordDigest, ...userWithoutPasswordDigest } = user;
   const token = sign(user as User);
-  return res.status(201).json({ user, token });
+  return res.status(201).json({ user: userWithoutPasswordDigest, token });
 };
 
 export const login = async (req: Request, res: Response) => {

@@ -6,15 +6,14 @@ import z from "zod";
 
 export const createUser = async (
   _userSignUpArgs: IUserSignUp
-): Promise<Omit<User, "passwordDigest">> => {
+): Promise<User> => {
   const validUserSignUpArgs = await UserSignUp.parseAsync(_userSignUpArgs);
   const { password, ...userSignUpParamsWithoutPassword } = validUserSignUpArgs;
   const passwordDigest = await argon2d.hash(password);
   const user = await prisma.user.create({
     data: { ...userSignUpParamsWithoutPassword, passwordDigest },
   });
-  const { passwordDigest: _omit, ...userWithoutPasswordDigest } = user;
-  return userWithoutPasswordDigest;
+  return user;
 };
 
 const EmailAndPasswordRequestContract = z.object({
@@ -38,6 +37,5 @@ export const getUserByEmailAndPassword = async (
   } catch (e) {
     throw new Error("Failed to login");
   }
-  const { passwordDigest: _omit, ...userWithoutPasswordDigest } = user!;
-  return userWithoutPasswordDigest;
+  return user;
 };
