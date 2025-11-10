@@ -1,8 +1,8 @@
+import { isAxiosError } from "axios";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isAxiosError } from "axios";
-import { authLogin } from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
+import { authLogin } from "../services/api.service";
 
 type LoginFormValues = {
   email: string;
@@ -19,7 +19,9 @@ const initialValues: LoginFormValues = {
 function LoginPage() {
   const [values, setValues] = useState<LoginFormValues>(initialValues);
   const [errors, setErrors] = useState<LoginFormErrors>({});
-  const [touched, setTouched] = useState<Record<keyof LoginFormValues, boolean>>({
+  const [touched, setTouched] = useState<
+    Record<keyof LoginFormValues, boolean>
+  >({
     email: false,
     password: false,
   });
@@ -31,13 +33,13 @@ function LoginPage() {
   const validate = (fieldValues: LoginFormValues) => {
     const nextErrors: LoginFormErrors = {};
 
-    if (!fieldValues.email.trim()) {
-      nextErrors.email = "Email is required.";
-    } else if (
-      !/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/u.test(fieldValues.email.trim())
-    ) {
-      nextErrors.email = "Enter a valid email.";
-    }
+    // if (!fieldValues.email.trim()) {
+    //   nextErrors.email = "Email is required.";
+    // } else if (
+    //   !/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/u.test(fieldValues.email.trim())
+    // ) {
+    //   nextErrors.email = "Enter a valid email.";
+    // }
 
     if (!fieldValues.password) {
       nextErrors.password = "Password is required.";
@@ -157,5 +159,3 @@ function LoginPage() {
 }
 
 export default LoginPage;
-
-

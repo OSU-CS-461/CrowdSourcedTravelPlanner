@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { AuthResponse } from "../services/api.service";
+import type { AuthResponse } from "../services/api.service";
 
 export type AuthContextValue = {
   token: string | null;
@@ -21,5 +21,3 @@ export const defaultAuthContext: AuthContextValue = {
 };
 
 export const AuthContext = createContext<AuthContextValue>(defaultAuthContext);
-
-
