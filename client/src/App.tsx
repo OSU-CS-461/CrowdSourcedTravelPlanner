@@ -5,11 +5,11 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { useAuth } from "./hooks/useAuth";
 
-export enum ClientRoutes {
-  HOME = "/",
-  LOGIN = "/login",
-  SIGNUP = "/signup",
-}
+export const ClientRoutes = {
+  HOME: "/",
+  LOGIN: "/login",
+  SIGNUP: "/signup",
+};
 
 export default function App() {
   const { isAuthenticated, logout } = useAuth();
