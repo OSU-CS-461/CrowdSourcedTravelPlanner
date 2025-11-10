@@ -18,6 +18,9 @@ datasource db {
 
 model User {
   id          Int             @id @default(autoincrement())
+  email String @unique
+  username String @unique
+  passwordDigest String
   experiences Experience[]
   reviews     Review[]
 }

@@ -1,9 +1,5 @@
 import "dotenv/config";
-import express, { Request, Response } from "express";
-import path from "path";
-import morgan from "morgan";
-import cors from "cors";
-import { PrismaClient } from "./generated/prisma/client";
+import app from "./app";
 
 // ---- Create the app ----
 

@@ -7,13 +7,12 @@ export type AuthResponse = {
   user: {
     id: string | number;
     email: string;
-    fullName?: string;
+    username?: string;
   };
 };
 
 const apiClient = axios.create({
   baseURL: API_BASE,
-  withCredentials: true,
 });
 
 export const setAuthToken = (token: string | null) => {
@@ -33,20 +32,10 @@ export const authLogin = async (email: string, password: string) => {
 };
 
 export const authSignup = async (input: {
-  fullName: string;
+  username: string;
   email: string;
   password: string;
 }) => {
-  const response = await apiClient.post<AuthResponse>("/auth/signup", input);
+  const response = await apiClient.post<AuthResponse>("/auth/register", input);
   return response.data;
-};
-
-export const exampleRequest = async () => {
-  const response = await apiClient.get<{ message: string }>("/hello");
-  return response.data.message;
-};
-
-export const usersExampleRequest = async () => {
-  const response = await apiClient.get<{ users: { id: number }[] }>("/users");
-  return response.data.users;
 };

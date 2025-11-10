@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import * as z from "zod";
 import { IUserSignUp, UserSignUp } from "../../models/user";
 
