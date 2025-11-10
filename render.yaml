@@ -19,7 +19,7 @@ projects:
 
             buildCommand: |
               npm ci
-              npx prisma generate
+              npx prisma generate --no-engine
               npx prisma migrate dev
 
               # build client and place it in public for the server to serve
@@ -34,7 +34,7 @@ projects:
             startCommand: |
               echo "Starting service..."
               pwd
-              npm start
+              npm start:production
               echo "Service started"
         databases:
           - name: db-prod

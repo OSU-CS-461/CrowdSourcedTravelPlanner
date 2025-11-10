@@ -1,10 +1,16 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { setAuthToken } from "../services/api.service";
 import {
   AuthContext,
-  AuthContextValue,
   TOKEN_STORAGE_KEY,
   USER_STORAGE_KEY,
+  type AuthContextValue,
 } from "./auth-context";
 
 type AuthProviderProps = {
@@ -44,7 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       window.localStorage.setItem(TOKEN_STORAGE_KEY, payload.token);
       window.localStorage.setItem(
         USER_STORAGE_KEY,
-        JSON.stringify(payload.user),
+        JSON.stringify(payload.user)
       );
     }
   }, []);
@@ -67,10 +73,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logout,
       isAuthenticated: Boolean(token),
     }),
-    [token, user, initialize, logout],
+    [token, user, initialize, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-

@@ -5,7 +5,7 @@ import { authSignup } from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
 
 type SignupFormValues = {
-  fullName: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -14,7 +14,7 @@ type SignupFormValues = {
 type SignupFormErrors = Partial<Record<keyof SignupFormValues, string>>;
 
 const initialValues: SignupFormValues = {
-  fullName: "",
+  username: "",
   email: "",
   password: "",
   confirmPassword: "",
@@ -26,7 +26,7 @@ function SignupPage() {
   const [touched, setTouched] = useState<
     Record<keyof SignupFormValues, boolean>
   >({
-    fullName: false,
+    username: false,
     email: false,
     password: false,
     confirmPassword: false,
@@ -39,17 +39,17 @@ function SignupPage() {
   const validate = (fieldValues: SignupFormValues) => {
     const nextErrors: SignupFormErrors = {};
 
-    if (!fieldValues.fullName.trim()) {
-      nextErrors.fullName = "Name is required.";
+    if (!fieldValues.username.trim()) {
+      nextErrors.username = "Name is required.";
     }
 
-    if (!fieldValues.email.trim()) {
-      nextErrors.email = "Email is required.";
-    } else if (
-      !/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/u.test(fieldValues.email.trim())
-    ) {
-      nextErrors.email = "Enter a valid email.";
-    }
+    // if (!fieldValues.email.trim()) {
+    //   nextErrors.email = "Email is required.";
+    // } else if (
+    //   !/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/u.test(fieldValues.email.trim())
+    // ) {
+    //   nextErrors.email = "Enter a valid email.";
+    // }
 
     if (!fieldValues.password) {
       nextErrors.password = "Password is required.";
@@ -71,7 +71,7 @@ function SignupPage() {
     setFormError(null);
     const validationErrors = validate(values);
     setTouched({
-      fullName: true,
+      username: true,
       email: true,
       password: true,
       confirmPassword: true,
@@ -82,7 +82,7 @@ function SignupPage() {
       try {
         setIsSubmitting(true);
         const authData = await authSignup({
-          fullName: values.fullName.trim(),
+          username: values.username.trim(),
           email: values.email.trim(),
           password: values.password,
         });
@@ -129,24 +129,24 @@ function SignupPage() {
           {formError ? <p className="form-error">{formError}</p> : null}
 
           <div className="field">
-            <label htmlFor="signup-name">Full name</label>
+            <label htmlFor="signup-name">Username</label>
             <input
               id="signup-name"
-              name="fullName"
+              name="username"
               type="text"
               autoComplete="name"
-              value={values.fullName}
-              onChange={handleChange("fullName")}
-              onBlur={handleBlur("fullName")}
+              value={values.username}
+              onChange={handleChange("username")}
+              onBlur={handleBlur("username")}
               disabled={isSubmitting}
-              aria-invalid={touched.fullName && !!errors.fullName}
+              aria-invalid={touched.username && !!errors.username}
               aria-describedby={
-                errors.fullName ? "signup-name-error" : undefined
+                errors.username ? "signup-name-error" : undefined
               }
             />
-            {touched.fullName && errors.fullName ? (
+            {touched.username && errors.username ? (
               <span className="field-error" id="signup-name-error">
-                {errors.fullName}
+                {errors.username}
               </span>
             ) : null}
           </div>
@@ -163,9 +163,7 @@ function SignupPage() {
               onBlur={handleBlur("email")}
               disabled={isSubmitting}
               aria-invalid={touched.email && !!errors.email}
-              aria-describedby={
-                errors.email ? "signup-email-error" : undefined
-              }
+              aria-describedby={errors.email ? "signup-email-error" : undefined}
             />
             {touched.email && errors.email ? (
               <span className="field-error" id="signup-email-error">
@@ -216,10 +214,7 @@ function SignupPage() {
               }
             />
             {touched.confirmPassword && errors.confirmPassword ? (
-              <span
-                className="field-error"
-                id="signup-confirm-password-error"
-              >
+              <span className="field-error" id="signup-confirm-password-error">
                 {errors.confirmPassword}
               </span>
             ) : null}
@@ -239,6 +234,3 @@ function SignupPage() {
 }
 
 export default SignupPage;
-
-
-
