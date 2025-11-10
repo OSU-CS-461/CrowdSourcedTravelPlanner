@@ -8,18 +8,6 @@ import { Routes } from "../../routes";
 describe("AuthController", () => {
   describe("POST /api/auth/register", () => {
     describe("with valid args", async () => {
-      it("responds with an authToken cookie", async () => {
-        const response = await request
-          .agent(app)
-          .post(Routes.POST__AUTH_REGISTER)
-          .send(VALID_USER_SIGNUP())
-          .expect(201);
-
-        const setCookie = response.headers["set-cookie"] as unknown as string[];
-        expect(Array.isArray(setCookie)).toBeTruthy();
-        expect(setCookie.some((c) => c.match("authToken"))).toBeTruthy();
-      });
-
       it("creates the user", async () => {
         const userArgs = VALID_USER_SIGNUP();
 
@@ -36,7 +24,7 @@ describe("AuthController", () => {
       it("responds with the correct contract", async () => {
         const userArgs = VALID_USER_SIGNUP();
 
-        await request
+        const response = await request
           .agent(app)
           .post(Routes.POST__AUTH_REGISTER)
           .send(userArgs)
@@ -44,11 +32,13 @@ describe("AuthController", () => {
 
         const { id, passwordDigest, ...storedUser } =
           (await prisma.user.findFirst())!;
-        expect(storedUser).toEqual({
+
+        expect(response.body.user).toEqual({
+          id,
           email: userArgs.email,
           username: userArgs.username,
         });
-        expect(await prisma.user.count()).toEqual(1);
+        expect(response.body.token).toBeDefined();
       });
     });
 
@@ -63,10 +53,6 @@ describe("AuthController", () => {
           .expect(400);
 
         expect(response.body.error).toBeDefined();
-        const setCookie = response.headers["set-cookie"] as unknown as
-          | string[]
-          | undefined;
-        expect(setCookie).toBeUndefined();
         expect(await prisma.user.count()).toEqual(0);
       });
 
@@ -93,13 +79,6 @@ describe("AuthController", () => {
           .send(duplicate)
           .expect(400);
 
-        const setCookie = response.headers["set-cookie"] as unknown as
-          | string[]
-          | undefined;
-        // ensure no new auth cookie for failed attempt
-        if (setCookie) {
-          expect(setCookie.some((c) => c.match("authToken"))).toBeFalsy();
-        }
         // still only one user in DB
         expect(await prisma.user.count()).toEqual(1);
       });
