@@ -97,10 +97,11 @@ export default function errorHandlerMiddleware(
     return res.status(status ?? 500).json({ error: message ?? "Error" });
   }
 
-  // Generic fallback
-  if (process.env.NODE_ENV !== "test") {
-    console.error("errorHandlerMiddleware hit");
-    console.error((err as any)?.stack || err);
-  }
-  return res.status(500).json({ error: err.message || "Unknown error" });
+  const defaultMessage =
+    err instanceof Error
+      ? err.message
+      : typeof err === "string"
+      ? err
+      : "Unknown error";
+  return res.status(500).json({ error: defaultMessage });
 }
