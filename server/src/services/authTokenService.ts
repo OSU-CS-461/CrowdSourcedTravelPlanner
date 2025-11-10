@@ -3,7 +3,8 @@ import { User } from "../generated/prisma/client";
 
 // -----------------------------------------------------------------------------
 // For simplicity, the auth token is the user's ID. We check if the JWT is
-// signed by us. If it is, we allow the user's session. Otherwise, we reject it.
+// signed by us. If it is, we allow the user's session and hydrate the user.
+// Otherwise, we reject it.
 // -----------------------------------------------------------------------------
 
 const privateKey = process.env.JWT_SECRET!;

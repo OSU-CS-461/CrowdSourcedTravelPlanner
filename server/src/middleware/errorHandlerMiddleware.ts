@@ -1,10 +1,8 @@
-// src/middlewares/errorHandlerMiddleware.ts
 import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
 
-// --- Type guards ---
 const isZodError = (err: unknown): err is ZodError =>
   err instanceof ZodError ||
   (typeof err === "object" && err !== null && (err as any).name === "ZodError");
@@ -23,7 +21,6 @@ export default function errorHandlerMiddleware(
   res: Response,
   _next: NextFunction
 ) {
-  // Zod (v4: message contains JSON array of issues)
   if (isZodError(err)) {
     let details: { path: string; message: string }[] = [];
     try {
