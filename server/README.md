@@ -48,5 +48,11 @@ After you make a change to the schema, generate a migration using `npx migrate d
 
 # Tests
 
-brew install postgresql
-brew services start postgresql
+## Integration Tests
+
+Make sure PostgreSQL is running the background for integration tests to run. These are the controller and DB constraint tests, which run against Postgres.
+
+One way to do this is through brew:
+
+1. `brew install postgresql`
+2. `brew services start postgresql`
