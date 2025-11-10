@@ -6,9 +6,8 @@ import { PrismaClient } from "@prisma/client";
 
 process.env.JWT_SECRET = "pretend-private-key";
 
-const TEST_DATABASE_URL =
-  "postgresql://postgres:postgres@localhost:5432/app_test";
-process.env.DATABASE_URL = TEST_DATABASE_URL; // for prisma client
+const DB_HOST = "localhost";
+const TEST_DATABASE_URL = `postgresql://postgres:postgres@${DB_HOST}:5432/app_test`;
 
 const worker = process.env.VITEST_WORKER_ID ?? "1";
 const schema = `test_w${worker}`;
