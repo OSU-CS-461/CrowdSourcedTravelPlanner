@@ -24,14 +24,19 @@ const EmailAndPasswordRequestContract = z.object({
 export const getUserByEmailAndPassword = async (
   _emailAndPasswordArgs: z.infer<typeof EmailAndPasswordRequestContract>
 ) => {
-  const emailAndPasswordArgs = await EmailAndPasswordRequestContract.parseAsync(
+  const { email, password } = await EmailAndPasswordRequestContract.parseAsync(
     _emailAndPasswordArgs
   );
-  const passwordDigest = await argon2d.hash(emailAndPasswordArgs.password);
+  const passwordDigest = await argon2d.hash(password);
   const user = await prisma.user.findFirst({
-    where: { email: emailAndPasswordArgs.email, passwordDigest },
+    where: { email },
   });
   if (!user) throw new Error("No user found");
+  try {
+    await argon2d.verify(user.passwordDigest, password);
+  } catch (e) {
+    throw new Error("Failed to login");
+  }
   const { passwordDigest: _omit, ...userWithoutPasswordDigest } = user!;
   return userWithoutPasswordDigest;
 };

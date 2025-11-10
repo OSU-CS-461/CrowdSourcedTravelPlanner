@@ -102,5 +102,5 @@ export default function errorHandlerMiddleware(
     console.error("errorHandlerMiddleware hit");
     console.error((err as any)?.stack || err);
   }
-  return res.status(500).json({ error: "Something broke" });
+  return res.status(500).json({ error: err.message || "Unknown error" });
 }
