@@ -17,7 +17,6 @@ const isPrismaKnownError = (
   (err as any).name === "PrismaClientKnownRequestError" &&
   typeof (err as any).code === "string";
 
-// TODO: @drew -- add unit tests for this
 export default function errorHandlerMiddleware(
   err: unknown,
   _req: Request,
