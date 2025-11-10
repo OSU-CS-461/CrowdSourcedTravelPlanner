@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start:dev": "NODE_ENV=development tsx src/index.ts",
+    "start:dev": "NODE_ENV=development tsx --watch src/index.ts",
     "start:production": "NODE_ENV=production tsx src/index.ts",
     "test:unit": "NODE_ENV=test vitest --run",
     "test:unit:coverage": "NODE_ENV=test vitest run --coverage",
