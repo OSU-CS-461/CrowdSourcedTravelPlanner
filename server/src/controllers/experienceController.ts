@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction} from "express";
 import prisma from "../db/prisma";
 import { 
     ExperienceListQuerySchema, 
@@ -12,30 +12,32 @@ import * as experienceService from "../services/experienceService";
 
 // --- CREATE ---
 
+import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
-async function createExperience(req: Request, res: Response) {
-    const result = ExperiencePutPostBodySchema.safeParse(req.body);
-
-    if (!result.success) {
-        return res.status(400).json({ errors: result.error.issues });
-    }
-
-    const postBody: ExperiencePutPostBody = result.data;
-
-    // TODO: fix once auth is implemented
-    const createdBy = 32; // const createdBy = req.user.id;
-    
+async function createExperience(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+    ) {
     try {
+        const postBody = ExperiencePutPostBodySchema.parse(req.body);
+
+        if (!req.user) {
+            throw { status: 401, message: "Unauthorized" };
+        }
+
         const experience = await experienceService.createExperience({
             ...postBody,
-            createdBy,
+            createdBy: req.user.id,
         });
+
         return res.status(201).json(experience);
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Failed to create experience" });
+        return next(err);
     }
 }
+
+
 
 
 // --- READ ---
@@ -226,4 +228,11 @@ async function deleteExperience(req: Request, res: Response) {
 
 
 
-export { createExperience, listExperiences, getExperience, updateExperience, editExperience, deleteExperience };
+export { 
+    createExperience, 
+    listExperiences, 
+    getExperience, 
+    updateExperience, 
+    editExperience, 
+    deleteExperience 
+};
