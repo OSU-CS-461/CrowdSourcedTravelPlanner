@@ -6,11 +6,8 @@ on:
     branches:
       - main
 jobs:
-  # TODO:
-  # server-build:
-  #   runs-on: ubuntu-latest
-
   server-lint:
+    name: Server Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -29,31 +26,31 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-  # server-integration-tests:
-  #   runs-on: ubuntu-latest
-  # defaults:
-  #     run:
-  #       working-directory: ./server
-  #   services:
-  #     postgres:
-  #       image: postgres:16
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  server-integration-tests:
+    name: Server Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "23.10.0"
-  #         cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23.10.0"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Run unit tests
-  #       run: npm run test:unit
+      - name: Run unit tests
+        run: npm run test:unit
 
   server-unit-tests:
+    name: Server Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

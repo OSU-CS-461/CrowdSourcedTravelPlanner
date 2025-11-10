@@ -4,12 +4,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { useAuth } from "./hooks/useAuth";
-
-export const ClientRoutes = {
-  HOME: "/",
-  LOGIN: "/login",
-  SIGNUP: "/signup",
-};
+import { ClientRoutes } from "./utils/clientRoutes";
 
 export default function App() {
   const { isAuthenticated, logout } = useAuth();
