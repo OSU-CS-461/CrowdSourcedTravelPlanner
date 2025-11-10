@@ -1,7 +1,6 @@
-import type { Request, Response, NextFunction } from "express";
-import { ZodError } from "zod";
-import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
+import type { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
 
 const isZodError = (err: unknown): err is ZodError =>
   err instanceof ZodError ||

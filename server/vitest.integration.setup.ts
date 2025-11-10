@@ -81,15 +81,11 @@ async function truncateAll(p: PrismaClient) {
 beforeAll(async () => {
   await ensureRoleAndDatabase(TEST_DATABASE_URL);
   await resetWorkerSchema(TEST_DATABASE_URL, schema); // 👈 wipe any failed _prisma_migrations state
-  const { stdout, stderr } = await execa(
-    "npx",
-    ["prisma", "migrate", "deploy"],
-    {
-      // then apply real migrations cleanly
-      // { stdio: "inherit" }
-      stdio: "pipe", // quiet
-    }
-  );
+  const { stderr } = await execa("npx", ["prisma", "migrate", "deploy"], {
+    // then apply real migrations cleanly
+    // { stdio: "inherit" }
+    stdio: "pipe", // quiet
+  });
   if (stderr) console.debug(stderr);
 });
 

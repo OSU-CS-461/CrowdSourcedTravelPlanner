@@ -30,8 +30,7 @@ describe("AuthController", () => {
           .send(userArgs)
           .expect(201);
 
-        const { id, passwordDigest, ...storedUser } =
-          (await prisma.user.findFirst())!;
+        const { id, passwordDigest: _omit } = (await prisma.user.findFirst())!;
 
         expect(response.body.user).toEqual({
           id,
@@ -73,13 +72,13 @@ describe("AuthController", () => {
           email: userArgs.email,
           username: "othername",
         };
-        const response = await request
+
+        await request
           .agent(app)
           .post(Routes.POST__AUTH_REGISTER)
           .send(duplicate)
           .expect(400);
 
-        // still only one user in DB
         expect(await prisma.user.count()).toEqual(1);
       });
     });
