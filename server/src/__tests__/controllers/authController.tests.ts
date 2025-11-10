@@ -1,0 +1,86 @@
+import request from "supertest";
+import { describe, it, expect } from "vitest";
+import app from "../../app";
+import { VALID_USER_SIGNUP } from "../../__fixtures__/userFixtures";
+import prisma from "../../db/prisma";
+import { Routes } from "../../routes";
+
+describe("AuthController", () => {
+  describe("POST /api/auth/register", () => {
+    describe("with valid args", async () => {
+      it("creates the user", async () => {
+        const userArgs = VALID_USER_SIGNUP();
+
+        expect(await prisma.user.count()).toEqual(0);
+        await request
+          .agent(app)
+          .post(Routes.POST__AUTH_REGISTER)
+          .send(userArgs)
+          .expect(201);
+
+        expect(await prisma.user.count()).toEqual(1);
+      });
+
+      it("responds with the correct contract", async () => {
+        const userArgs = VALID_USER_SIGNUP();
+
+        const response = await request
+          .agent(app)
+          .post(Routes.POST__AUTH_REGISTER)
+          .send(userArgs)
+          .expect(201);
+
+        const { id, passwordDigest: _omit } = (await prisma.user.findFirst())!;
+
+        expect(response.body.user).toEqual({
+          id,
+          email: userArgs.email,
+          username: userArgs.username,
+        });
+        expect(response.body.token).toBeDefined();
+      });
+    });
+
+    describe("with invalid args", () => {
+      it("responds 400 and does not set authToken when required fields are missing", async () => {
+        const incomplete = { username: "noemail", password: "Password123!" }; // missing email
+
+        const response = await request
+          .agent(app)
+          .post(Routes.POST__AUTH_REGISTER)
+          .send(incomplete)
+          .expect(400);
+
+        expect(response.body.error).toBeDefined();
+        expect(await prisma.user.count()).toEqual(0);
+      });
+
+      it("does not create a second user with the same email", async () => {
+        const userArgs = VALID_USER_SIGNUP();
+
+        // create first user
+        await request
+          .agent(app)
+          .post(Routes.POST__AUTH_REGISTER)
+          .send(userArgs)
+          .expect(201);
+        expect(await prisma.user.count()).toEqual(1);
+
+        // attempt to create another user with same email
+        const duplicate = {
+          ...VALID_USER_SIGNUP(),
+          email: userArgs.email,
+          username: "othername",
+        };
+
+        await request
+          .agent(app)
+          .post(Routes.POST__AUTH_REGISTER)
+          .send(duplicate)
+          .expect(400);
+
+        expect(await prisma.user.count()).toEqual(1);
+      });
+    });
+  });
+});
