@@ -34,7 +34,7 @@ const requireAuth = async (
     req.user = { id: user.id };
     next();
   } catch (err) {
-    return res.status(401).json({ error: "Invalid token" });
+    next(err);
   }
 };
 

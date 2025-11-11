@@ -8,40 +8,39 @@ interface ExperienceCreateInput extends ExpPutPostBody {
 
 export async function createExperience(postBody: ExperienceCreateInput ) {
     const experience = await prisma.experience.create({
-        data: {
-          createdBy: postBody.createdBy,
-          title: postBody.title,
-          description: postBody.description,
-          country: postBody.country,
-          adminRegion: postBody.adminRegion,
-          city: postBody.city,
-          street: postBody.street,
-          postalCode: postBody.postalCode,
-          latitude: postBody.latitude,
-          longitude: postBody.longitude,
-          thumbnail: postBody.thumbnail,
-          keywords: postBody.keywords,
-        },
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            descriptionEdit: true,
-            country: true,
-            adminRegion: true,
-            city: true,
-            street: true,
-            postalCode: true,
-            latitude: true,
-            longitude: true,
-            thumbnail: true,
-            keywords: true,
-            dateCreated: true,
-            lastUpdated: true
-        },
+      data: {
+        createdBy: postBody.createdBy,
+        title: postBody.title,
+        description: postBody.description,
+        country: postBody.country,
+        adminRegion: postBody.adminRegion,
+        city: postBody.city,
+        street: postBody.street,
+        postalCode: postBody.postalCode,
+        latitude: postBody.latitude,
+        longitude: postBody.longitude,
+        thumbnail: postBody.thumbnail,
+        keywords: postBody.keywords,
+      },
+      select: {
+          id: true,
+          title: true,
+          description: true,
+          descriptionEdit: true,
+          country: true,
+          adminRegion: true,
+          city: true,
+          street: true,
+          postalCode: true,
+          latitude: true,
+          longitude: true,
+          thumbnail: true,
+          keywords: true,
+          dateCreated: true,
+          lastUpdated: true
+      },
     });
-
-
+    return experience;
 }
 
 // ---- READ ----
