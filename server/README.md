@@ -56,3 +56,6 @@ One way to do this is through brew:
 
 1. `brew install postgresql`
 2. `brew services start postgresql`
+
+##Database Schema
+![alt text](image.png)
