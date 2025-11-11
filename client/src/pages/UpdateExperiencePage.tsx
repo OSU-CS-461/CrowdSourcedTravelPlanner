@@ -1,10 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClientRoutes } from "../App";
+import { ClientRoutes } from "../utils/clientRoutes";
 import FormTemplate, { type FormValues } from "../components/FormTemplate";
 
 // TODO: update URL
 const API_BASE_URL = "update-url"; 
+
+type ApiExperience = {
+  id: number | string;
+  title: string | null;
+  description: string | null;
+  dateCreated: string | null;
+  thumbnail: string | null;
+  keywords: string[] | string | null;
+
+  country: string | null;
+  adminRegion: string | null;
+  city: string | null;
+  street: string | null;
+  postalCode: string | null;
+
+  latitude: number | null;
+  longitude: number | null;
+};
+
 
 export default function UpdateExperiencePage() {
   const { id } = useParams();
@@ -14,7 +33,7 @@ export default function UpdateExperiencePage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  function mapApiToFormValues(api: any): FormValues {
+  function mapApiToFormValues(api: ApiExperience): FormValues {
     return {
       title: api.title ?? "",
       description: api.description ?? "",
