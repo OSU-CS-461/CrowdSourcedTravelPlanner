@@ -22,7 +22,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 import { default as experienceRouter } from './routes/experiences';
-app.use('/experiences', experienceRouter);
+app.use('/api/experiences', experienceRouter);
 
 
 app.post(Routes.POST__AUTH_REGISTER, register);
