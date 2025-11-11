@@ -4,12 +4,12 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { useAuth } from "./hooks/useAuth";
+import CreateExperiencePage from "./pages/CreateExperiencePage";
+import UpdateExperiencePage from "./pages/UpdateExperiencePage";
+import { ClientRoutes } from "./utils/clientRoutes";
 
-export const ClientRoutes = {
-  HOME: "/",
-  LOGIN: "/login",
-  SIGNUP: "/signup",
-};
+
+
 
 export default function App() {
   const { isAuthenticated, logout } = useAuth();
@@ -45,6 +45,18 @@ export default function App() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route
+          path={ClientRoutes.EXPERIENCE_CREATE}
+          element={
+            <CreateExperiencePage />}
+        />
+        <Route
+          path={ClientRoutes.EXPERIENCE_UPDATE}
+          element={
+            <UpdateExperiencePage />}
+        />
+
       </Routes>
     </>
   );
