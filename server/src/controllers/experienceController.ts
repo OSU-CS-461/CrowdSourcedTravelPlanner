@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction} from "express";
-import prisma from "../db/prisma";
 import { 
-    ExperienceListQuerySchema, 
-    ExperiencePutPostBodySchema,
-    ExperiencePatchBodySchema,
-    ExperiencePatchBody,
-    ExperiencePutPostBody,
-    ExperienceListQuery
+    ExpListQuerySchema, 
+    ExpPutPostBodySchema,
+    ExpPatchBodySchema,
+    ExpPatchBody,
+    ExpPutPostBody,
+    ExpListQuery
    } from "../models/experience";
 import * as experienceService from "../services/experienceService";
 
@@ -20,14 +19,14 @@ async function createExperience(
     next: NextFunction
     ) {
     try {
-        const postBody = ExperiencePutPostBodySchema.parse(req.body);
+        const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
 
         if (!req.user) {
             throw { status: 401, message: "Unauthorized" };
         }
 
         const experience = await experienceService.createExperience({
-            ...postBody,
+            ...body,
             createdBy: req.user.id,
         });
 
@@ -44,39 +43,41 @@ async function createExperience(
 
 
 // TODO: implement reviewCount, inTrips
-async function getExperience(req: Request, res: Response) {
+async function getExperience(
+    req: Request, 
+    res: Response,
+    next: NextFunction
+    ) {
     try {
         const experienceId = parseInt(req.params.id as string);
+
         if (isNaN(experienceId) || experienceId <= 0) {
-            return res.status(400).json({ error: "Invalid experience ID" });
+            throw { status: 400, message: "Invalid experience ID"}
         }
 
         const experience = await experienceService.getExperience(experienceId);
 
         if (!experience) {
-            return res.status(404).json({ error: "No experience with this id exists" });
+            throw { status: 404, message: "No experience with this id exists"}
         }
 
         return res.status(200).json(experience);
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Failed to retrieve experience"})
+        return next(err)
     }
 }
 
 
 // TODO: implement filtering by tags, creator
 // TODO: add pagination info to response (nextOffset, prevOffset, etc)
-async function listExperiences(req: Request, res: Response) {
-    const result = ExperienceListQuerySchema.safeParse(req.query);
-
-    if (!result.success) {
-        return res.status(400).json({ errors: result.error.issues });
-    }
-
-    const query: ExperienceListQuery = result.data;
-    
+async function listExperiences(
+    req: Request, 
+    res: Response,
+    next: NextFunction
+    ) {
     try {
+        const query: ExpListQuery = ExpListQuerySchema.parse(req.query);
+
         // --- Pagination ---
 
         // limit must be less than 50, default is 20
@@ -132,8 +133,7 @@ async function listExperiences(req: Request, res: Response) {
 
         return res.status(200).json(experiences);
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Failed to retrieve experiences" });
+        next(err);
     }
 }
 
@@ -141,84 +141,89 @@ async function listExperiences(req: Request, res: Response) {
 // --- UPDATE ---
 
 
-async function updateExperience(req: Request, res: Response) {
-    const experienceId = parseInt(req.params.id as string);
-    if (isNaN(experienceId) || experienceId <= 0) {
-        return res.status(400).json({ error: "Invalid experience ID" });
-    }
-
-    const result = ExperiencePutPostBodySchema.safeParse(req.body);
-    if (!result.success) {
-        return res.status(400).json({ errors: result.error.issues });
-    }
-    const putData: ExperiencePutPostBody = result.data;
-
-    // TODO: fix once auth is implemented
-    const userId = 32; // const userId = req.user.id;
-
+async function updateExperience(
+    req: AuthenticatedRequest, 
+    res: Response,
+    next: NextFunction
+    ) {
     try {
+        const experienceId = parseInt(req.params.id as string);
+
+        if (isNaN(experienceId) || experienceId <= 0) {
+            throw { status: 401, message: "Invalid experience ID"}
+        }
+
+        const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
+
+        if (!req.user) {
+            throw { status: 401, message: "Unauthorized" };
+        }
+
         const updatedExperience = await experienceService.updateExperience({
             experienceId: experienceId,
-            userId,
-            putData,
+            userId: req.user.id,
+            putData: body,
         });
 
         if (!updatedExperience) {
-            return res.status(404).json({ error: "Experience not found or not editable" });
+            throw { status: 404, message: "Experience not found or not editable"}
         }
 
         return res.status(200).json(updatedExperience);
-    } catch (err: any) {
-        return res.status(500).json({ error: err.message });
+    } catch (err) {
+        return next(err);
     }
 }
 
-async function editExperience(req: Request, res: Response) {
-    const experienceId = parseInt(req.params.id as string);
-    if (isNaN(experienceId) || experienceId <= 0) {
-        return res.status(400).json({ error: "Invalid experience ID" });
-    }
-
-    const result = ExperiencePatchBodySchema.safeParse(req.body);
-    if (!result.success) {
-        return res.status(400).json({ errors: result.error.issues });
-    }
-    const patchData: ExperiencePatchBody = result.data;
-
-    // TODO: fix once auth is implemented
-    const userId = 32; // const userId = req.user.id;
-
+async function editExperience(
+    req: AuthenticatedRequest, 
+    res: Response,
+    next: NextFunction
+    ) {
     try {
+        const experienceId = parseInt(req.params.id as string);
+        if (isNaN(experienceId) || experienceId <= 0) {
+            throw { status: 401, message: "Invalid experience ID"}
+        }
+
+        const body: ExpPatchBody = ExpPatchBodySchema.parse(req.body);
+        if (!req.user) {
+            throw { status: 401, message: "Unauthorized" };
+        }
+
         const editedExperience = await experienceService.editExperience({
             experienceId: experienceId,
-            userId,
-            patchData,
+            userId: req.user.id,
+            patchData: body,
         });
 
         if (!editedExperience) {
-            return res.status(404).json({ error: "Experience not found" });
+            throw { status: 404, message: "Experience not found"};
         }
 
         return res.status(200).json(editedExperience);
-    } catch (err: any) {
-        return res.status(500).json({ error: err.message });
+    } catch (err) {
+        next(err);
     }
 }
 
 
-async function deleteExperience(req: Request, res: Response) {
-    const experienceId = parseInt(req.params.id);
-
-
-    // TODO: fix once auth is implemented
-    const userId = 32; // const userId = req.user.id;
-
+async function deleteExperience(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+    ) {
     try {
-        const result = await experienceService.deleteExperience({ experienceId, userId });
+        const experienceId = parseInt(req.params.id);
 
-        if (!result) {
-            return res.status(404).json({ error: "Experience not found" });
+        if (!req.user) {
+            throw { status: 401, message: "Unauthorized" };
         }
+
+        await experienceService.deleteExperience({ 
+            experienceId, 
+            userId: req.user.id
+        });
 
         return res.status(204).send();
     } catch (err: any) {

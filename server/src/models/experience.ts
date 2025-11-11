@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const ExperiencePutPostBodySchema = z.object({
+export const ExpPutPostBodySchema = z.object({
   // ---- REQUIRED ---  
   title: z.string().min(3).max(200),            
   description: z.string().min(20).max(5000),    
@@ -58,14 +58,14 @@ export const ExperiencePutPostBodySchema = z.object({
   { message: "Street requires city and adminRegion; city requires adminRegion", path: ["street", "city", "adminRegion"] }
 )
 
-export const ExperiencePatchBodySchema = z.object({           
+export const ExpPatchBodySchema = z.object({           
   thumbnail: z.string().optional(),   
   keywords: z.array(z.string()).optional(),
   descriptionEdit: z.string().optional()
 })
 
 
-export const ExperienceListQuerySchema = z.object({
+export const ExpListQuerySchema = z.object({
   limit: z.string().optional(),
   offset: z.string().optional(),
   sortBy: z.enum(["avgRating", "dateCreated", "reviewCount", "title"]).optional(),
@@ -79,6 +79,6 @@ export const ExperienceListQuerySchema = z.object({
 
 
 
-export type ExperiencePutPostBody = z.infer<typeof ExperiencePutPostBodySchema>;
-export type ExperiencePatchBody = z.infer<typeof ExperiencePatchBodySchema>;
-export type ExperienceListQuery = z.infer<typeof ExperienceListQuerySchema>;
+export type ExpPutPostBody = z.infer<typeof ExpPutPostBodySchema>;
+export type ExpPatchBody = z.infer<typeof ExpPatchBodySchema>;
+export type ExpListQuery = z.infer<typeof ExpListQuerySchema>;

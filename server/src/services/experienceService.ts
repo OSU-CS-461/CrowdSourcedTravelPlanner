@@ -1,7 +1,7 @@
 import prisma from "../db/prisma"; // Make sure prisma client is exported from db/index.ts
-import { ExperiencePutPostBody, ExperiencePatchBody } from "../models/experience";
+import { ExpPutPostBody, ExpPatchBody } from "../models/experience";
 
-interface ExperienceCreateInput extends ExperiencePutPostBody {
+interface ExperienceCreateInput extends ExpPutPostBody {
     createdBy: number;
 }
 
@@ -101,7 +101,7 @@ export async function listExperiences(params: ListExperiencesParams) {
 interface UpdateExperienceParams {
     experienceId: number;
     userId: number;
-    putData: ExperiencePutPostBody
+    putData: ExpPutPostBody
 }
 
 export async function updateExperience(params: UpdateExperienceParams) {
@@ -153,7 +153,7 @@ export async function updateExperience(params: UpdateExperienceParams) {
 interface EditExperienceParams {
     experienceId: number;
     userId: number;
-    patchData: ExperiencePatchBody
+    patchData: ExpPatchBody
 }
 
 
@@ -206,24 +206,24 @@ export async function deleteExperience(params: DeleteExperienceParams) {
   
     const experience = await prisma.experience.findUnique({
         where: { id: experienceId },
-        include: { reviews: true }, // fetch reviews to check reviewCount
+        include: { reviews: true },
     });
 
-    if (!experience) return null;
+    if (!experience) {
+      throw { status: 404, message: "Experience not found"};
+    }
 
     // check ownership
     if (experience.createdBy !== userId) {
-        throw new Error("User does not own this experience!"); // could be handled as 403
+        throw {status: 403, message: "User does not own this experience!"};
     }
 
     const hasReviews = experience.reviews.length > 0;
     if (hasReviews) {
-      throw new Error("Cannot delete after reviews have been added");
+      throw {status: 403, message: "Cannot delete after reviews have been added"}
     }
 
     await prisma.experience.delete({
       where: { id: experienceId },
     });
-
-    return true;
 }
