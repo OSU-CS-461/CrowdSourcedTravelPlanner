@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ClientRoutes } from "../App"; 
+import { ClientRoutes } from "../utils/clientRoutes";
 import FormTemplate, { type FormValues } from "../components/FormTemplate";
 
 export default function CreateExperiencePage() {
