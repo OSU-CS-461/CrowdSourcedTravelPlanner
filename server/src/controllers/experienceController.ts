@@ -7,6 +7,7 @@ import {
     ExpPutPostBody,
     ExpListQuery
    } from "../models/experience";
+import { Prisma } from '../generated/prisma/client';
 import * as experienceService from "../services/experienceService";
 
 // --- CREATE ---
@@ -88,7 +89,7 @@ async function listExperiences(
 
         // --- Filters ---
 
-        const where: any = {};
+        const where: Prisma.ExperienceWhereInput = {};
 
         if (query.title) {
             where.title = { contains: query.title, mode: "insensitive" };
@@ -107,7 +108,7 @@ async function listExperiences(
         }
 
         // --- Sorting ---
-        const orderBy: any = {};
+        const orderBy: Prisma.ExperienceOrderByWithRelationInput = {};
 
         const direction = query.sortDirection || "desc";
         switch (query.sortBy) {
@@ -117,9 +118,9 @@ async function listExperiences(
             case 'title':
                 orderBy.title = query.sortDirection || "asc";
                 break;
-            case 'reviewCount':
-                orderBy.reviewCount = direction;
-                break;
+            // case 'reviewCount':
+            //     orderBy.reviewCount = direction;
+            //     break;
             default:
                 orderBy.dateCreated = direction;
         }
@@ -226,8 +227,8 @@ async function deleteExperience(
         });
 
         return res.status(204).send();
-    } catch (err: any) {
-        return res.status(500).json({ error: err.message });
+    } catch (err) {
+        next(err);
     }
 }
 

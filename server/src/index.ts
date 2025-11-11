@@ -2,13 +2,6 @@ import "dotenv/config";
 import app from "./app";
 
 
-import { PrismaClient } from './generated/prisma/client';
-const prisma = new PrismaClient();
-
-// --- Routers ---
-
-
-
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
