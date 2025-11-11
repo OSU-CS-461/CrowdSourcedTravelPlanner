@@ -6,16 +6,10 @@ import SignupPage from "./pages/SignupPage";
 import { useAuth } from "./hooks/useAuth";
 import CreateExperiencePage from "./pages/CreateExperiencePage";
 import UpdateExperiencePage from "./pages/UpdateExperiencePage";
+import { ClientRoutes } from "./utils/clientRoutes";
 
 
 
-export const ClientRoutes = {
-  HOME: "/",
-  LOGIN: "/login",
-  SIGNUP: "/signup",
-  EXPERIENCE_CREATE: "/experiences/create",
-  EXPERIENCE_UPDATE: "/experiences/:id/update",
-};
 
 export default function App() {
   const { isAuthenticated, logout } = useAuth();
