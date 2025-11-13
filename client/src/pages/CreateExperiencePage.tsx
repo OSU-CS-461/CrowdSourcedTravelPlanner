@@ -1,17 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../utils/clientRoutes";
 import FormTemplate, { type FormValues } from "../components/FormTemplate";
+import { setAuthToken } from "../services/api.service";
+import { apiClient } from "../services/api.service";
 
 export default function CreateExperiencePage() {
   const navigate = useNavigate();
 
   const handleCreateExperience = async (values: FormValues) => {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) {
+      alert("You must be logged in to create experiences.");
+      return;
+    }
+    setAuthToken(token);
 
-    // TODO: replace with real user ID from auth
-    const currentUserId = 1;
+    const keywordsArray =
+      values.keywords?.trim().length
+        ? values.keywords
+            .split(",")
+            .map((k) => k.trim())
+            .filter(Boolean)
+        : [];
 
     const postBody = {
-      createdBy: currentUserId,
       title: values.title,
       description: values.description,
       country: values.country || "Unknown",
@@ -28,23 +40,13 @@ export default function CreateExperiencePage() {
           ? Number(values.longitude)
           : null,
       thumbnail: values.image, 
-      keywords: values.keywords,
+      keywords: keywordsArray,
     };
 
     try {
-        // TODO: replace with backend API URL
-      const res = await fetch("replace-with-backendapiurl", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postBody),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to create experience");
-      }
-
+      await apiClient.post("/experiences", postBody);
       alert("Experience created successfully!");
-      navigate(ClientRoutes.HOME); 
+      navigate(ClientRoutes.HOME);
     } catch (err) {
       console.error(err);
       alert("There was a problem creating the experience.");
