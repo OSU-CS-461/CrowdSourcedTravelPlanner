@@ -11,7 +11,7 @@ export type AuthResponse = {
   };
 };
 
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_BASE,
 });
 

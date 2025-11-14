@@ -11,7 +11,7 @@ export const createUser = async (
   const { password, ...userSignUpParamsWithoutPassword } = validUserSignUpArgs;
   const passwordDigest = await argon2d.hash(password);
   const user = await prisma.user.create({
-    data: { ...userSignUpParamsWithoutPassword, passwordDigest },
+    data: { ...userSignUpParamsWithoutPassword, passwordDigest } as any,
   });
   return user;
 };

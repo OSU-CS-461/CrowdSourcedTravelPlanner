@@ -14,10 +14,16 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ---- Routers ----
+
 app.get("/", (req: Request, res: Response) => {
   const spaFilePath = path.resolve(__dirname, "..", "public");
   res.sendFile(spaFilePath);
 });
+
+import { default as experienceRouter } from './routes/experiences';
+app.use('/api/experiences', experienceRouter);
+
 
 app.post(Routes.POST__AUTH_REGISTER, register);
 app.post(Routes.POST__AUTH_LOGIN, login);
