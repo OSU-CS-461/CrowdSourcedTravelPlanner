@@ -14,17 +14,18 @@ import * as experienceService from "../services/experienceService";
 
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
-async function createExperience(
-    req: AuthenticatedRequest,
+
+async function createExperience (
+    req: AuthenticatedRequest, 
     res: Response,
     next: NextFunction
     ) {
     try {
-        const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
-
         if (!req.user) {
-            throw { status: 401, message: "Unauthorized" };
+            throw {status: 400, message: "Unauthorized"};
         }
+
+        const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
 
         const experience = await experienceService.createExperience({
             ...body,
@@ -32,10 +33,11 @@ async function createExperience(
         });
 
         return res.status(201).json(experience);
-    } catch (err) {
-        return next(err);
+    } catch(err) {
+        next(err);
     }
-}
+    
+};
 
 
 
@@ -63,9 +65,10 @@ async function getExperience(
         }
 
         return res.status(200).json(experience);
-    } catch (err) {
-        return next(err)
+    } catch(err) {
+        next(err);
     }
+
 }
 
 

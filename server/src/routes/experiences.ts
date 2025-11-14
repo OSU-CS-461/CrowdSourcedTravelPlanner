@@ -1,13 +1,13 @@
 import { default as express } from "express";
 import * as experienceController from "../controllers/experienceController";
-import * as experienceMiddleware from "../middleware/authMiddleware";
+import * as authMiddleware from "../middleware/authMiddleware";
 
 const router = express.Router();
 
 
 // Create
 router.post("/",
-    experienceMiddleware.requireAuth,
+    authMiddleware.requireAuth,
     experienceController.createExperience
 );
 
@@ -18,17 +18,17 @@ router.get("/", experienceController.listExperiences);
 
 // Update
 router.put("/:id", 
-    experienceMiddleware.requireAuth,
+    authMiddleware.requireAuth,
     experienceController.updateExperience
 );
 router.patch("/:id", 
-    experienceMiddleware.requireAuth,
+    authMiddleware.requireAuth,
     experienceController.editExperience
 );
 
 // Delete (none)
 router.delete("/:id", 
-    experienceMiddleware.requireAuth,
+    authMiddleware.requireAuth,
     experienceController.deleteExperience
 );
 
