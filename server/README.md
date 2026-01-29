@@ -2,6 +2,18 @@
 
 To run the server, we need to install node (steps in top level README.md), setup our `.env` file and spin up the database.
 
+## Windows
+
+For Windows users, please see the **[WINDOWS_SETUP.md](../WINDOWS_SETUP.md)** in the root directory for detailed Windows-specific instructions.
+
+Quick setup:
+1. `npm i`
+2. Copy `env.example.txt` to `.env` and configure it
+3. Generate JWT secret: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+4. `npx prisma generate`
+5. `npx prisma dev` (or use local PostgreSQL)
+6. Copy the `DATABASE_URL` from Prisma dev output to your `.env` file
+
 ## MacOS
 
 Run the following from this directory (server) and be sure you followed the shared setup steps on the top level README.md:
@@ -26,7 +38,7 @@ DATABASE_URL="prisma+postgres://localhost:51213/?api_key=eyJkYXRhYmFzZVVybCI6InB
 Now that you've completed the first time setup, each time you want to work on the server, you just start the database and then the server:
 
 1. npx prisma dev
-2. npm start
+2. npm run start:dev
 
 ## Install Dependencies Upon Changes
 
