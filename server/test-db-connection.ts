@@ -16,7 +16,7 @@ async function testConnection() {
     try {
       const userCount = await prisma.user.count();
       console.log(`User table exists. Current user count: ${userCount}`);
-    } catch (error) {
+    } catch {
       console.log("User table might not exist or migrations not run");
       console.log("Run: npx prisma migrate dev");
     }
