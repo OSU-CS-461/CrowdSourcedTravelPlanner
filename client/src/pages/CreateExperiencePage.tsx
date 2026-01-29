@@ -111,8 +111,9 @@ export default function CreateExperiencePage() {
       navigate(ClientRoutes.HOME);
     } catch (err) {
       console.error("Error creating experience:", err);
-      const errorMessage = (err as { response?: { data?: { error?: string } } }).response?.data?.error || 
-                          err.response?.data?.details?.message ||
+      const errorObj = err as { response?: { data?: { error?: string; details?: { message?: string } } } };
+      const errorMessage = errorObj.response?.data?.error || 
+                          errorObj.response?.data?.details?.message ||
                           "There was a problem creating the experience.";
       alert(`Error: ${errorMessage}`);
     }

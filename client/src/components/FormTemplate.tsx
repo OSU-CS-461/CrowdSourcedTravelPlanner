@@ -3,7 +3,6 @@ import { useState } from "react";
 export interface FormValues {
   title: string;
   description: string;
-  date: string;
   image: string;
   keywords: string;
   country: string;
@@ -53,7 +52,6 @@ export default function FormTemplate({
     const payload: FormValues = {
       title: title.trim(),
       description: description.trim(),
-      date,
       image: image.trim(),
       keywords: keywords.trim(),
       country: country.trim(),

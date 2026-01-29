@@ -71,8 +71,8 @@ export default function ExperienceDetailPage() {
       navigate(ClientRoutes.HOME);
     } catch (err) {
       console.error(err);
-      const errorMessage =
-        err.response?.data?.error || "Failed to delete experience";
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      const errorMessage = errorObj.response?.data?.error || "Failed to delete experience";
       alert(`Error: ${errorMessage}`);
     } finally {
       setDeleting(false);

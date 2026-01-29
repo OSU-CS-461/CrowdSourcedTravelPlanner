@@ -35,10 +35,6 @@ export default function UpdateExperiencePage() {
     return {
       title: api.title ?? "",
       description: api.description ?? "",
-      date: api.dateCreated
-        ? new Date(api.dateCreated).toISOString().slice(0, 10)
-        : "",
-
       image: api.thumbnail ?? "",
       keywords: Array.isArray(api.keywords)
         ? api.keywords.join(", ")
@@ -171,8 +167,8 @@ export default function UpdateExperiencePage() {
       navigate(ClientRoutes.HOME);
     } catch (err) {
       console.error(err);
-      const errorMessage =
-        err.response?.data?.error || "There was a problem updating the experience.";
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      const errorMessage = errorObj.response?.data?.error || "There was a problem updating the experience.";
       alert(`Error: ${errorMessage}`);
     }
   };
