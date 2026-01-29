@@ -69,7 +69,7 @@ export default function ExperienceDetailPage() {
       await apiClient.delete(`/experiences/${id}`);
       alert("Experience deleted successfully!");
       navigate(ClientRoutes.HOME);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       const errorMessage =
         err.response?.data?.error || "Failed to delete experience";

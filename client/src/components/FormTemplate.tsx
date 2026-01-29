@@ -28,7 +28,6 @@ export default function FormTemplate({
 }: FormTemplateProps) {
   const [title, setTitle] = useState(initialValues.title ?? "");
   const [description, setDescription] = useState(initialValues.description ?? "");
-  const [date, setDate] = useState(initialValues.date ?? "");
   const [error, setError] = useState("");
 
   const [image, setImage] = useState(initialValues.image ?? "");
@@ -95,25 +94,17 @@ export default function FormTemplate({
       <br />
 
       <label>
-        Description
+        Description (minimum 20 characters)
         <textarea
           rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          minLength={20}
           required
         />
-      </label>
-
-      <br />
-
-      <label>
-        Date
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
+        <small style={{ color: "gray", fontSize: "0.9em" }}>
+          {description.length}/20 minimum characters
+        </small>
       </label>
 
       <br />
@@ -121,99 +112,97 @@ export default function FormTemplate({
       <h3>Location</h3>
 
       <label>
-        Country
+        Country (ISO Code - 2 letters, e.g., US, GB, CN)
         <input
           type="text"
           value={country}
           onChange={(e) => setCountry(e.target.value)}
+          placeholder="US"
+          maxLength={2}
           required
         />
+        <small style={{ color: "gray", fontSize: "0.9em" }}>
+          Use 2-letter country code (US, GB, CN, etc.)
+        </small>
       </label>
 
       <br />
 
       <label>
-        State / Region
+        State / Region (optional)
         <input
           type="text"
           value={adminRegion}
           onChange={(e) => setAdminRegion(e.target.value)}
-          required
         />
       </label>
 
       <br />
 
       <label>
-        City
+        City (optional - required if street/postal code provided)
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          required
         />
       </label>
 
       <br />
 
       <label>
-        Street
+        Street (optional - required if postal code provided)
         <input
           type="text"
           value={street}
           onChange={(e) => setStreet(e.target.value)}
-          required
         />
       </label>
 
       <br />
 
       <label>
-        Postal Code
+        Postal Code (optional - requires street, city, and region)
         <input
           type="text"
           value={postalCode}
           onChange={(e) => setPostalCode(e.target.value)}
-          required
         />
       </label>
 
       <br />
 
       <label>
-        Latitude
+        Latitude (optional - must provide both or neither)
         <input
           type="text"
           value={latitude}
           onChange={(e) => setLatitude(e.target.value)}
           placeholder="e.g. 37.7749"
-          required
         />
       </label>
 
       <br />
 
       <label>
-        Longitude
+        Longitude (optional - must provide both or neither)
         <input
           type="text"
           value={longitude}
           onChange={(e) => setLongitude(e.target.value)}
           placeholder="-122.4194"
-          required
         />
       </label>
 
       <br />
 
       <label>
-        Image URL
+        Image URL (optional)
         <input
           type="text"
           value={image}
           onChange={(e) => setImage(e.target.value)}
           placeholder="https://example.com/image.jpg"
-          required
         />
       </label>
 
@@ -234,13 +223,12 @@ export default function FormTemplate({
       <br />
 
       <label>
-        Keywords (comma separated)
+        Keywords (comma separated, optional)
         <input
           type="text"
           value={keywords}
           onChange={(e) => setKeywords(e.target.value)}
           placeholder="adventure, beach, food"
-          required
         />
       </label>
 
