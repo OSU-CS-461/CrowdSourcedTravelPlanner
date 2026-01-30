@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createReview } from "../../services/reviewService";
+import { createReview } from "../../../services/reviewService";
 import StarRating from "../common/StarRating";
 
 export default function ReviewForm({ experienceId, onSuccess }) {

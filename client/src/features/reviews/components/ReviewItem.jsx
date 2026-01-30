@@ -1,4 +1,4 @@
-import { deleteReview } from "../../services/reviewService";
+import { deleteReview } from "../../../services/reviewService";
 import StarRating from "../common/StarRating";
 
 export default function ReviewItem({ review, onChange }) {

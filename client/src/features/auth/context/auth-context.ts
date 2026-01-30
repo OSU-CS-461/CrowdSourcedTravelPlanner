@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthResponse } from "../services/api.service";
+import type { AuthResponse } from "../../../services/api.service";
 
 export type AuthContextValue = {
   token: string | null;

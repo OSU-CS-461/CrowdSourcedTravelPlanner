@@ -1,8 +1,9 @@
 import { type ChangeEvent, type FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
-import { authSignup } from "../services/api.service";
+import { authSignup } from "../../../services/api.service";
 import { useAuth } from "../hooks/useAuth";
+import { ClientRoutes } from "../../../utils/clientRoutes";
 
 type SignupFormValues = {
   username: string;
@@ -228,6 +229,11 @@ function SignupPage() {
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>
         </form>
+
+        <p>
+          Already have an account?{" "}
+          <Link to={ClientRoutes.LOGIN}>Log in</Link>
+        </p>
       </section>
     </main>
   );

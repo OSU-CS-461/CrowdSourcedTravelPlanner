@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
-import { AuthProvider } from "./context/AuthContext.tsx";
+import { AuthProvider } from "./features/auth/context/AuthContext.tsx";
 
 if (import.meta.env.DEV) {
   console.log("Dev");
@@ -13,9 +13,9 @@ if (import.meta.env.DEV) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <AuthProvider>
+  <AuthProvider>
+    <BrowserRouter>
       <App />
-    </AuthProvider>
-  </BrowserRouter>,
+    </BrowserRouter>
+  </AuthProvider>,
 );

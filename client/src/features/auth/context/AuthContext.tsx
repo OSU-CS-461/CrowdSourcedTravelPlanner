@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { setAuthToken } from "../services/api.service";
+import { setAuthToken } from "../../../services/api.service";
 import {
   AuthContext,
   TOKEN_STORAGE_KEY,

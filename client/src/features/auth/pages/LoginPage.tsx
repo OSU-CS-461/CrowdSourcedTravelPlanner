@@ -1,8 +1,9 @@
 import { isAxiosError } from "axios";
 import { type ChangeEvent, type FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { authLogin } from "../services/api.service";
+import { authLogin } from "../../../services/api.service";
+import { ClientRoutes } from "../../../utils/clientRoutes";
 
 type LoginFormValues = {
   email: string;
@@ -153,6 +154,11 @@ function LoginPage() {
             {isSubmitting ? "Signing in..." : "Continue"}
           </button>
         </form>
+
+        <p>
+          Don&apos;t have an account?{" "}
+          <Link to={ClientRoutes.SIGNUP}>Sign up</Link>
+        </p>
       </section>
     </main>
   );

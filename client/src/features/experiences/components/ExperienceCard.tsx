@@ -1,0 +1,59 @@
+export type Experience = {
+  id?: number | string;
+  title?: string | null;
+  description?: string | null;
+  dateCreated?: string | null;
+  thumbnail?: string | null;
+  keywords?: string[] | string | null;
+  country?: string | null;
+  adminRegion?: string | null;
+  city?: string | null;
+  street?: string | null;
+  postalCode?: string | null;
+};
+
+interface ExperienceCardProps {
+  experience: Experience;
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString();
+}
+
+function formatLocation(experience: Experience) {
+  const parts = [
+    experience.street,
+    experience.city,
+    experience.adminRegion,
+    experience.postalCode,
+    experience.country,
+  ].filter((part) => typeof part === "string" && part.trim().length > 0);
+
+  return parts.length ? parts.join(", ") : null;
+}
+
+export default function ExperienceCard({ experience }: ExperienceCardProps) {
+  const title = experience.title?.trim() || "Untitled experience";
+  const description = experience.description?.trim();
+  const date = formatDate(experience.dateCreated);
+  const location = formatLocation(experience);
+  const keywords = Array.isArray(experience.keywords)
+    ? experience.keywords
+    : experience.keywords
+      ? experience.keywords.split(",").map((keyword) => keyword.trim())
+      : [];
+
+  return (
+    <article className="experience-card">
+      <h3>{title}</h3>
+      <img className="photo" src={experience.thumbnail || ""} alt={title} />
+      {description ? <p>{description}</p> : null}
+      {date ? <p>{date}</p> : null}
+      {location ? <p>{location}</p> : null}
+      {keywords.length ? <p>{keywords.join(", ")}</p> : null}
+    </article>
+  );
+}
