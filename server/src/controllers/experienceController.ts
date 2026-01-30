@@ -64,6 +64,7 @@ async function getExperience(
             throw { status: 404, message: "No experience with this id exists"}
         }
 
+        // Include createdBy in response
         return res.status(200).json(experience);
     } catch(err) {
         next(err);

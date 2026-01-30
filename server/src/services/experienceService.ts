@@ -48,6 +48,24 @@ export async function createExperience(postBody: ExperienceCreateInput ) {
 export async function getExperience(experienceId: number) {
     const experience = await prisma.experience.findUnique({
         where: { id: experienceId },
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            country: true,
+            adminRegion: true,
+            city: true,
+            street: true,
+            postalCode: true,
+            latitude: true,
+            longitude: true,
+            thumbnail: true,
+            keywords: true,
+            avgRating: true,
+            dateCreated: true,
+            lastUpdated: true,
+            createdBy: true,
+        },
     });
 
     return experience;
@@ -85,7 +103,8 @@ export async function listExperiences(params: ListExperiencesParams) {
       thumbnail: true,
       avgRating: true,
       dateCreated: true,
-      lastUpdated: true
+      lastUpdated: true,
+      createdBy: true,
     },
     orderBy: orderBy || { lastUpdated: 'desc' },
   });

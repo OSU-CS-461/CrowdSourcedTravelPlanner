@@ -56,11 +56,11 @@ async function ensureRoleAndDatabase(connectionString: string) {
   }
 }
 
-// ✅ Drop & recreate the per-worker schema to avoid P3009
+// Drop & recreate the per-worker schema to avoid P3009
 async function resetWorkerSchema(connectionString: string, schemaName: string) {
   const base = new URL(connectionString);
   // connect to the target DB (not the default 'postgres')
-  const conn = base.toString(); // no ?schema here; we’ll address schema via SQL
+  const conn = base.toString(); // no ?schema here; we'll address schema via SQL
   const client = new PgClient({ connectionString: conn });
   await client.connect();
   try {
@@ -88,7 +88,7 @@ async function truncateAll(p: PrismaClient) {
 
 beforeAll(async () => {
   await ensureRoleAndDatabase(TEST_DATABASE_URL);
-  await resetWorkerSchema(TEST_DATABASE_URL, schema); // 👈 wipe any failed _prisma_migrations state
+  await resetWorkerSchema(TEST_DATABASE_URL, schema); // wipe any failed _prisma_migrations state
   const { stderr } = await execa("npx", ["prisma", "migrate", "deploy"], {
     // then apply real migrations cleanly
     // { stdio: "inherit" }
