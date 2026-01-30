@@ -6,6 +6,8 @@ import SignupPage from "./pages/SignupPage";
 import { useAuth } from "./hooks/useAuth";
 import CreateExperiencePage from "./pages/CreateExperiencePage";
 import UpdateExperiencePage from "./pages/UpdateExperiencePage";
+import CreateTripPage from "./pages/CreateTripsPage";
+import UpdateTripPage from "./pages/UpdateTripsPage";
 import { ClientRoutes } from "./utils/clientRoutes";
 
 
@@ -55,6 +57,14 @@ export default function App() {
           path={ClientRoutes.EXPERIENCE_UPDATE}
           element={
             <UpdateExperiencePage />}
+        />
+
+        <Route path={ClientRoutes.TRIP_CREATE} 
+        element={<CreateTripPage />}
+        />
+
+        <Route path={ClientRoutes.TRIP_UPDATE} 
+        element={<UpdateTripPage />}
         />
 
       </Routes>

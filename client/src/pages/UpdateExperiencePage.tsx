@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClientRoutes } from "../utils/clientRoutes";
 import FormTemplate, { type FormValues } from "../components/FormTemplate";
-
-// TODO: update URL
-const API_BASE_URL = "update-url"; 
+import { apiClient, setAuthToken } from "../services/api.service";
 
 type ApiExperience = {
   id: number | string;
@@ -24,7 +22,6 @@ type ApiExperience = {
   longitude: number | null;
 };
 
-
 export default function UpdateExperiencePage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,18 +37,15 @@ export default function UpdateExperiencePage() {
       date: api.dateCreated
         ? new Date(api.dateCreated).toISOString().slice(0, 10)
         : "",
-
       image: api.thumbnail ?? "",
       keywords: Array.isArray(api.keywords)
         ? api.keywords.join(", ")
         : api.keywords ?? "",
-
       country: api.country ?? "",
       adminRegion: api.adminRegion ?? "",
       city: api.city ?? "",
       street: api.street ?? "",
       postalCode: api.postalCode ?? "",
-
       latitude:
         api.latitude !== null && api.latitude !== undefined
           ? String(api.latitude)
@@ -75,14 +69,8 @@ export default function UpdateExperiencePage() {
         setLoading(true);
         setLoadError(null);
 
-        const res = await fetch(`${API_BASE_URL}/${id}`);
-
-        if (!res.ok) {
-          throw new Error("Failed to load experience.");
-        }
-
-        const data = await res.json();
-        const mapped = mapApiToFormValues(data);
+        const res = await apiClient.get(`/experiences/${id}`);
+        const mapped = mapApiToFormValues(res.data);
         setInitialValues(mapped);
       } catch (err) {
         console.error(err);
@@ -101,11 +89,19 @@ export default function UpdateExperiencePage() {
       return;
     }
 
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) {
+      alert("You must be logged in.");
+      return;
+    }
+
+    setAuthToken(token);
+
     const keywordsArray = values.keywords
       ? values.keywords
           .split(",")
           .map((k) => k.trim())
-          .filter((k) => k.length > 0)
+          .filter(Boolean)
       : undefined;
 
     const putBody = {
@@ -129,16 +125,7 @@ export default function UpdateExperiencePage() {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(putBody),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to update experience");
-      }
-
+      await apiClient.put(`/experiences/${id}`, putBody);
       alert("Experience updated successfully!");
       navigate(ClientRoutes.HOME);
     } catch (err) {
@@ -147,17 +134,9 @@ export default function UpdateExperiencePage() {
     }
   };
 
-  if (loading) {
-    return <p>Loading experience...</p>;
-  }
-
-  if (loadError) {
-    return <p>{loadError}</p>;
-  }
-
-  if (!initialValues) {
-    return <p>Could not load experience data.</p>;
-  }
+  if (loading) return <p>Loading experience...</p>;
+  if (loadError) return <p>{loadError}</p>;
+  if (!initialValues) return <p>Could not load experience data.</p>;
 
   return (
     <div>
