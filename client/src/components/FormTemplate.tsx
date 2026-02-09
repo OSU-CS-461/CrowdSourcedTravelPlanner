@@ -81,6 +81,7 @@ export default function FormTemplate({
 
       <label>
         Title
+        <br />
         <input
           type="text"
           value={title}
@@ -90,16 +91,19 @@ export default function FormTemplate({
       </label>
 
       <br />
+      <br />
 
       <label>
         Description (minimum 20 characters)
+        <br />
         <textarea
-          rows={4}
+          rows={5} cols={80}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           minLength={20}
           required
         />
+        <br />
         <small style={{ color: "gray", fontSize: "0.9em" }}>
           {description.length}/20 minimum characters
         </small>
