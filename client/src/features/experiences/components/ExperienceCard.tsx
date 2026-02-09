@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { ClientRoutes } from "../../../utils/clientRoutes";
+
 export type Experience = {
   id?: number | string;
   title?: string | null;
@@ -45,6 +48,10 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
     : experience.keywords
       ? experience.keywords.split(",").map((keyword) => keyword.trim())
       : [];
+  const updateHref =
+    experience.id !== undefined && experience.id !== null
+      ? ClientRoutes.EXPERIENCE_UPDATE.replace(":id", String(experience.id))
+      : null;
 
   return (
     <article className="experience-card">
@@ -54,6 +61,13 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       {date ? <p>{date}</p> : null}
       {location ? <p>{location}</p> : null}
       {keywords.length ? <p>{keywords.join(", ")}</p> : null}
+      {updateHref ? (
+        <div className="card-actions">
+          <Link className="card-edit-button" to={updateHref}>
+            Edit
+          </Link>
+        </div>
+      ) : null}
     </article>
   );
 }

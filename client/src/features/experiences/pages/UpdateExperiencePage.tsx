@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { apiClient, setAuthToken } from "../../../services/api.service";
 import { ClientRoutes } from "../../../utils/clientRoutes";
-import FormTemplate, { type FormValues } from "../components/ExperienceForm";
-
-// TODO: update URL
-const API_BASE_URL = "update-url"; 
+import ExperienceForm, { type FormValues } from "../components/ExperienceForm";
 
 type ApiExperience = {
   id: number | string;
   title: string | null;
   description: string | null;
-  dateCreated: string | null;
   thumbnail: string | null;
   keywords: string[] | string | null;
 
@@ -26,7 +23,7 @@ type ApiExperience = {
 
 
 export default function UpdateExperiencePage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [initialValues, setInitialValues] = useState<FormValues | null>(null);
@@ -37,10 +34,6 @@ export default function UpdateExperiencePage() {
     return {
       title: api.title ?? "",
       description: api.description ?? "",
-      date: api.dateCreated
-        ? new Date(api.dateCreated).toISOString().slice(0, 10)
-        : "",
-
       image: api.thumbnail ?? "",
       keywords: Array.isArray(api.keywords)
         ? api.keywords.join(", ")
@@ -74,14 +67,11 @@ export default function UpdateExperiencePage() {
       try {
         setLoading(true);
         setLoadError(null);
+        const token = localStorage.getItem("cstp.auth.token");
+        if (token) setAuthToken(token);
 
-        const res = await fetch(`${API_BASE_URL}/${id}`);
-
-        if (!res.ok) {
-          throw new Error("Failed to load experience.");
-        }
-
-        const data = await res.json();
+        const res = await apiClient.get(`/experiences/${id}`);
+        const data = res.data as ApiExperience;
         const mapped = mapApiToFormValues(data);
         setInitialValues(mapped);
       } catch (err) {
@@ -101,6 +91,9 @@ export default function UpdateExperiencePage() {
       return;
     }
 
+    const token = localStorage.getItem("cstp.auth.token");
+    if (token) setAuthToken(token);
+
     const keywordsArray = values.keywords
       ? values.keywords
           .split(",")
@@ -108,42 +101,79 @@ export default function UpdateExperiencePage() {
           .filter((k) => k.length > 0)
       : undefined;
 
-    const putBody = {
-      title: values.title,
-      description: values.description,
-      country: values.country,
-      adminRegion: values.adminRegion || undefined,
-      city: values.city || undefined,
-      street: values.street || undefined,
-      postalCode: values.postalCode || undefined,
-      latitude:
-        values.latitude && values.latitude.trim() !== ""
-          ? Number(values.latitude)
-          : undefined,
-      longitude:
-        values.longitude && values.longitude.trim() !== ""
-          ? Number(values.longitude)
-          : undefined,
-      thumbnail: values.image || undefined,
-      keywords: keywordsArray,
+    const countryCodeMap: Record<string, string> = {
+      "united states": "US",
+      "usa": "US",
+      "us": "US",
+      "united kingdom": "GB",
+      "uk": "GB",
+      "canada": "CA",
+      "china": "CN",
+      "japan": "JP",
+      "australia": "AU",
+      "germany": "DE",
+      "france": "FR",
+      "italy": "IT",
+      "spain": "ES",
+      "mexico": "MX",
+      "brazil": "BR",
+      "india": "IN",
+      "south korea": "KR",
+      "korea": "KR",
     };
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(putBody),
-      });
+    let countryCode = values.country?.trim().toLowerCase() || "";
+    if (countryCode.length > 2) {
+      countryCode = countryCodeMap[countryCode] || countryCode.substring(0, 2).toUpperCase();
+    }
+    if (countryCode.length !== 2) {
+      alert("Country must be a 2-character ISO code (e.g., US, GB, CN).");
+      return;
+    }
+    countryCode = countryCode.toUpperCase();
 
-      if (!res.ok) {
-        throw new Error("Failed to update experience");
+    if (values.description.trim().length < 20) {
+      alert("Description must be at least 20 characters long.");
+      return;
+    }
+
+    const putBody: Record<string, unknown> = {
+      title: values.title.trim(),
+      description: values.description.trim(),
+      country: countryCode,
+    };
+
+    if (values.adminRegion?.trim()) putBody.adminRegion = values.adminRegion.trim();
+    if (values.city?.trim()) putBody.city = values.city.trim();
+    if (values.street?.trim()) putBody.street = values.street.trim();
+    if (values.postalCode?.trim()) putBody.postalCode = values.postalCode.trim();
+
+    if (values.latitude?.trim() && values.longitude?.trim()) {
+      const lat = Number(values.latitude.trim());
+      const lon = Number(values.longitude.trim());
+      if (!isNaN(lat) && !isNaN(lon)) {
+        putBody.latitude = lat;
+        putBody.longitude = lon;
       }
+    } else if (values.latitude?.trim() || values.longitude?.trim()) {
+      alert("Both latitude and longitude must be provided together, or leave both empty.");
+      return;
+    }
 
+    if (values.image?.trim()) putBody.thumbnail = values.image.trim();
+    if (keywordsArray && keywordsArray.length > 0) putBody.keywords = keywordsArray;
+
+    try {
+      await apiClient.put(`/experiences/${id}`, putBody);
       alert("Experience updated successfully!");
       navigate(ClientRoutes.HOME);
     } catch (err) {
       console.error(err);
-      alert("There was a problem updating the experience.");
+      const errorObj = err as { response?: { data?: { error?: string; details?: { message?: string } } } };
+      const errorMessage = errorObj.response?.data?.error ||
+        errorObj.response?.data?.details?.message ||
+        "There was a problem updating the experience.";
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -162,7 +192,7 @@ export default function UpdateExperiencePage() {
   return (
     <div>
       <h1>Edit Experience</h1>
-      <FormTemplate
+      <ExperienceForm
         initialValues={initialValues}
         onSubmit={handleUpdateExperience}
         submitLabel="Update"

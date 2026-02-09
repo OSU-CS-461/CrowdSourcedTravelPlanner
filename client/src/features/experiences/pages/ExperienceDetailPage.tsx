@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { apiClient, setAuthToken } from "../services/api.service";
-import { ClientRoutes } from "../utils/clientRoutes";
-import { useAuth } from "../features/auth/hooks/useAuth";
+import { apiClient, setAuthToken } from "../../../services/api.service";
+import { ClientRoutes } from "../../../utils/clientRoutes";
+import { useAuth } from "../../auth/hooks/useAuth";
 import "./ExperienceDetailPage.css";
 
 type Experience = {
