@@ -22,6 +22,7 @@ type ApiExperience = {
   longitude: number | null;
 };
 
+
 export default function UpdateExperiencePage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,11 +39,13 @@ export default function UpdateExperiencePage() {
       keywords: Array.isArray(api.keywords)
         ? api.keywords.join(", ")
         : api.keywords ?? "",
+
       country: api.country ?? "",
       adminRegion: api.adminRegion ?? "",
       city: api.city ?? "",
       street: api.street ?? "",
       postalCode: api.postalCode ?? "",
+
       latitude:
         api.latitude !== null && api.latitude !== undefined
           ? String(api.latitude)
@@ -132,7 +135,7 @@ export default function UpdateExperiencePage() {
       ? values.keywords
           .split(",")
           .map((k) => k.trim())
-          .filter(Boolean)
+          .filter((k) => k.length > 0)
       : undefined;
 
     const putBody: Record<string, unknown> = {
@@ -170,13 +173,22 @@ export default function UpdateExperiencePage() {
     }
   };
 
-  if (loading) return <p>Loading experience...</p>;
-  if (loadError) return <p>{loadError}</p>;
-  if (!initialValues) return <p>Could not load experience data.</p>;
+  if (loading) {
+    return <p>Loading experience...</p>;
+  }
+
+  if (loadError) {
+    return <p>{loadError}</p>;
+  }
+
+  if (!initialValues) {
+    return <p>Could not load experience data.</p>;
+  }
 
   return (
     <div>
       <h1>Edit Experience</h1>
+      <a href="/">&lt; Home</a>
       <FormTemplate
         initialValues={initialValues}
         onSubmit={handleUpdateExperience}

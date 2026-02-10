@@ -81,6 +81,7 @@ export default function ExperienceForm({
 
       <label>
         Title
+        <br />
         <input
           type="text"
           value={title}
@@ -90,11 +91,12 @@ export default function ExperienceForm({
       </label>
 
       <br />
+      <br />
 
       <label>
         Description
         <textarea
-          rows={4}
+          rows={5} cols={80}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
