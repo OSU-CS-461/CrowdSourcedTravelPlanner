@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ClientRoutes } from "../../../utils/clientRoutes";
+import { ClientRoutes } from "../../../shared/clientRoutes";
 
 export type Experience = {
   id?: number | string;

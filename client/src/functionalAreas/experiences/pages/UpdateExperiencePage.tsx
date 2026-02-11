@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
-import { ClientRoutes } from "../../../utils/clientRoutes";
+import { ClientRoutes } from "../../../shared/clientRoutes";
 import ExperienceForm, { type FormValues } from "../components/ExperienceForm";
 
 type ApiExperience = {

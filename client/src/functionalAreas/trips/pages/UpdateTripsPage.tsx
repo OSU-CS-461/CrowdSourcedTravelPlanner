@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClientRoutes } from "../../../utils/clientRoutes";
+import { ClientRoutes } from "../../../shared/clientRoutes";
 import TripFormTemplate, {type TripFormValues,} from "../components/TripFormTemplate";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 

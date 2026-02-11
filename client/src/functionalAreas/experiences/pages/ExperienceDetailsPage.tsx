@@ -3,7 +3,7 @@ import ReviewsSection from "../../reviews/components/ReviewSection";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
-import { ClientRoutes } from "../../../utils/clientRoutes";
+import { ClientRoutes } from "../../../shared/clientRoutes";
 import { useAuth } from "../../auth/hooks/useAuth";
 import "./ExperienceDetailPage.css";
 

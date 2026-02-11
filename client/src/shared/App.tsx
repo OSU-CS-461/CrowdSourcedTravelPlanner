@@ -9,7 +9,7 @@ import ExperienceDetailsPage from "../functionalAreas/experiences/pages/Experien
 import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
 import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
-import { ClientRoutes } from "../utils/clientRoutes";
+import { ClientRoutes } from "./clientRoutes";
 
 
 

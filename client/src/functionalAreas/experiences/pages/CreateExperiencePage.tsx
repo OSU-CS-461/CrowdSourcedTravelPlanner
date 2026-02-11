@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ClientRoutes } from "../../../utils/clientRoutes";
+import { ClientRoutes } from "../../../shared/clientRoutes";
 import ExperienceForm from "../components/ExperienceForm";
 import type { FormValues } from "../components/ExperienceForm";
 import { setAuthToken } from "../../../shared/services/api.service";

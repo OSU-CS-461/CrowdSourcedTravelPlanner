@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ClientRoutes } from "../../../utils/clientRoutes";
+import { ClientRoutes } from "../../../shared/clientRoutes";
 import TripFormTemplate, {type TripFormValues} from "../components/TripFormTemplate";
 import { setAuthToken } from "../../../shared/services/api.service";
 import { apiClient } from "../../../shared/services/api.service";
