@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { ClientRoutes } from "../utils/clientRoutes";
+import { ClientRoutes } from "./clientRoutes";
 import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
 
 export default function RootLayout() {
