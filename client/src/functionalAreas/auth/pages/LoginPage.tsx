@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { authLogin } from "../../../services/api.service";
+import { authLogin } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../utils/clientRoutes";
 
 type LoginFormValues = {

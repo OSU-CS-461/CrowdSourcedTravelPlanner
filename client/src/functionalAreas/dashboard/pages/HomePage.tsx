@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiClient, setAuthToken } from "../../../services/api.service";
+import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../utils/clientRoutes";
 
 type Experience = {

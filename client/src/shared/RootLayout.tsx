@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { ClientRoutes } from "../utils/clientRoutes";
-import { useAuth } from "../features/auth/hooks/useAuth";
+import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
 
 export default function RootLayout() {
   const { isAuthenticated, logout } = useAuth();

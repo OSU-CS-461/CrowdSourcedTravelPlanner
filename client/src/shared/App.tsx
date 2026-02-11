@@ -1,15 +1,15 @@
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
-import HomePage from "./features/dashboard/pages/HomePage";
-import LoginPage from "./features/auth/pages/LoginPage";
-import SignupPage from "./features/auth/pages/SignupPage";
-import { useAuth } from "./features/auth/hooks/useAuth";
-import CreateExperiencePage from "./features/experiences/pages/CreateExperiencePage";
-import ExperienceDetailsPage from "./features/experiences/pages/ExperienceDetailsPage";
-import UpdateExperiencePage from "./features/experiences/pages/UpdateExperiencePage";
-import CreateTripPage from "./features/trips/pages/CreateTripsPage";
-import UpdateTripPage from "./features/trips/pages/UpdateTripsPage";
-import { ClientRoutes } from "./utils/clientRoutes";
+import HomePage from "../functionalAreas/dashboard/pages/HomePage";
+import LoginPage from "../functionalAreas/auth/pages/LoginPage";
+import SignupPage from "../functionalAreas/auth/pages/SignupPage";
+import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
+import CreateExperiencePage from "../functionalAreas/experiences/pages/CreateExperiencePage";
+import ExperienceDetailsPage from "../functionalAreas/experiences/pages/ExperienceDetailsPage";
+import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
+import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
+import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
+import { ClientRoutes } from "../utils/clientRoutes";
 
 
 

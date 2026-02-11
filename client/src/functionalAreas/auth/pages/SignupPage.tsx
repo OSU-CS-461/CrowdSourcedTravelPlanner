@@ -1,7 +1,7 @@
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
-import { authSignup } from "../../../services/api.service";
+import { authSignup } from "../../../shared/services/api.service";
 import { useAuth } from "../hooks/useAuth";
 import { ClientRoutes } from "../../../utils/clientRoutes";
 
