@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../services/api.service";
 import { ClientRoutes } from "../../../utils/clientRoutes";
 import { useAuth } from "../../auth/hooks/useAuth";
 import "./ExperienceDetailPage.css";
 
 type Experience = {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   dateCreated: string;
-  lastUpdated: string;
+  lastUpdated?: string;
   thumbnail?: string;
   keywords?: string[];
   country?: string;
@@ -21,15 +21,30 @@ type Experience = {
   latitude?: number | null;
   longitude?: number | null;
   avgRating?: number | null;
-  createdBy?: number;
+  createdBy?: number | string;
 };
 
 export default function ExperienceDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [experience, setExperience] = useState<Experience | null>(null);
-  const [loading, setLoading] = useState(true);
+  const previewExperience = (
+    location.state as { experience?: Experience } | null
+  )?.experience;
+  const previewMatchesRoute =
+    Boolean(previewExperience) &&
+    Boolean(id) &&
+    String(previewExperience?.id) === id;
+  const [experience, setExperience] = useState<Experience | null>(() =>
+    previewMatchesRoute && previewExperience
+      ? {
+          ...previewExperience,
+          lastUpdated: previewExperience.lastUpdated ?? previewExperience.dateCreated,
+        }
+      : null
+  );
+  const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -43,6 +58,18 @@ export default function ExperienceDetailPage() {
       return;
     }
 
+    if (previewMatchesRoute && previewExperience) {
+      setExperience({
+        ...previewExperience,
+        lastUpdated: previewExperience.lastUpdated ?? previewExperience.dateCreated,
+      });
+      setLoading(false);
+    } else {
+      setExperience(null);
+      setLoading(true);
+    }
+    setError(null);
+
     apiClient
       .get(`/experiences/${id}`)
       .then((res) => {
@@ -51,10 +78,12 @@ export default function ExperienceDetailPage() {
       })
       .catch((err) => {
         console.error(err);
-        setError("Failed to load experience");
+        if (!previewMatchesRoute) {
+          setError("Failed to load experience");
+        }
         setLoading(false);
       });
-  }, [id]);
+  }, [id, previewExperience, previewMatchesRoute]);
 
   const handleDelete = async () => {
     if (!id || !experience) return;
@@ -100,9 +129,13 @@ export default function ExperienceDetailPage() {
     return parts.length > 0 ? parts.join(", ") : "Location not specified";
   };
 
-  const isOwner = user && experience && user.id === experience.createdBy;
+  const isOwner =
+    Boolean(user) &&
+    Boolean(experience) &&
+    experience?.createdBy !== undefined &&
+    String(user?.id) === String(experience.createdBy);
 
-  if (loading) {
+  if (loading && !experience) {
     return (
       <main className="experience-detail-page">
         <div className="loading">Loading experience...</div>
@@ -110,7 +143,7 @@ export default function ExperienceDetailPage() {
     );
   }
 
-  if (error || !experience) {
+  if (!experience) {
     return (
       <main className="experience-detail-page">
         <div className="error">
@@ -173,8 +206,8 @@ export default function ExperienceDetailPage() {
           <div className="detail-section">
             <h2>Location</h2>
             <p>{getLocationString(experience)}</p>
-            {experience.latitude !== null &&
-              experience.longitude !== null && (
+            {experience.latitude != null &&
+              experience.longitude != null && (
                 <p className="coordinates">
                   Coordinates: {experience.latitude}, {experience.longitude}
                 </p>
@@ -198,7 +231,8 @@ export default function ExperienceDetailPage() {
             <p>
               <strong>Created:</strong> {formatDate(experience.dateCreated)}
             </p>
-            {experience.lastUpdated !== experience.dateCreated && (
+            {experience.lastUpdated &&
+              experience.lastUpdated !== experience.dateCreated && (
               <p>
                 <strong>Last Updated:</strong>{" "}
                 {formatDate(experience.lastUpdated)}

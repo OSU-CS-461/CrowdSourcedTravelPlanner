@@ -29,18 +29,6 @@ function HomePage() {
       .catch((err) => console.error(err));
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to remove this experience?")) {
-      try {
-        await apiClient.delete(`/experiences/${id}`);
-        setExperiences(experiences.filter((exp) => exp.id !== id));
-      } catch (err) {
-        console.error("Failed to delete experience:", err);
-        alert("Could not remove the experience. Please try again.");
-      }
-    }
-  };
-
   return (
     <main style={{ maxWidth: "800px", margin: "0 auto", padding: "20px", textAlign: "left" }}>
       <h1>Welcome to CrowdSourced Travel Planner</h1>
@@ -73,14 +61,21 @@ function HomePage() {
               style={{
                 borderBottom: "1px solid #eee",
                 padding: "20px 0",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
               }}
             >
               <div style={{ flex: 1 }}>
                 <h2
-                  onClick={() => navigate(`/experience/${exp.id}`)}
+                  onClick={() =>
+                    navigate(
+                      ClientRoutes.EXPERIENCE_DETAILS.replace(
+                        ":id",
+                        exp.id.toString()
+                      ),
+                      {
+                        state: { experience: exp },
+                      }
+                    )
+                  }
                   style={{
                     color: "#1a0dab",
                     cursor: "pointer",
@@ -101,48 +96,6 @@ function HomePage() {
                     ? exp.description.substring(0, 160) + "..."
                     : exp.description || "Discover more about this hidden gem..."}
                 </p>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  alignItems: "flex-end",
-                  marginLeft: "20px",
-                }}
-              >
-                <button
-                  onClick={() => navigate(ClientRoutes.EXPERIENCE_UPDATE.replace(":id", exp.id.toString()))}
-                  style={{
-                    background: "#f1f3f4",
-                    border: "1px solid #dadce0",
-                    borderRadius: "4px",
-                    color: "#1a73e8",
-                    cursor: "pointer",
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                    width: "80px",
-                  }}
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => handleDelete(exp.id)}
-                  style={{
-                    background: "#f1f3f4",
-                    border: "1px solid #dadce0",
-                    borderRadius: "4px",
-                    color: "#d93025",
-                    cursor: "pointer",
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                    width: "80px",
-                  }}
-                >
-                  Remove
-                </button>
               </div>
             </div>
           ))}

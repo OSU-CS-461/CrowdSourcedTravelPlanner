@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../utils/clientRoutes";
-import FormTemplate, { type FormValues } from "../components/FormTemplate";
+import ExperienceForm from "../features/experiences/components/ExperienceForm";
+import type { FormValues } from "../features/experiences/components/ExperienceForm";
 import { setAuthToken } from "../services/api.service";
 import { apiClient } from "../services/api.service";
 
@@ -122,7 +123,7 @@ export default function CreateExperiencePage() {
   return (
     <div>
       <h1>Create Experience</h1>
-      <FormTemplate onSubmit={handleCreateExperience} submitLabel="Create" />
+      <ExperienceForm onSubmit={handleCreateExperience} submitLabel="Create" />
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import { useAuth } from "./hooks/useAuth";
+import LoginPage from "./features/auth/pages/LoginPage";
+import SignupPage from "./features/auth/pages/SignupPage";
+import { useAuth } from "./features/auth/hooks/useAuth";
 import CreateExperiencePage from "./pages/CreateExperiencePage";
-import UpdateExperiencePage from "./pages/UpdateExperiencePage";
+import ExperienceDetailsPage from "./features/experiences/pages/ExperienceDetailsPage";
+import UpdateExperiencePage from "./features/experiences/pages/UpdateExperiencePage";
 import CreateTripPage from "./pages/CreateTripsPage";
 import UpdateTripPage from "./pages/UpdateTripsPage";
 import { ClientRoutes } from "./utils/clientRoutes";
@@ -52,6 +53,10 @@ export default function App() {
           path={ClientRoutes.EXPERIENCE_CREATE}
           element={
             <CreateExperiencePage />}
+        />
+        <Route
+          path={ClientRoutes.EXPERIENCE_DETAILS}
+          element={<ExperienceDetailsPage />}
         />
         <Route
           path={ClientRoutes.EXPERIENCE_UPDATE}
