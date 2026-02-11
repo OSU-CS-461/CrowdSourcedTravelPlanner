@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { ClientRoutes } from "../utils/clientRoutes";
-import ExperienceForm from "../features/experiences/components/ExperienceForm";
-import type { FormValues } from "../features/experiences/components/ExperienceForm";
-import { setAuthToken } from "../services/api.service";
-import { apiClient } from "../services/api.service";
+import { ClientRoutes } from "../../../utils/clientRoutes";
+import ExperienceForm from "../components/ExperienceForm";
+import type { FormValues } from "../components/ExperienceForm";
+import { setAuthToken } from "../../../services/api.service";
+import { apiClient } from "../../../services/api.service";
 
 export default function CreateExperiencePage() {
   const navigate = useNavigate();

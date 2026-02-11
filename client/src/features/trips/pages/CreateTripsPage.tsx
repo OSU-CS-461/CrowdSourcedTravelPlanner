@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { ClientRoutes } from "../utils/clientRoutes";
-import TripFormTemplate, {type TripFormValues} from "../components/TripFormTemplate";
-import { setAuthToken } from "../services/api.service";
-import { apiClient } from "../services/api.service";
+import { ClientRoutes } from "../../../utils/clientRoutes";
+import TripFormTemplate, {type TripFormValues} from "../../../components/TripFormTemplate";
+import { setAuthToken } from "../../../services/api.service";
+import { apiClient } from "../../../services/api.service";
+
 export default function CreateTripPage() {
   const navigate = useNavigate();
 

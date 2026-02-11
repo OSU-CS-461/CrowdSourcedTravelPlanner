@@ -1,14 +1,14 @@
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
-import HomePage from "./pages/HomePage";
+import HomePage from "./features/dashboard/pages/HomePage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import SignupPage from "./features/auth/pages/SignupPage";
 import { useAuth } from "./features/auth/hooks/useAuth";
-import CreateExperiencePage from "./pages/CreateExperiencePage";
+import CreateExperiencePage from "./features/experiences/pages/CreateExperiencePage";
 import ExperienceDetailsPage from "./features/experiences/pages/ExperienceDetailsPage";
 import UpdateExperiencePage from "./features/experiences/pages/UpdateExperiencePage";
-import CreateTripPage from "./pages/CreateTripsPage";
-import UpdateTripPage from "./pages/UpdateTripsPage";
+import CreateTripPage from "./features/trips/pages/CreateTripsPage";
+import UpdateTripPage from "./features/trips/pages/UpdateTripsPage";
 import { ClientRoutes } from "./utils/clientRoutes";
 
 
