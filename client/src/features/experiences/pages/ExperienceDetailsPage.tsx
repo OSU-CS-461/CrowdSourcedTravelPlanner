@@ -1,3 +1,5 @@
+import ReviewsSection from "../../reviews/components/ReviewSection";
+
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../services/api.service";
@@ -32,18 +34,22 @@ export default function ExperienceDetailPage() {
   const previewExperience = (
     location.state as { experience?: Experience } | null
   )?.experience;
+
   const previewMatchesRoute =
     Boolean(previewExperience) &&
     Boolean(id) &&
     String(previewExperience?.id) === id;
+
   const [experience, setExperience] = useState<Experience | null>(() =>
     previewMatchesRoute && previewExperience
       ? {
           ...previewExperience,
-          lastUpdated: previewExperience.lastUpdated ?? previewExperience.dateCreated,
+          lastUpdated:
+            previewExperience.lastUpdated ?? previewExperience.dateCreated,
         }
       : null
   );
+
   const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -68,6 +74,7 @@ export default function ExperienceDetailPage() {
       setExperience(null);
       setLoading(true);
     }
+
     setError(null);
 
     apiClient
@@ -101,7 +108,8 @@ export default function ExperienceDetailPage() {
     } catch (err) {
       console.error(err);
       const errorObj = err as { response?: { data?: { error?: string } } };
-      const errorMessage = errorObj.response?.data?.error || "Failed to delete experience";
+      const errorMessage =
+        errorObj.response?.data?.error || "Failed to delete experience";
       alert(`Error: ${errorMessage}`);
     } finally {
       setDeleting(false);
@@ -206,12 +214,11 @@ export default function ExperienceDetailPage() {
           <div className="detail-section">
             <h2>Location</h2>
             <p>{getLocationString(experience)}</p>
-            {experience.latitude != null &&
-              experience.longitude != null && (
-                <p className="coordinates">
-                  Coordinates: {experience.latitude}, {experience.longitude}
-                </p>
-              )}
+            {experience.latitude != null && experience.longitude != null && (
+              <p className="coordinates">
+                Coordinates: {experience.latitude}, {experience.longitude}
+              </p>
+            )}
           </div>
 
           {experience.keywords && experience.keywords.length > 0 && (
@@ -233,12 +240,22 @@ export default function ExperienceDetailPage() {
             </p>
             {experience.lastUpdated &&
               experience.lastUpdated !== experience.dateCreated && (
-              <p>
-                <strong>Last Updated:</strong>{" "}
-                {formatDate(experience.lastUpdated)}
-              </p>
-            )}
+                <p>
+                  <strong>Last Updated:</strong> {formatDate(experience.lastUpdated)}
+                </p>
+              )}
           </div>
+
+          {/* =========================
+              REVIEWS (Teammate work area)
+              File: src/features/reviews/components/ReviewsSection/ReviewsSection.tsx
+              API:  src/features/reviews/api/reviews.api.ts
+              Types: src/features/reviews/types/review.ts
+              Props provided:
+              - experienceId (string)
+              - isOwner (boolean)
+             ========================= */}
+          <ReviewsSection experienceId={String(experience.id)} isOwner={isOwner} />
         </div>
       </div>
     </main>
