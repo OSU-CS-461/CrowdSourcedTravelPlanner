@@ -17,6 +17,7 @@ model User {
   experiences    Experience[]
   reviews        Review[]
   trips          Trip[]
+  interests      Interest[]
 }
 
 model Experience {
@@ -131,4 +132,18 @@ model ExperienceTag {
   @@id([experienceId, tagId])
   @@index([tagId])
   @@index([experienceId])
+}
+
+model Interest {
+  id          Int      @id @default(autoincrement())
+  createdBy   Int
+  user        User     @relation(fields: [createdBy], references: [id])
+
+  name        String
+  description String?
+
+  dateCreated DateTime @default(now())
+  lastUpdated DateTime @updatedAt
+
+  @@index([createdBy])
 }

@@ -9,6 +9,7 @@ import ExperienceDetailsPage from "../functionalAreas/experiences/pages/Experien
 import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
 import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
+import InterestsPage from "../functionalAreas/interests/pages/InterestsPage";
 import { ClientRoutes } from "./clientRoutes";
 
 
@@ -65,6 +66,13 @@ export default function App() {
 
         <Route path={ClientRoutes.TRIP_UPDATE} 
         element={<UpdateTripPage />}
+        />
+
+        <Route
+          path={ClientRoutes.INTERESTS}
+          element={
+            isAuthenticated ? <InterestsPage /> : <Navigate to="/login" replace />
+          }
         />
 
       </Routes>

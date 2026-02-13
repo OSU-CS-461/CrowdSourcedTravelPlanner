@@ -62,6 +62,13 @@ export default function HomePage() {
         >
           + Create New Trip
         </button>
+
+        <button
+          className="btn btn-interests"
+          onClick={() => navigate(ClientRoutes.INTERESTS)}
+        >
+          My Interests
+        </button>
       </div>
 
       <h2>Your Experiences</h2>

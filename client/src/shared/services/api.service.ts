@@ -39,3 +39,42 @@ export const authSignup = async (input: {
   const response = await apiClient.post<AuthResponse>("/auth/register", input);
   return response.data;
 };
+
+export type Interest = {
+  id: number;
+  name: string;
+  description?: string;
+  dateCreated: string;
+  lastUpdated: string;
+  createdBy: number;
+};
+
+export const getInterests = async () => {
+  const response = await apiClient.get<Interest[]>("/interests");
+  return response.data;
+};
+
+export const getInterest = async (id: number) => {
+  const response = await apiClient.get<Interest>(`/interests/${id}`);
+  return response.data;
+};
+
+export const createInterest = async (input: {
+  name: string;
+  description?: string;
+}) => {
+  const response = await apiClient.post<Interest>("/interests", input);
+  return response.data;
+};
+
+export const updateInterest = async (id: number, input: {
+  name: string;
+  description?: string;
+}) => {
+  const response = await apiClient.put<Interest>(`/interests/${id}`, input);
+  return response.data;
+};
+
+export const deleteInterest = async (id: number) => {
+  await apiClient.delete(`/interests/${id}`);
+};

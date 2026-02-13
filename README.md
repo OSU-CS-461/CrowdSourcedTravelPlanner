@@ -11,6 +11,26 @@ An easy way to manage your node versions is through nvm. This can be installed t
 3. `nvm install 23.10.0`
 4. `nvm use 23.10.0`
 
+## Windows
+
+For Windows users, see the comprehensive setup guide: **[WINDOWS_SETUP.md](./WINDOWS_SETUP.md)**
+
+Quick start:
+1. Install Node.js 20.19+ or 22.12+ from https://nodejs.org/
+2. Install Git from https://git-scm.com/download/win
+3. Follow the detailed instructions in `WINDOWS_SETUP.md` for:
+   - First-time setup
+   - Environment configuration
+   - Running the project
+   - Troubleshooting
+
+The Windows guide includes:
+- Step-by-step setup instructions
+- Prisma database configuration
+- Startup scripts
+- Common issues and solutions
+- Application usage guide
+
 # Local Dev
 
 When developing locally, run the client and the server by following the README.md instructions in the each directory (after the shared setup steps here).
