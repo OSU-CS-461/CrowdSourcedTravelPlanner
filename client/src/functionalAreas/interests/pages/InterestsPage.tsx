@@ -67,13 +67,17 @@ export default function InterestsPage() {
       await loadInterests();
     } catch (err: unknown) {
       console.error("Error saving interest:", err);
-      const errorMessage = 
-        (err && typeof err === "object" && "response" in err && 
-         err.response && typeof err.response === "object" && "data" in err.response &&
-         err.response.data && typeof err.response.data === "object" &&
-         ("error" in err.response.data || "message" in err.response.data))
-          ? String(err.response.data.error || err.response.data.message)
-          : (err instanceof Error ? err.message : "Failed to save interest");
+      let errorMessage = "Failed to save interest";
+      
+      if (err && typeof err === "object" && "response" in err) {
+        const response = (err as { response?: { data?: { error?: unknown; message?: unknown } } }).response;
+        if (response?.data) {
+          errorMessage = String(response.data.error || response.data.message || errorMessage);
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     }
   };
@@ -116,12 +120,15 @@ export default function InterestsPage() {
       await deleteInterest(id);
       await loadInterests();
     } catch (err: unknown) {
-      const errorMessage = 
-        (err && typeof err === "object" && "response" in err && 
-         err.response && typeof err.response === "object" && "data" in err.response &&
-         err.response.data && typeof err.response.data === "object" && "error" in err.response.data)
-          ? String(err.response.data.error)
-          : "Failed to delete interest";
+      let errorMessage = "Failed to delete interest";
+      
+      if (err && typeof err === "object" && "response" in err) {
+        const response = (err as { response?: { data?: { error?: unknown } } }).response;
+        if (response?.data?.error) {
+          errorMessage = String(response.data.error);
+        }
+      }
+      
       setError(errorMessage);
     }
   };
