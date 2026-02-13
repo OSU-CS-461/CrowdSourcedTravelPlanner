@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  apiClient,
   setAuthToken,
   getInterests,
   createInterest,
@@ -66,9 +65,15 @@ export default function InterestsPage() {
       setShowForm(false);
       setEditingId(null);
       await loadInterests();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving interest:", err);
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || "Failed to save interest";
+      const errorMessage = 
+        (err && typeof err === "object" && "response" in err && 
+         err.response && typeof err.response === "object" && "data" in err.response &&
+         err.response.data && typeof err.response.data === "object" &&
+         ("error" in err.response.data || "message" in err.response.data))
+          ? String(err.response.data.error || err.response.data.message)
+          : (err instanceof Error ? err.message : "Failed to save interest");
       setError(errorMessage);
     }
   };
@@ -110,8 +115,14 @@ export default function InterestsPage() {
       if (token) setAuthToken(token);
       await deleteInterest(id);
       await loadInterests();
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to delete interest");
+    } catch (err: unknown) {
+      const errorMessage = 
+        (err && typeof err === "object" && "response" in err && 
+         err.response && typeof err.response === "object" && "data" in err.response &&
+         err.response.data && typeof err.response.data === "object" && "error" in err.response.data)
+          ? String(err.response.data.error)
+          : "Failed to delete interest";
+      setError(errorMessage);
     }
   };
 
