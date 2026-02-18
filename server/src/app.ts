@@ -5,6 +5,8 @@ import { Routes } from "./routes";
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
 import morgan from "morgan";
 import cors from "cors";
+import { default as experienceRouter } from "./routes/experiences";
+import { default as tagsRouter } from "./routes/tags";
 
 const app = express();
 
@@ -21,8 +23,8 @@ app.get("/", (req: Request, res: Response) => {
   res.sendFile(spaFilePath);
 });
 
-import { default as experienceRouter } from './routes/experiences';
-app.use('/api/experiences', experienceRouter);
+app.use("/api/experiences", experienceRouter);
+app.use("/api/tags", tagsRouter);
 
 
 app.post(Routes.POST__AUTH_REGISTER, register);

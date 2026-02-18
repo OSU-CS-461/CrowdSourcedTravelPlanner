@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 
+type ExperienceTag = {
+  id: number;
+  label: string;
+  slug: string;
+  type: "CATEGORY" | "FEATURE";
+  parentCategoryId?: number | null;
+};
+
 type Experience = {
   id: number;
   title: string;
@@ -13,6 +21,8 @@ type Experience = {
   country?: string;
   city?: string;
   adminRegion?: string;
+  categoryTags?: ExperienceTag[];
+  featureTags?: ExperienceTag[];
 };
 
 export default function HomePage() {
@@ -96,6 +106,20 @@ export default function HomePage() {
                     ? exp.description.substring(0, 160) + "..."
                     : exp.description || "Discover more about this hidden gem..."}
                 </p>
+
+                {exp.categoryTags && exp.categoryTags.length > 0 && (
+                  <p style={{ color: "#4d5156", margin: "8px 0 0 0", fontSize: "14px" }}>
+                    <strong>Category:</strong>{" "}
+                    {exp.categoryTags.map((tag) => tag.label).join(", ")}
+                  </p>
+                )}
+
+                {exp.featureTags && exp.featureTags.length > 0 && (
+                  <p style={{ color: "#4d5156", margin: "4px 0 0 0", fontSize: "14px" }}>
+                    <strong>Features:</strong>{" "}
+                    {exp.featureTags.map((tag) => tag.label).join(", ")}
+                  </p>
+                )}
               </div>
             </div>
           ))}

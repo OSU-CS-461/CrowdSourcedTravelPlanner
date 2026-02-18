@@ -14,6 +14,31 @@ import * as experienceService from "../services/experienceService";
 
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
+function parseTagSlugs(tagsQuery: string | undefined): string[] {
+    if (tagsQuery === undefined) return [];
+    if (tagsQuery.trim().length === 0) {
+        throw { status: 400, message: "tags must include at least one non-empty slug" };
+    }
+
+    const slugs = [...new Set(
+        tagsQuery
+            .split(",")
+            .map((slug) => slug.trim().toLowerCase())
+            .filter(Boolean)
+    )];
+
+    if (slugs.length === 0) {
+        throw { status: 400, message: "tags must include at least one non-empty slug" };
+    }
+
+    const invalidSlug = slugs.find((slug) => !/^[a-z0-9-]+$/.test(slug));
+    if (invalidSlug) {
+        throw { status: 400, message: `Invalid tag slug: ${invalidSlug}` };
+    }
+
+    return slugs;
+}
+
 async function createExperience(
     req: AuthenticatedRequest,
     res: Response,
@@ -70,7 +95,6 @@ async function getExperience(
 }
 
 
-// TODO: implement filtering by tags, creator
 // TODO: add pagination info to response (nextOffset, prevOffset, etc)
 async function listExperiences(
     req: Request, 
@@ -83,14 +107,23 @@ async function listExperiences(
         // --- Pagination ---
 
         // limit must be less than 50, default is 20
-        const limit = Math.min( (parseInt(query.limit as string) || 20), 50 );
-        // offset defaults to 0
-        const offset = parseInt(req.query.offset as string) || 0;
+        const limit = Math.min((parseInt(query.limit as string) || 20), 50);
+        const offset = parseInt(query.offset as string) || 0;
+
+        if (limit <= 0) {
+            throw { status: 400, message: "limit must be > 0" };
+        }
+
+        if (offset < 0) {
+            throw { status: 400, message: "offset must be >= 0" };
+        }
         
 
         // --- Filters ---
 
         const where: Prisma.ExperienceWhereInput = {};
+        const tagSlugs = parseTagSlugs(query.tags);
+        const tagMode = query.tagMode || "or";
 
         if (query.title) {
             where.title = { contains: query.title, mode: "insensitive" };
@@ -106,6 +139,26 @@ async function listExperiences(
 
         if (query.city) {
             where.city = { contains: query.city, mode: "insensitive" };
+        }
+
+        if (tagSlugs.length > 0 && tagMode === "and") {
+            where.AND = tagSlugs.map((slug) => ({
+                tags: {
+                    some: {
+                        tag: { slug },
+                    },
+                },
+            }));
+        }
+
+        if (tagSlugs.length > 0 && tagMode === "or") {
+            where.tags = {
+                some: {
+                    tag: {
+                        slug: { in: tagSlugs },
+                    },
+                },
+            };
         }
 
         // --- Sorting ---
@@ -152,7 +205,7 @@ async function updateExperience(
         const experienceId = parseInt(req.params.id as string);
 
         if (isNaN(experienceId) || experienceId <= 0) {
-            throw { status: 401, message: "Invalid experience ID"}
+            throw { status: 400, message: "Invalid experience ID"}
         }
 
         const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
@@ -185,7 +238,7 @@ async function editExperience(
     try {
         const experienceId = parseInt(req.params.id as string);
         if (isNaN(experienceId) || experienceId <= 0) {
-            throw { status: 401, message: "Invalid experience ID"}
+            throw { status: 400, message: "Invalid experience ID"}
         }
 
         const body: ExpPatchBody = ExpPatchBodySchema.parse(req.body);
@@ -217,6 +270,10 @@ async function deleteExperience(
     ) {
     try {
         const experienceId = parseInt(req.params.id);
+
+        if (isNaN(experienceId) || experienceId <= 0) {
+            throw { status: 400, message: "Invalid experience ID" };
+        }
 
         if (!req.user) {
             throw { status: 401, message: "Unauthorized" };

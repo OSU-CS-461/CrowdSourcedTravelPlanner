@@ -40,8 +40,8 @@ export { Prisma }
 
 
 // file annotations for bundling tools to include these files
-path.join(__dirname, "query_engine-windows.dll.node")
-path.join(process.cwd(), "src/generated/prisma/query_engine-windows.dll.node")
+path.join(__dirname, "libquery_engine-darwin-arm64.dylib.node")
+path.join(process.cwd(), "src/generated/prisma/libquery_engine-darwin-arm64.dylib.node")
 
 /**
  * Model User
@@ -53,6 +53,16 @@ export type User = Prisma.UserModel
  * 
  */
 export type Experience = Prisma.ExperienceModel
+/**
+ * Model Tag
+ * 
+ */
+export type Tag = Prisma.TagModel
+/**
+ * Model ExperienceTag
+ * 
+ */
+export type ExperienceTag = Prisma.ExperienceTagModel
 /**
  * Model Review
  * 

@@ -7,6 +7,14 @@ import { ClientRoutes } from "../../../shared/clientRoutes";
 import { useAuth } from "../../auth/hooks/useAuth";
 import "./ExperienceDetailPage.css";
 
+type ExperienceTag = {
+  id: number | string;
+  label: string;
+  slug: string;
+  type: "CATEGORY" | "FEATURE";
+  parentCategoryId?: number | null;
+};
+
 type Experience = {
   id: number | string;
   title: string;
@@ -24,6 +32,8 @@ type Experience = {
   longitude?: number | null;
   avgRating?: number | null;
   createdBy?: number | string;
+  categoryTags?: ExperienceTag[];
+  featureTags?: ExperienceTag[];
 };
 
 export default function ExperienceDetailPage() {
@@ -228,6 +238,32 @@ export default function ExperienceDetailPage() {
                 {experience.keywords.map((keyword, idx) => (
                   <span key={idx} className="keyword-tag">
                     {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {experience.categoryTags && experience.categoryTags.length > 0 && (
+            <div className="detail-section">
+              <h2>Category Tags</h2>
+              <div className="detail-keywords">
+                {experience.categoryTags.map((tag) => (
+                  <span key={tag.id} className="keyword-tag">
+                    {tag.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {experience.featureTags && experience.featureTags.length > 0 && (
+            <div className="detail-section">
+              <h2>Feature Tags</h2>
+              <div className="detail-keywords">
+                {experience.featureTags.map((tag) => (
+                  <span key={tag.id} className="keyword-tag">
+                    {tag.label}
                   </span>
                 ))}
               </div>

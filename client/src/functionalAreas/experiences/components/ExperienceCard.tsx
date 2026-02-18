@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 
+type ExperienceTag = {
+  id: number | string;
+  label: string;
+  slug: string;
+  type: "CATEGORY" | "FEATURE";
+  parentCategoryId?: number | null;
+};
+
 export type Experience = {
   id?: number | string;
   title?: string | null;
@@ -13,6 +21,8 @@ export type Experience = {
   city?: string | null;
   street?: string | null;
   postalCode?: string | null;
+  categoryTags?: ExperienceTag[] | null;
+  featureTags?: ExperienceTag[] | null;
 };
 
 interface ExperienceCardProps {
@@ -48,6 +58,8 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
     : experience.keywords
       ? experience.keywords.split(",").map((keyword) => keyword.trim())
       : [];
+  const categories = experience.categoryTags ?? [];
+  const features = experience.featureTags ?? [];
   const updateHref =
     experience.id !== undefined && experience.id !== null
       ? ClientRoutes.EXPERIENCE_UPDATE.replace(":id", String(experience.id))
@@ -61,6 +73,16 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       {date ? <p>{date}</p> : null}
       {location ? <p>{location}</p> : null}
       {keywords.length ? <p>{keywords.join(", ")}</p> : null}
+      {categories.length ? (
+        <p>
+          <strong>Category:</strong> {categories.map((tag) => tag.label).join(", ")}
+        </p>
+      ) : null}
+      {features.length ? (
+        <p>
+          <strong>Features:</strong> {features.map((tag) => tag.label).join(", ")}
+        </p>
+      ) : null}
       {updateHref ? (
         <div className="card-actions">
           <Link className="card-edit-button" to={updateHref}>

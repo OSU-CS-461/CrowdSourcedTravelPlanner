@@ -1,5 +1,12 @@
 import * as z from "zod";
 
+const TagIdsSchema = z
+  .array(z.number().int().positive())
+  .max(50)
+  .refine((ids) => new Set(ids).size === ids.length, {
+    message: "tagIds must not contain duplicates",
+  });
+
 export const ExpPutPostBodySchema = z.object({
   // ---- REQUIRED ---  
   title: z.string().min(3).max(200),            
@@ -14,6 +21,8 @@ export const ExpPutPostBodySchema = z.object({
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   thumbnail: z.string().optional(),   
+  tagIds: TagIdsSchema.optional(),
+  // Deprecated input kept for backward compatibility with existing clients.
   keywords: z.array(z.string()).optional(),
 })
 .refine(
@@ -60,6 +69,8 @@ export const ExpPutPostBodySchema = z.object({
 
 export const ExpPatchBodySchema = z.object({           
   thumbnail: z.string().optional(),   
+  tagIds: TagIdsSchema.optional(),
+  // Deprecated input kept for backward compatibility with existing clients.
   keywords: z.array(z.string()).optional(),
   descriptionEdit: z.string().optional()
 })
@@ -75,6 +86,10 @@ export const ExpListQuerySchema = z.object({
   adminRegion: z.string().optional(),
   city: z.string().optional(),
   tags: z.string().optional(),
+  tagMode: z.preprocess(
+    (value) => (typeof value === "string" ? value.toLowerCase() : value),
+    z.enum(["and", "or"]).optional()
+  ),
 })
 
 

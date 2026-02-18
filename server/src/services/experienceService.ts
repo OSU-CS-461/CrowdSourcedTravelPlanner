@@ -1,13 +1,166 @@
-import prisma from "../db/prisma"; // Make sure prisma client is exported from db/index.ts
+import { Prisma } from "../generated/prisma/client";
+import prisma from "../db/prisma";
 import { ExpPutPostBody, ExpPatchBody } from "../models/experience";
 
 interface ExperienceCreateInput extends ExpPutPostBody {
-    createdBy: number;
+  createdBy: number;
 }
 
+interface ListExperiencesParams {
+  limit: number;
+  offset: number;
+  where?: Prisma.ExperienceWhereInput;
+  orderBy?: Prisma.ExperienceOrderByWithRelationInput;
+}
 
-export async function createExperience(postBody: ExperienceCreateInput ) {
-    const experience = await prisma.experience.create({
+interface UpdateExperienceParams {
+  experienceId: number;
+  userId: number;
+  putData: ExpPutPostBody;
+}
+
+interface EditExperienceParams {
+  experienceId: number;
+  userId: number;
+  patchData: ExpPatchBody;
+}
+
+interface DeleteExperienceParams {
+  experienceId: number;
+  userId: number;
+}
+
+const EXPERIENCE_LIST_SELECT = {
+  id: true,
+  title: true,
+  country: true,
+  adminRegion: true,
+  city: true,
+  street: true,
+  postalCode: true,
+  latitude: true,
+  longitude: true,
+  thumbnail: true,
+  avgRating: true,
+  dateCreated: true,
+  lastUpdated: true,
+  createdBy: true,
+  tags: {
+    select: {
+      tag: {
+        select: {
+          id: true,
+          slug: true,
+          label: true,
+          type: true,
+          parentCategoryId: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.ExperienceSelect;
+
+const EXPERIENCE_DETAIL_SELECT = {
+  id: true,
+  title: true,
+  description: true,
+  descriptionEdit: true,
+  country: true,
+  adminRegion: true,
+  city: true,
+  street: true,
+  postalCode: true,
+  latitude: true,
+  longitude: true,
+  thumbnail: true,
+  avgRating: true,
+  dateCreated: true,
+  lastUpdated: true,
+  createdBy: true,
+  tags: {
+    select: {
+      tag: {
+        select: {
+          id: true,
+          slug: true,
+          label: true,
+          type: true,
+          parentCategoryId: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.ExperienceSelect;
+
+type ExperienceListRow = Prisma.ExperienceGetPayload<{
+  select: typeof EXPERIENCE_LIST_SELECT;
+}>;
+
+type ExperienceDetailRow = Prisma.ExperienceGetPayload<{
+  select: typeof EXPERIENCE_DETAIL_SELECT;
+}>;
+
+function serializeExperience<T extends ExperienceListRow | ExperienceDetailRow>(
+  experience: T
+) {
+  const tags = experience.tags.map((joinedTag) => joinedTag.tag);
+  const categoryTags = tags.filter((tag) => tag.type === "CATEGORY");
+  const featureTags = tags.filter((tag) => tag.type === "FEATURE");
+  const { tags: _joinedTags, ...rest } = experience;
+  return {
+    ...rest,
+    tags,
+    tagIds: tags.map((tag) => tag.id),
+    categoryTags,
+    featureTags,
+  };
+}
+
+async function validateTagIds(tagIds: number[] | undefined) {
+  if (tagIds === undefined) return undefined;
+
+  const uniqueTagIds = [...new Set(tagIds)];
+  if (uniqueTagIds.length === 0) return [];
+
+  const existingTags = await prisma.tag.findMany({
+    where: { id: { in: uniqueTagIds } },
+    select: { id: true },
+  });
+  const existingTagIds = new Set(existingTags.map((tag) => tag.id));
+  const missingTagIds = uniqueTagIds.filter((id) => !existingTagIds.has(id));
+
+  if (missingTagIds.length > 0) {
+    throw {
+      status: 400,
+      message: `Invalid tagIds: ${missingTagIds.join(", ")}`,
+    };
+  }
+
+  return uniqueTagIds;
+}
+
+async function replaceExperienceTags(
+  tx: Prisma.TransactionClient,
+  experienceId: number,
+  tagIds: number[]
+) {
+  await tx.experienceTag.deleteMany({ where: { experienceId } });
+
+  if (tagIds.length === 0) {
+    return;
+  }
+
+  await tx.experienceTag.createMany({
+    data: tagIds.map((tagId) => ({ experienceId, tagId })),
+    skipDuplicates: true,
+  });
+}
+
+export async function createExperience(postBody: ExperienceCreateInput) {
+  const validatedTagIds = await validateTagIds(postBody.tagIds);
+
+  const createdExperience = await prisma.$transaction(async (tx) => {
+    const created = await tx.experience.create({
       data: {
         createdBy: postBody.createdBy,
         title: postBody.title,
@@ -20,228 +173,163 @@ export async function createExperience(postBody: ExperienceCreateInput ) {
         latitude: postBody.latitude,
         longitude: postBody.longitude,
         thumbnail: postBody.thumbnail,
-        keywords: postBody.keywords,
       },
-      select: {
-          id: true,
-          title: true,
-          description: true,
-          descriptionEdit: true,
-          country: true,
-          adminRegion: true,
-          city: true,
-          street: true,
-          postalCode: true,
-          latitude: true,
-          longitude: true,
-          thumbnail: true,
-          keywords: true,
-          dateCreated: true,
-          lastUpdated: true
-      },
+      select: { id: true },
     });
-    return experience;
-}
 
-// ---- READ ----
+    if (validatedTagIds && validatedTagIds.length > 0) {
+      await tx.experienceTag.createMany({
+        data: validatedTagIds.map((tagId) => ({
+          experienceId: created.id,
+          tagId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return tx.experience.findUniqueOrThrow({
+      where: { id: created.id },
+      select: EXPERIENCE_DETAIL_SELECT,
+    });
+  });
+
+  return serializeExperience(createdExperience);
+}
 
 export async function getExperience(experienceId: number) {
-    const experience = await prisma.experience.findUnique({
-        where: { id: experienceId },
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            country: true,
-            adminRegion: true,
-            city: true,
-            street: true,
-            postalCode: true,
-            latitude: true,
-            longitude: true,
-            thumbnail: true,
-            keywords: true,
-            avgRating: true,
-            dateCreated: true,
-            lastUpdated: true,
-            createdBy: true,
-        },
-    });
+  const experience = await prisma.experience.findUnique({
+    where: { id: experienceId },
+    select: EXPERIENCE_DETAIL_SELECT,
+  });
 
-    return experience;
+  if (!experience) return null;
+  return serializeExperience(experience);
 }
 
-
-
-
-interface ListExperiencesParams {
-  limit: number;
-  offset: number;
-  where?: any;
-  orderBy?: any;
-}
-
-
-// TODO: implement reviewCount
 export async function listExperiences(params: ListExperiencesParams) {
   const { limit, offset, where, orderBy } = params;
 
   const experiences = await prisma.experience.findMany({
     skip: offset,
     take: limit,
-    where: where,
-    select: {
-      id: true,
-      title: true,
-      country: true,
-      adminRegion: true,
-      city: true,
-      street: true,
-      postalCode: true,
-      latitude: true,
-      longitude: true,
-      thumbnail: true,
-      avgRating: true,
-      dateCreated: true,
-      lastUpdated: true,
-      createdBy: true,
-    },
-    orderBy: orderBy || { lastUpdated: 'desc' },
+    where,
+    select: EXPERIENCE_LIST_SELECT,
+    orderBy: orderBy || { lastUpdated: "desc" },
   });
 
-  return experiences;
-}
-
-
-// --- UPDATE ---
-
-
-interface UpdateExperienceParams {
-    experienceId: number;
-    userId: number;
-    putData: ExpPutPostBody
+  return experiences.map(serializeExperience);
 }
 
 export async function updateExperience(params: UpdateExperienceParams) {
-    const { experienceId, userId, putData } = params;
+  const { experienceId, userId, putData } = params;
+  const validatedTagIds = await validateTagIds(putData.tagIds);
 
-    const experience = await prisma.experience.findUnique({
-        where: { id: experienceId },
-        include: { reviews: true }, // fetch reviews to check reviewCount
+  return prisma.$transaction(async (tx) => {
+    const experience = await tx.experience.findUnique({
+      where: { id: experienceId },
+      include: { reviews: true },
     });
 
     if (!experience) return null;
 
-    // check ownership
     if (experience.createdBy !== userId) {
-        throw new Error("Forbidden"); // could be handled as 403
+      throw { status: 403, message: "User does not own this experience!" };
     }
 
     const hasReviews = experience.reviews.length > 0;
     if (hasReviews) {
-        throw new Error(`Cannot update after reviews have been added`);
+      throw { status: 403, message: "Cannot update after reviews have been added" };
     }
 
-    const updatedExperience = await prisma.experience.update({
-        where: { id: experienceId },
-        data: putData,
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            descriptionEdit: true,
-            country: true,
-            adminRegion: true,
-            city: true,
-            street: true,
-            postalCode: true,
-            latitude: true,
-            longitude: true,
-            thumbnail: true,
-            keywords: true,
-            dateCreated: true,
-        },
+    await tx.experience.update({
+      where: { id: experienceId },
+      data: {
+        title: putData.title,
+        description: putData.description,
+        country: putData.country,
+        adminRegion: putData.adminRegion,
+        city: putData.city,
+        street: putData.street,
+        postalCode: putData.postalCode,
+        latitude: putData.latitude,
+        longitude: putData.longitude,
+        thumbnail: putData.thumbnail,
+        lastUpdated: new Date(),
+      },
     });
 
-    return updatedExperience;
+    if (validatedTagIds !== undefined) {
+      await replaceExperienceTags(tx, experienceId, validatedTagIds);
+    }
+
+    const updated = await tx.experience.findUniqueOrThrow({
+      where: { id: experienceId },
+      select: EXPERIENCE_DETAIL_SELECT,
+    });
+
+    return serializeExperience(updated);
+  });
 }
-
-
-
-interface EditExperienceParams {
-    experienceId: number;
-    userId: number;
-    patchData: ExpPatchBody
-}
-
 
 export async function editExperience(params: EditExperienceParams) {
   const { experienceId, userId, patchData } = params;
+  const validatedTagIds = await validateTagIds(patchData.tagIds);
 
-  const experience = await prisma.experience.findUnique({
-    where: { id: experienceId },
-  })
+  return prisma.$transaction(async (tx) => {
+    const experience = await tx.experience.findUnique({
+      where: { id: experienceId },
+    });
 
-  if(!experience) return null;
+    if (!experience) return null;
 
-  // check ownership
-  if (experience.createdBy !== userId) {
-      throw new Error("User does not own this experience!");
-  }
+    if (experience.createdBy !== userId) {
+      throw { status: 403, message: "User does not own this experience!" };
+    }
 
-  const editedExperience = await prisma.experience.update({
-    where: { id: experienceId },
-        data: patchData,
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            descriptionEdit: true,
-            country: true,
-            adminRegion: true,
-            city: true,
-            street: true,
-            postalCode: true,
-            latitude: true,
-            longitude: true,
-            thumbnail: true,
-            keywords: true,
-            dateCreated: true,
-        },
-  })
+    await tx.experience.update({
+      where: { id: experienceId },
+      data: {
+        thumbnail: patchData.thumbnail,
+        descriptionEdit: patchData.descriptionEdit,
+        lastUpdated: new Date(),
+      },
+    });
 
-  return editedExperience;
-}
+    if (validatedTagIds !== undefined) {
+      await replaceExperienceTags(tx, experienceId, validatedTagIds);
+    }
 
+    const edited = await tx.experience.findUniqueOrThrow({
+      where: { id: experienceId },
+      select: EXPERIENCE_DETAIL_SELECT,
+    });
 
-interface DeleteExperienceParams {
-  experienceId: number,
-  userId: number
+    return serializeExperience(edited);
+  });
 }
 
 export async function deleteExperience(params: DeleteExperienceParams) {
-    const { experienceId, userId } = params
-  
-    const experience = await prisma.experience.findUnique({
-        where: { id: experienceId },
-        include: { reviews: true },
-    });
+  const { experienceId, userId } = params;
 
-    if (!experience) {
-      throw { status: 404, message: "Experience not found"};
-    }
+  const experience = await prisma.experience.findUnique({
+    where: { id: experienceId },
+    include: { reviews: true },
+  });
 
-    // check ownership
-    if (experience.createdBy !== userId) {
-        throw {status: 403, message: "User does not own this experience!"};
-    }
+  if (!experience) {
+    throw { status: 404, message: "Experience not found" };
+  }
 
-    const hasReviews = experience.reviews.length > 0;
-    if (hasReviews) {
-      throw {status: 403, message: "Cannot delete after reviews have been added"}
-    }
+  if (experience.createdBy !== userId) {
+    throw { status: 403, message: "User does not own this experience!" };
+  }
 
-    await prisma.experience.delete({
-      where: { id: experienceId },
-    });
+  const hasReviews = experience.reviews.length > 0;
+  if (hasReviews) {
+    throw { status: 403, message: "Cannot delete after reviews have been added" };
+  }
+
+  await prisma.experience.delete({
+    where: { id: experienceId },
+  });
 }

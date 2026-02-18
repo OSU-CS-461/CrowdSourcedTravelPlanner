@@ -43,11 +43,43 @@ model Experience {
   latitude        Float?        
   longitude       Float?        
   thumbnail       String?       
-  avgRating       Float?       
-  keywords        String[]
+  avgRating       Float?     
 
+  tags            ExperienceTag[]
   reviews         Review[]
 }
+
+enum TagType {
+  CATEGORY
+  FEATURE
+}
+
+model Tag {
+  id               Int      @id @default(autoincrement())
+  slug             String   @unique
+  label            String
+  type             TagType
+
+  parentCategoryId Int?
+  parentCategory   Tag?     @relation("CategoryFeatures", fields: [parentCategoryId], references: [id])
+  features         Tag[]    @relation("CategoryFeatures")
+
+  experiences      ExperienceTag[]
+}
+
+
+model ExperienceTag {
+  experienceId Int
+  tagId        Int
+
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  tag          Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([experienceId, tagId])
+  @@index([tagId])
+  @@index([experienceId])
+}
+
 
 model Review {
   id            Int           @id @default(autoincrement())

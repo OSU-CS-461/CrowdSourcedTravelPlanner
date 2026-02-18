@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ExpPutPostBodySchema, ExpPutPostBody } from "../../models/experience";
+import { ExpPutPostBodySchema, ExpPutPostBody, ExpListQuerySchema } from "../../models/experience";
 
 const BASE_VALID_EXP = (): ExpPutPostBody => ({
     title: "Bright Angel Trail",
@@ -67,6 +67,24 @@ describe("Experience generic validation", () => {
 
     it("fails if keywords is not an array of strings", () => {
         const data = { ...BASE_VALID_EXP(), keywords: [false, 5] };
+        const parsed = ExpPutPostBodySchema.safeParse(data);
+        expect(parsed.success).toBeFalsy();
+    });
+
+    it("passes with valid tagIds", () => {
+        const data = { ...BASE_VALID_EXP(), tagIds: [1, 2, 3] };
+        const parsed = ExpPutPostBodySchema.safeParse(data);
+        expect(parsed.success).toBeTruthy();
+    });
+
+    it("fails when tagIds has duplicate values", () => {
+        const data = { ...BASE_VALID_EXP(), tagIds: [1, 1] };
+        const parsed = ExpPutPostBodySchema.safeParse(data);
+        expect(parsed.success).toBeFalsy();
+    });
+
+    it("fails when tagIds includes non-positive values", () => {
+        const data = { ...BASE_VALID_EXP(), tagIds: [1, 0] };
         const parsed = ExpPutPostBodySchema.safeParse(data);
         expect(parsed.success).toBeFalsy();
     });
@@ -139,5 +157,20 @@ describe("Experience cascading dependencies", () => {
         const data = { ...BASE_VALID_EXP(), city: "Springfield", adminRegion: "IL" };
         const parsed = ExpPutPostBodySchema.safeParse(data);
         expect(parsed.success).toBeTruthy();
+    });
+});
+
+describe("Experience list query validation", () => {
+    it("parses tagMode case-insensitively", () => {
+        const parsed = ExpListQuerySchema.safeParse({ tags: "beach,sunset", tagMode: "AND" });
+        expect(parsed.success).toBeTruthy();
+        if (parsed.success) {
+            expect(parsed.data.tagMode).toBe("and");
+        }
+    });
+
+    it("fails for invalid tagMode", () => {
+        const parsed = ExpListQuerySchema.safeParse({ tags: "beach,sunset", tagMode: "all" });
+        expect(parsed.success).toBeFalsy();
     });
 });

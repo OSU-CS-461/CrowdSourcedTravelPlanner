@@ -10,6 +10,7 @@ type ApiExperience = {
   description: string | null;
   thumbnail: string | null;
   keywords: string[] | string | null;
+  tagIds?: number[];
 
   country: string | null;
   adminRegion: string | null;
@@ -38,6 +39,7 @@ export default function UpdateExperiencePage() {
       keywords: Array.isArray(api.keywords)
         ? api.keywords.join(", ")
         : api.keywords ?? "",
+      tagIds: api.tagIds ?? [],
 
       country: api.country ?? "",
       adminRegion: api.adminRegion ?? "",

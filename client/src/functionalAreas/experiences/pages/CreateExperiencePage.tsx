@@ -1,12 +1,86 @@
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 import ExperienceForm from "../components/ExperienceForm";
 import type { FormValues } from "../components/ExperienceForm";
+import type { TagOption } from "../components/ExperienceForm";
 import { setAuthToken } from "../../../shared/services/api.service";
 import { apiClient } from "../../../shared/services/api.service";
 
+
+// TODO: at some point there should be a map here and we should rely on lat and long to populate
+// the street address, city, state, etc
+
 export default function CreateExperiencePage() {
   const navigate = useNavigate();
+  const [availableCategories, setAvailableCategories] = useState<TagOption[]>([]);
+  const [availableFeatures, setAvailableFeatures] = useState<TagOption[]>([]);
+  const [tagsLoading, setTagsLoading] = useState(true);
+  const [featuresLoading, setFeaturesLoading] = useState(false);
+  const [tagsError, setTagsError] = useState<string | null>(null);
+  const featureRequestIdRef = useRef(0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchCategories() {
+      try {
+        setTagsLoading(true);
+        setTagsError(null);
+        const response = await apiClient.get<TagOption[]>("/tags", {
+          params: { type: "CATEGORY" },
+        });
+        if (isMounted) {
+          setAvailableCategories(response.data);
+        }
+      } catch (err) {
+        console.error("Error loading tags:", err);
+        if (isMounted) {
+          setTagsError("Unable to load categories right now. You can still create without tags.");
+        }
+      } finally {
+        if (isMounted) {
+          setTagsLoading(false);
+        }
+      }
+    }
+
+    fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handleCategoryChange(categoryId: number | null) {
+    featureRequestIdRef.current += 1;
+    const requestId = featureRequestIdRef.current;
+
+    if (!categoryId) {
+      setAvailableFeatures([]);
+      setFeaturesLoading(false);
+      return;
+    }
+
+    try {
+      setFeaturesLoading(true);
+      setTagsError(null);
+      const response = await apiClient.get<TagOption[]>("/tags", {
+        params: { type: "FEATURE", parentCategoryId: categoryId },
+      });
+      if (requestId !== featureRequestIdRef.current) return;
+      setAvailableFeatures(response.data);
+    } catch (err) {
+      console.error("Error loading features:", err);
+      if (requestId !== featureRequestIdRef.current) return;
+      setAvailableFeatures([]);
+      setTagsError("Unable to load features for the selected category.");
+    } finally {
+      if (requestId === featureRequestIdRef.current) {
+        setFeaturesLoading(false);
+      }
+    }
+  }
 
   const handleCreateExperience = async (values: FormValues) => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -104,6 +178,9 @@ export default function CreateExperiencePage() {
     if (keywordsArray.length > 0) {
       postBody.keywords = keywordsArray;
     }
+    if (values.tagIds.length > 0) {
+      postBody.tagIds = values.tagIds;
+    }
 
     try {
       const response = await apiClient.post("/experiences", postBody);
@@ -123,7 +200,17 @@ export default function CreateExperiencePage() {
   return (
     <div>
       <h1>Create Experience</h1>
-      <ExperienceForm onSubmit={handleCreateExperience} submitLabel="Create" />
+      <ExperienceForm
+        onSubmit={handleCreateExperience}
+        submitLabel="Create"
+        showTagSelector
+        availableCategories={availableCategories}
+        availableFeatures={availableFeatures}
+        tagsLoading={tagsLoading}
+        featuresLoading={featuresLoading}
+        tagsError={tagsError}
+        onCategoryChange={handleCategoryChange}
+      />
     </div>
   );
 }
