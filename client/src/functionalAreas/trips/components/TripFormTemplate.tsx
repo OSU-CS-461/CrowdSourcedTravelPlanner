@@ -2,10 +2,7 @@ import { useState } from "react";
 
 export interface TripFormValues {
   title: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  visibility: "private" | "public" | "unlisted";
+  description: string;
 }
 
 interface TripFormTemplateProps {
@@ -20,37 +17,21 @@ export default function TripFormTemplate({
   submitLabel = "Save",
 }: TripFormTemplateProps) {
   const [title, setTitle] = useState(initialValues.title ?? "");
-  const [destination, setDestination] = useState(
-    initialValues.destination ?? ""
-  );
-  const [startDate, setStartDate] = useState(initialValues.startDate ?? "");
-  const [endDate, setEndDate] = useState(initialValues.endDate ?? "");
-  const [visibility, setVisibility] =
-    useState<TripFormValues["visibility"]>(
-      initialValues.visibility ?? "private"
-    );
+  const [description, setDescription] = useState(initialValues.description ?? "");
 
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!title.trim() || !destination.trim()) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-
-    if (startDate > endDate) {
-      setError("End date cannot be before start date.");
+    if (!title.trim()) {
+      setError("Trip title is required.");
       return;
     }
 
     const payload: TripFormValues = {
       title: title.trim(),
-      destination: destination.trim(),
-      startDate,
-      endDate,
-      visibility,
+      description: description.trim(),
     };
 
     try {
@@ -81,53 +62,12 @@ export default function TripFormTemplate({
       <br />
 
       <label>
-        Destination
-        <input
-          type="text"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          required
+        Description
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
         />
-      </label>
-
-      <br />
-
-      <label>
-        Start Date
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          required
-        />
-      </label>
-
-      <br />
-
-      <label>
-        End Date
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          required
-        />
-      </label>
-
-      <br />
-
-      <label>
-        Visibility
-        <select
-          value={visibility}
-          onChange={(e) =>
-            setVisibility(e.target.value as TripFormValues["visibility"])
-          }
-        >
-          <option value="private">Private</option>
-          <option value="public">Public</option>
-          <option value="unlisted">Unlisted</option>
-        </select>
       </label>
 
       <br />
