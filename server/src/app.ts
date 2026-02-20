@@ -6,6 +6,7 @@ import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
 import morgan from "morgan";
 import cors from "cors";
 
+
 const app = express();
 
 app.use(morgan("dev"));
@@ -21,9 +22,11 @@ app.get("/", (req: Request, res: Response) => {
   res.sendFile(spaFilePath);
 });
 
+import { default as tripRouter } from './routes/trips';
 import { default as experienceRouter } from './routes/experiences';
-app.use('/api/experiences', experienceRouter);
 
+app.use('/api/trips', tripRouter);
+app.use('/api/experiences', experienceRouter);
 
 app.post(Routes.POST__AUTH_REGISTER, register);
 app.post(Routes.POST__AUTH_LOGIN, login);
