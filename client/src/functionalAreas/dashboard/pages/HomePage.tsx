@@ -88,6 +88,56 @@ export default function HomePage() {
       ) : (
         <div>
           {experiences.map((exp) => (
+            <div key={exp.id} className="card">
+              <h2
+                className="card-title"
+                onClick={() =>
+                  navigate(
+                    ClientRoutes.EXPERIENCE_DETAILS.replace(
+                      ":id",
+                      exp.id.toString()
+                    ),
+                    { state: { experience: exp } }
+                  )
+                }
+              >
+                {exp.title}
+              </h2>
+
+              <div className="card-meta">
+                {exp.city ? `${exp.city}, ` : ""}
+                {exp.adminRegion ? `${exp.adminRegion}, ` : ""}
+                {exp.country || "Global"} —{" "}
+                {new Date(exp.dateCreated).toLocaleDateString()}
+              </div>
+
+              <p className="card-description">
+                {exp.description && exp.description.length > 160
+                  ? exp.description.substring(0, 160) + "..."
+                  : exp.description ||
+                    "Discover more about this hidden gem..."}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* TRIPS SECTION */}
+      <h2 className="section-title">Your Trips</h2>
+
+      {trips.length === 0 ? (
+        <p>No trips found. Create one!</p>
+      ) : (
+        <div>
+          {trips.map((trip) => (
+            <div key={trip.id} className="card">
+              <h2
+                className="card-title"
+                onClick={() =>
+                  navigate(
+                    ClientRoutes.TRIP_DETAILS.replace(// need to create detailed trips page and add routes
+                      ":id",
+                      trip.id.toString()
             (() => {
               const categoryTags =
                 exp.categoryTags ??
@@ -206,6 +256,9 @@ export default function HomePage() {
                 {new Date(trip.dateCreated).toLocaleDateString()}
               </div>
 
+              <p className="card-description">
+                {trip.description || "Plan your next adventure."}
+              </p>
               <aside style={{ width: "220px", flexShrink: 0 }}>
                 {categoryTags.length > 0 && (
                   <div style={{ marginBottom: "8px" }}>
