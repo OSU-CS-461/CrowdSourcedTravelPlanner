@@ -39,9 +39,6 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 
-// file annotations for bundling tools to include these files
-path.join(__dirname, "query_engine-windows.dll.node")
-path.join(process.cwd(), "src/generated/prisma/query_engine-windows.dll.node")
 
 /**
  * Model User
@@ -53,6 +50,21 @@ export type User = Prisma.UserModel
  * 
  */
 export type Experience = Prisma.ExperienceModel
+/**
+ * Model Category
+ * 
+ */
+export type Category = Prisma.CategoryModel
+/**
+ * Model Tag
+ * 
+ */
+export type Tag = Prisma.TagModel
+/**
+ * Model ExperienceTag
+ * 
+ */
+export type ExperienceTag = Prisma.ExperienceTagModel
 /**
  * Model Review
  * 

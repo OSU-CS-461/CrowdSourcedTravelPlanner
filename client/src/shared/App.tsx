@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import HomePage from "../functionalAreas/dashboard/pages/HomePage";
 import LoginPage from "../functionalAreas/auth/pages/LoginPage";
@@ -19,14 +19,9 @@ export default function App() {
 
   return (
     <>
-      {isAuthenticated ? (
-        <button onClick={logout}>Logout</button>
-      ) : (
-        <>
-          <Link to={ClientRoutes.LOGIN}>Login</Link>
-          <Link to={ClientRoutes.SIGNUP}>Signup</Link>
-        </>
-      )}
+      <header style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginBottom: 12 }}>
+        {isAuthenticated ? <button onClick={logout}>Logout</button> : null}
+      </header>
 
       <Routes>
         <Route
