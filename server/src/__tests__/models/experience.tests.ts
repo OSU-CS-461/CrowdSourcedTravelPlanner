@@ -1,143 +1,144 @@
-import { describe, it, expect } from "vitest";
-import { ExpPutPostBodySchema, ExpPutPostBody } from "../../models/experience";
+import { describe, expect, it } from "vitest";
+import {
+  ExpListQuerySchema,
+  ExpPutPostBody,
+  ExpPutPostBodySchema,
+} from "../../models/experience";
 
 const BASE_VALID_EXP = (): ExpPutPostBody => ({
-    title: "Bright Angel Trail",
-    description: "A beautiful hike with incredible views of the Grand Canyon.",
-    country: "US"
+  title: "Bright Angel Trail",
+  description: "A beautiful hike with incredible views of the Grand Canyon.",
+  categoryId: 1,
+  country: "US",
+  latitude: 36.057,
+  longitude: -112.143,
 });
-
 
 describe("Experience generic validation", () => {
-    it("passes a correct baseline experience object", () => {
-        const parsed = ExpPutPostBodySchema.safeParse(BASE_VALID_EXP());
-        expect(parsed.success).toBeTruthy();
-    });
+  it("passes a correct baseline experience object", () => {
+    const parsed = ExpPutPostBodySchema.safeParse(BASE_VALID_EXP());
+    expect(parsed.success).toBeTruthy();
+  });
 
-    // ---- TITLE ----
+  // ---- TITLE ----
 
-    it("fails if title is missing", () => {
-        const { title: _title, ...data} = BASE_VALID_EXP();
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    })
+  it("fails if title is missing", () => {
+    const { title: _title, ...data } = BASE_VALID_EXP();
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    it("fails if title is too short", () => {
-        const data = { ...BASE_VALID_EXP(), title: "Hi" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
+  it("fails if title is too short", () => {
+    const data = { ...BASE_VALID_EXP(), title: "Hi" };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    it("fails if title is too long", () => {
-        const data = { ...BASE_VALID_EXP(), title: "A".repeat(201) };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
+  it("fails if title is too long", () => {
+    const data = { ...BASE_VALID_EXP(), title: "A".repeat(201) };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    // ---- DESCRIPTION ----
+  // ---- DESCRIPTION ----
 
-    it("fails if description is missing", () => {
-        const { description: _description, ...data} = BASE_VALID_EXP();
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    })
+  it("fails if description is missing", () => {
+    const { description: _description, ...data } = BASE_VALID_EXP();
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    it("fails if description is too short", () => {
-        const data = { ...BASE_VALID_EXP(), description: "Short desc" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
+  it("fails if description is too short", () => {
+    const data = { ...BASE_VALID_EXP(), description: "Short desc" };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    // ---- COUNTRY ----
+  // ---- CATEGORY ----
 
-    it("fails if country is missing", () => {
-        const { country: _country, ...data } = BASE_VALID_EXP();
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
+  it("fails if categoryId is missing", () => {
+    const { categoryId: _categoryId, ...data } = BASE_VALID_EXP();
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    // ---- OTHER ----
+  it("fails if categoryId is not positive", () => {
+    const data = { ...BASE_VALID_EXP(), categoryId: 0 };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    it("passes if optional fields are missing", () => {
-        const { keywords: _keywords, ...data } = BASE_VALID_EXP();
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeTruthy();
-    });
+  // ---- COUNTRY ----
 
+  it("fails if country is missing", () => {
+    const { country: _country, ...data } = BASE_VALID_EXP();
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    it("fails if keywords is not an array of strings", () => {
-        const data = { ...BASE_VALID_EXP(), keywords: [false, 5] };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
+  // ---- TAG IDS ----
+
+  it("passes with valid tagIds", () => {
+    const data = { ...BASE_VALID_EXP(), tagIds: [1, 2, 3] };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeTruthy();
+  });
+
+  it("fails when tagIds has duplicate values", () => {
+    const data = { ...BASE_VALID_EXP(), tagIds: [1, 1] };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
+
+  it("fails when tagIds includes non-positive values", () => {
+    const data = { ...BASE_VALID_EXP(), tagIds: [1, 0] };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 });
 
+describe("Experience location validation", () => {
+  it("fails when latitude is missing", () => {
+    const { latitude: _latitude, ...data } = BASE_VALID_EXP();
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-describe("Experience cascading dependencies", () => {
-    // --- LATITUDE/LONGITUDE ---
-    it("passes when both latitude and longitude are provided", () => {
-        const data = { ...BASE_VALID_EXP(), latitude: 10, longitude: 20 };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeTruthy();
-    });
+  it("fails when longitude is missing", () => {
+    const { longitude: _longitude, ...data } = BASE_VALID_EXP();
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeFalsy();
+  });
 
-    it("fails when only latitude is provided", () => {
-        const data = { ...BASE_VALID_EXP(), latitude: 10 };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-        if (!parsed.success) {
-        expect(parsed.error.issues[0].message).toContain("Latitude and longitude must both be provided together");
-        }
-    });
+  it("passes with optional location fields omitted", () => {
+    const parsed = ExpPutPostBodySchema.safeParse(BASE_VALID_EXP());
+    expect(parsed.success).toBeTruthy();
+  });
 
-    it("fails when only longitude is provided", () => {
-        const data = { ...BASE_VALID_EXP(), longitude: 20 };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
+  it("passes with partial optional location fields", () => {
+    const data = { ...BASE_VALID_EXP(), city: "Springfield" };
+    const parsed = ExpPutPostBodySchema.safeParse(data);
+    expect(parsed.success).toBeTruthy();
+  });
+});
 
-    // --- POSTAL CODE DEPENDENCY ---
-    it("fails if postalCode is provided but street is missing", () => {
-        const data = { ...BASE_VALID_EXP(), postalCode: "12345" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
+describe("Experience list query validation", () => {
+  it("parses tagMode case-insensitively", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      tags: "beach,sunset",
+      tagMode: "AND",
     });
+    expect(parsed.success).toBeTruthy();
+    if (parsed.success) {
+      expect(parsed.data.tagMode).toBe("and");
+    }
+  });
 
-    it("passes if postalCode, street, city, and adminRegion are provided", () => {
-        const data = { 
-        ...BASE_VALID_EXP(), 
-        postalCode: "12345", 
-        street: "Main St", 
-        city: "Springfield", 
-        adminRegion: "IL" 
-        };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeTruthy();
+  it("fails for invalid tagMode", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      tags: "beach,sunset",
+      tagMode: "all",
     });
-
-    // --- STREET DEPENDENCY ---
-    it("fails if street is provided but city is missing", () => {
-        const data = { ...BASE_VALID_EXP(), street: "Main St" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
-
-    it("passes if street, city, and adminRegion are provided", () => {
-        const data = { ...BASE_VALID_EXP(), street: "Main St", city: "Springfield", adminRegion: "IL" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeTruthy();
-    });
-
-    // --- CITY DEPENDENCY ---
-    it("fails if city is provided but adminRegion is missing", () => {
-        const data = { ...BASE_VALID_EXP(), city: "Springfield" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeFalsy();
-    });
-
-    it("passes if city and adminRegion are provided", () => {
-        const data = { ...BASE_VALID_EXP(), city: "Springfield", adminRegion: "IL" };
-        const parsed = ExpPutPostBodySchema.safeParse(data);
-        expect(parsed.success).toBeTruthy();
-    });
+    expect(parsed.success).toBeFalsy();
+  });
 });

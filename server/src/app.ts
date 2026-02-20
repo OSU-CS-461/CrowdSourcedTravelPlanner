@@ -5,6 +5,11 @@ import { Routes } from "./routes";
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
 import morgan from "morgan";
 import cors from "cors";
+import { default as experienceRouter } from "./routers/experience";
+import { default as tripRouter } from './routes/trips';
+import { default as tagRouter } from "./routers/tag";
+import { default as categoryRouter } from "./routers/category";
+import { default as geocodeRouter } from "./routers/geocode";
 
 
 const app = express();
@@ -22,9 +27,12 @@ app.get("/", (req: Request, res: Response) => {
   res.sendFile(spaFilePath);
 });
 
-import { default as tripRouter } from './routes/trips';
-import { default as experienceRouter } from './routes/experiences';
 
+
+app.use("/api/experiences", experienceRouter);
+app.use("/api/tags", tagRouter);
+app.use("/api/categories", categoryRouter);
+app.use("/api/geocode", geocodeRouter);
 app.use('/api/trips', tripRouter);
 app.use('/api/experiences', experienceRouter);
 

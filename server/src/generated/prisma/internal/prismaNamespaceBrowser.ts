@@ -50,6 +50,9 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 export const ModelName = {
   User: 'User',
   Experience: 'Experience',
+  Category: 'Category',
+  Tag: 'Tag',
+  ExperienceTag: 'ExperienceTag',
   Review: 'Review'
 } as const
 
@@ -96,10 +99,37 @@ export const ExperienceScalarFieldEnum = {
   longitude: 'longitude',
   thumbnail: 'thumbnail',
   avgRating: 'avgRating',
-  keywords: 'keywords'
+  categoryId: 'categoryId'
 } as const
 
 export type ExperienceScalarFieldEnum = (typeof ExperienceScalarFieldEnum)[keyof typeof ExperienceScalarFieldEnum]
+
+
+export const CategoryScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  label: 'label'
+} as const
+
+export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
+export const TagScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  label: 'label',
+  categoryId: 'categoryId'
+} as const
+
+export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const ExperienceTagScalarFieldEnum = {
+  experienceId: 'experienceId',
+  tagId: 'tagId'
+} as const
+
+export type ExperienceTagScalarFieldEnum = (typeof ExperienceTagScalarFieldEnum)[keyof typeof ExperienceTagScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {

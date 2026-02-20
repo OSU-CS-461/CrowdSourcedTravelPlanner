@@ -4,6 +4,8 @@ import "./index.css";
 import App from "./App.tsx";
 import { AuthProvider } from "../functionalAreas/auth/context/AuthContext.tsx";
 
+import "leaflet/dist/leaflet.css";
+
 if (import.meta.env.DEV) {
   console.log("Dev");
   console.log(import.meta.env);

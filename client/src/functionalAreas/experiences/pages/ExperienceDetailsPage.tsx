@@ -1,11 +1,24 @@
-import ReviewsSection from "../../reviews/components/ReviewSection";
-
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../shared/clientRoutes";
+import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 import { useAuth } from "../../auth/hooks/useAuth";
+import { USER_STORAGE_KEY } from "../../auth/context/auth-context";
+import ReviewsSection from "../../reviews/components/ReviewSection";
 import "./ExperienceDetailPage.css";
+
+type Category = {
+  id: number | string;
+  label: string;
+  slug: string;
+};
+
+type ExperienceTag = {
+  id: number | string;
+  label: string;
+  slug: string;
+  categoryId?: number;
+};
 
 type Experience = {
   id: number | string;
@@ -14,7 +27,6 @@ type Experience = {
   dateCreated: string;
   lastUpdated?: string;
   thumbnail?: string;
-  keywords?: string[];
   country?: string;
   city?: string;
   adminRegion?: string;
@@ -24,17 +36,47 @@ type Experience = {
   longitude?: number | null;
   avgRating?: number | null;
   createdBy?: number | string;
+  categoryId?: number | null;
+  category?: Category | null;
+  tags?: ExperienceTag[];
+  tagIds?: number[];
 };
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getLocationString(experience: Experience) {
+  const parts = [
+    experience.street,
+    experience.city,
+    experience.adminRegion,
+    experience.country,
+  ].filter((part) => typeof part === "string" && part.trim().length > 0);
+  const postal = experience.postalCode?.trim();
+  if (postal) {
+    parts.push(postal);
+  }
+  return parts.length > 0 ? parts.join(", ") : "Location not specified";
+}
 
 export default function ExperienceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const previewExperience = (
     location.state as { experience?: Experience } | null
   )?.experience;
-
   const previewMatchesRoute =
     Boolean(previewExperience) &&
     Boolean(id) &&
@@ -49,7 +91,6 @@ export default function ExperienceDetailPage() {
         }
       : null
   );
-
   const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -92,7 +133,33 @@ export default function ExperienceDetailPage() {
       });
   }, [id, previewExperience, previewMatchesRoute]);
 
-  const handleDelete = async () => {
+  const currentUserId = useMemo(() => {
+    if (user?.id !== undefined && user?.id !== null) {
+      return user.id;
+    }
+
+    try {
+      const raw = localStorage.getItem(USER_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { id?: string | number };
+      return parsed.id ?? null;
+    } catch {
+      return null;
+    }
+  }, [user?.id]);
+
+  const canManageExperience =
+    currentUserId !== null &&
+    experience?.createdBy !== undefined &&
+    String(currentUserId) === String(experience.createdBy);
+
+  const sortedTags = useMemo(() => {
+    return [...(experience?.tags ?? [])].sort((a, b) =>
+      a.label.localeCompare(b.label)
+    );
+  }, [experience?.tags]);
+
+  async function handleDelete() {
     if (!id || !experience) return;
 
     const confirmed = window.confirm(
@@ -103,7 +170,6 @@ export default function ExperienceDetailPage() {
     setDeleting(true);
     try {
       await apiClient.delete(`/experiences/${id}`);
-      alert("Experience deleted successfully!");
       navigate(ClientRoutes.HOME);
     } catch (err) {
       console.error(err);
@@ -114,39 +180,12 @@ export default function ExperienceDetailPage() {
     } finally {
       setDeleting(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getLocationString = (exp: Experience) => {
-    const parts = [];
-    if (exp.street) parts.push(exp.street);
-    if (exp.city) parts.push(exp.city);
-    if (exp.adminRegion) parts.push(exp.adminRegion);
-    if (exp.country) parts.push(exp.country);
-    if (exp.postalCode) parts.push(`(${exp.postalCode})`);
-    return parts.length > 0 ? parts.join(", ") : "Location not specified";
-  };
-
-  const isOwner =
-    Boolean(user) &&
-    Boolean(experience) &&
-    experience?.createdBy !== undefined &&
-    String(user?.id) === String(experience.createdBy);
+  }
 
   if (loading && !experience) {
     return (
       <main className="experience-detail-page">
-        <div className="loading">Loading experience...</div>
+        <div className="detail-status-card">Loading experience...</div>
       </main>
     );
   }
@@ -154,7 +193,7 @@ export default function ExperienceDetailPage() {
   if (!experience) {
     return (
       <main className="experience-detail-page">
-        <div className="error">
+        <div className="detail-status-card">
           <p>{error || "Experience not found"}</p>
           <button onClick={() => navigate(ClientRoutes.HOME)}>Go Home</button>
         </div>
@@ -164,14 +203,15 @@ export default function ExperienceDetailPage() {
 
   return (
     <main className="experience-detail-page">
-      <div className="detail-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← Back
+      <div className="detail-toolbar">
+        <button className="toolbar-back" onClick={() => navigate(-1)}>
+          Back
         </button>
-        {isOwner && (
-          <div className="owner-actions">
+
+        {canManageExperience && (
+          <div className="toolbar-actions">
             <button
-              className="edit-button"
+              className="toolbar-edit"
               onClick={() =>
                 navigate(ClientRoutes.EXPERIENCE_UPDATE.replace(":id", id!))
               }
@@ -179,7 +219,7 @@ export default function ExperienceDetailPage() {
               Edit
             </button>
             <button
-              className="delete-button"
+              className="toolbar-delete"
               onClick={handleDelete}
               disabled={deleting}
             >
@@ -189,75 +229,72 @@ export default function ExperienceDetailPage() {
         )}
       </div>
 
-      <div className="experience-detail">
+      <article className="detail-card">
         {experience.thumbnail && (
-          <div className="detail-image">
+          <div className="detail-image-wrap">
             <img src={experience.thumbnail} alt={experience.title} />
           </div>
         )}
 
-        <div className="detail-content">
-          <h1>{experience.title}</h1>
-
-          {experience.avgRating !== null &&
-            experience.avgRating !== undefined && (
-              <div className="detail-rating">
-                Rating: {experience.avgRating.toFixed(1)} / 5.0
-              </div>
+        <div className="detail-body">
+          <header className="detail-title-group">
+            <h1>{experience.title}</h1>
+            {experience.avgRating !== null && experience.avgRating !== undefined && (
+              <span className="rating-chip">{experience.avgRating.toFixed(1)} / 5</span>
             )}
+          </header>
 
-          <div className="detail-section">
-            <h2>Description</h2>
-            <p>{experience.description}</p>
-          </div>
+          <p className="detail-description">{experience.description}</p>
 
-          <div className="detail-section">
-            <h2>Location</h2>
-            <p>{getLocationString(experience)}</p>
-            {experience.latitude != null && experience.longitude != null && (
-              <p className="coordinates">
-                Coordinates: {experience.latitude}, {experience.longitude}
+          <section className="detail-grid">
+            <div className="detail-panel">
+              <h2>Location</h2>
+              <p>{getLocationString(experience)}</p>
+              {experience.latitude != null && experience.longitude != null && (
+                <p className="detail-muted">
+                  {experience.latitude}, {experience.longitude}
+                </p>
+              )}
+            </div>
+
+            <div className="detail-panel">
+              <h2>Classification</h2>
+              <p>
+                <strong>Category:</strong>{" "}
+                {experience.category?.label ?? "Not specified"}
               </p>
-            )}
-          </div>
-
-          {experience.keywords && experience.keywords.length > 0 && (
-            <div className="detail-section">
-              <h2>Keywords</h2>
-              <div className="detail-keywords">
-                {experience.keywords.map((keyword, idx) => (
-                  <span key={idx} className="keyword-tag">
-                    {keyword}
-                  </span>
-                ))}
+              <div className="tag-list">
+                {sortedTags.length ? (
+                  sortedTags.map((tag) => (
+                    <span key={tag.id} className="tag-pill">
+                      {tag.label}
+                    </span>
+                  ))
+                ) : (
+                  <span className="detail-muted">No tags</span>
+                )}
               </div>
             </div>
-          )}
+          </section>
 
-          <div className="detail-meta">
+          <footer className="detail-meta">
             <p>
               <strong>Created:</strong> {formatDate(experience.dateCreated)}
             </p>
             {experience.lastUpdated &&
               experience.lastUpdated !== experience.dateCreated && (
                 <p>
-                  <strong>Last Updated:</strong> {formatDate(experience.lastUpdated)}
+                  <strong>Updated:</strong> {formatDate(experience.lastUpdated)}
                 </p>
               )}
-          </div>
+          </footer>
 
-          {/* =========================
-              REVIEWS (Teammate work area)
-              File: src/features/reviews/components/ReviewsSection/ReviewsSection.tsx
-              API:  src/features/reviews/api/reviews.api.ts
-              Types: src/features/reviews/types/review.ts
-              Props provided:
-              - experienceId (string)
-              - isOwner (boolean)
-             ========================= */}
-          <ReviewsSection experienceId={String(experience.id)} isOwner={isOwner} />
+          <ReviewsSection
+            experienceId={String(experience.id)}
+            isOwner={canManageExperience}
+          />
         </div>
-      </div>
+      </article>
     </main>
   );
 }
