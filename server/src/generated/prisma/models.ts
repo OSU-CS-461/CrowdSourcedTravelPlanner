@@ -10,4 +10,6 @@
 export type * from './models/User.js'
 export type * from './models/Experience.js'
 export type * from './models/Review.js'
+export type * from './models/Trip.js'
+export type * from './models/TripExperience.js'
 export type * from './commonInputTypes.js'

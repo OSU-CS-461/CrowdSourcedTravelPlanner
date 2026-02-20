@@ -23,6 +23,7 @@ model User {
   passwordDigest String
   experiences Experience[]
   reviews     Review[]
+  trips       Trip[]
 }
 
 model Experience {
@@ -34,7 +35,7 @@ model Experience {
   description     String      
   descriptionEdit String?       
   dateCreated     DateTime      @default(now())
-  lastUpdated     DateTime      @default(now())
+  lastUpdated     DateTime      @updatedAt
   country         String
   adminRegion     String?       
   city            String?      
@@ -45,19 +46,39 @@ model Experience {
   thumbnail       String?       
   avgRating       Float?       
   keywords        String[]
-
+  trips           TripExperience[]
   reviews         Review[]
 }
 
 model Review {
-  id            Int           @id @default(autoincrement())
-  rating        Int
-  reviewText    String
-  dateCreated   DateTime      @default(now())
+  id              Int           @id @default(autoincrement())
+  rating          Int
+  reviewText      String
+  dateCreated     DateTime      @default(now())
 
-  experienceId  Int 
-  experience    Experience    @relation(fields: [experienceId], references: [id])
+  experienceId    Int 
+  experience      Experience    @relation(fields: [experienceId], references: [id])
 
-  userId        Int
-  user          User          @relation(fields: [userId], references: [id])
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id])
+}
+
+model Trip {
+  id              Int           @id @default(autoincrement())
+  createdBy       Int
+  user            User          @relation(fields: [createdBy], references: [id])
+  title           String
+  description     String?
+  dateCreated     DateTime      @default(now())
+  lastUpdated     DateTime      @updatedAt
+  experiences     TripExperience[]
+}
+
+model TripExperience {
+  tripId          Int
+  experienceId    Int
+  trip            Trip          @relation(fields: [tripId], references: [id])
+  experience      Experience    @relation(fields: [experienceId], references: [id])
+  @@id([tripId, experienceId])
+
 }
