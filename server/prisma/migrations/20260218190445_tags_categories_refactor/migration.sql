@@ -7,7 +7,7 @@
 
 */
 -- DropForeignKey
-ALTER TABLE "public"."Tag" DROP CONSTRAINT "Tag_parentCategoryId_fkey";
+ALTER TABLE "Tag" DROP CONSTRAINT "Tag_parentCategoryId_fkey";
 
 -- AlterTable
 ALTER TABLE "Experience" ADD COLUMN     "categoryId" INTEGER,
@@ -19,7 +19,7 @@ DROP COLUMN "type",
 ADD COLUMN     "categoryId" INTEGER NOT NULL;
 
 -- DropEnum
-DROP TYPE "public"."TagType";
+DROP TYPE "TagType";
 
 -- CreateTable
 CREATE TABLE "Category" (
