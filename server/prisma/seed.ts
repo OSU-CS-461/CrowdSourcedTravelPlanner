@@ -1,16 +1,15 @@
 import { PrismaClient } from "../src/generated/prisma/client";
 const prisma = new PrismaClient();
-// process is available globally in Node.js, no import is required
 
 /**
- * Keep this as the single source of truth for your curated tags.
+ * Single source of truth:
  * - Keys are CATEGORY slugs
- * - Each has a label + list of FEATURES (slug + label)
+ * - Each has a label + list of TAGS (slug + label)
  */
 const TAG_TREE = {
   "nature-outdoors": {
     label: "Nature & Outdoors",
-    features: [
+    tags: [
       { slug: "hiking", label: "Hiking" },
       { slug: "snorkeling", label: "Snorkeling" },
       { slug: "swimming", label: "Swimming" },
@@ -28,7 +27,7 @@ const TAG_TREE = {
 
   "history-culture": {
     label: "History & Culture",
-    features: [
+    tags: [
       { slug: "fort", label: "Fort" },
       { slug: "castle", label: "Castle" },
       { slug: "ruins", label: "Ruins" },
@@ -46,7 +45,7 @@ const TAG_TREE = {
 
   "food-drink": {
     label: "Food & Drink",
-    features: [
+    tags: [
       { slug: "restaurant", label: "Restaurant" },
       { slug: "street-food", label: "Street food" },
       { slug: "cafe-coffee", label: "Café / Coffee" },
@@ -68,53 +67,41 @@ async function main() {
   const categoryBySlug = new Map();
 
   for (const [categorySlug, cfg] of Object.entries(TAG_TREE)) {
-    const category = await prisma.tag.upsert({
+    const category = await prisma.category.upsert({
       where: { slug: categorySlug },
-      update: {
-        label: cfg.label,
-        type: "CATEGORY",
-        parentCategoryId: null,
-      },
-      create: {
-        slug: categorySlug,
-        label: cfg.label,
-        type: "CATEGORY",
-        parentCategoryId: null,
-      },
+      update: { label: cfg.label },
+      create: { slug: categorySlug, label: cfg.label },
     });
 
     categoryBySlug.set(categorySlug, category);
   }
 
-  // 2) Upsert features tied to each category
+  // 2) Upsert tags tied to each category
+  let tagCount = 0;
+
   for (const [categorySlug, cfg] of Object.entries(TAG_TREE)) {
     const category = categoryBySlug.get(categorySlug);
     if (!category) throw new Error(`Missing category for slug: ${categorySlug}`);
 
-    for (const f of cfg.features) {
+    for (const t of cfg.tags) {
       await prisma.tag.upsert({
-        where: { slug: f.slug },
+        where: { slug: t.slug },
         update: {
-          label: f.label,
-          type: "FEATURE",
-          parentCategoryId: category.id,
+          label: t.label,
+          categoryId: category.id,
         },
         create: {
-          slug: f.slug,
-          label: f.label,
-          type: "FEATURE",
-          parentCategoryId: category.id,
+          slug: t.slug,
+          label: t.label,
+          categoryId: category.id,
         },
       });
+
+      tagCount += 1;
     }
   }
 
-  console.log(
-    `Seeded ${categoryBySlug.size} categories and ${Object.values(TAG_TREE).reduce(
-      (sum, c) => sum + c.features.length,
-      0
-    )} features.`
-  );
+  console.log(`Seeded ${categoryBySlug.size} categories and ${tagCount} tags.`);
 }
 
 main()

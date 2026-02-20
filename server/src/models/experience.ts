@@ -1,98 +1,79 @@
+// src/models/experience.ts
 import * as z from "zod";
 
-const TagIdsSchema = z
+export const TagIdsSchema = z
   .array(z.number().int().positive())
   .max(50)
   .refine((ids) => new Set(ids).size === ids.length, {
     message: "tagIds must not contain duplicates",
   });
 
+export const CategoryIdSchema = z.number().int().positive();
+
+const Iso2CountrySchema = z
+  .string()
+  .length(2)
+  .transform((s) => s.toUpperCase());
+
+// Shared location fields (optional)
+const LocationFieldsSchema = z.object({
+  country: Iso2CountrySchema, // REQUIRED for create/put
+  adminRegion: z.string().min(1).optional(),
+  city: z.string().min(1).optional(),
+  street: z.string().min(1).optional(),
+  postalCode: z.string().min(1).optional(),
+  latitude: z.number().finite(),
+  longitude: z.number().finite(),
+});
+
+// PUT/POST body (create & full update)
 export const ExpPutPostBodySchema = z.object({
-  // ---- REQUIRED ---  
-  title: z.string().min(3).max(200),            
-  description: z.string().min(20).max(5000),    
-  country: z.string().length(2),  // ISO code                   
-  
-  // ---- OPTIONAL ---
-  adminRegion: z.string().optional(),    
-  city: z.string().optional(),
-  street: z.string().optional(),
-  postalCode: z.string().optional(),     
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  thumbnail: z.string().optional(),   
+  // Required
+  title: z.string().min(3).max(200),
+  description: z.string().min(20).max(5000),
+  categoryId: CategoryIdSchema,
+
+  // Location + address
+  country: LocationFieldsSchema.shape.country,
+  adminRegion: LocationFieldsSchema.shape.adminRegion,
+  city: LocationFieldsSchema.shape.city,
+  street: LocationFieldsSchema.shape.street,
+  postalCode: LocationFieldsSchema.shape.postalCode,
+  latitude: LocationFieldsSchema.shape.latitude,
+  longitude: LocationFieldsSchema.shape.longitude,
+
+  // Optional
+  thumbnail: z.string().url().optional(),
   tagIds: TagIdsSchema.optional(),
-  // Deprecated input kept for backward compatibility with existing clients.
-  keywords: z.array(z.string()).optional(),
-})
-.refine(
-  (data) => {
-    // Latitude/Longitude dependency:
-    // if either is provided, both must be provided
-    const latProvided = data.latitude !== undefined;
-    const lonProvided = data.longitude !== undefined;
-    return (latProvided && lonProvided) || (!latProvided && !lonProvided);
-  },
-  { message: "Latitude and longitude must both be provided together", path: ["latitude", "longitude"] }
-)
-.refine(
-  (data) => {
-    // if postalCode is provided, street, city, and adminRegion must also be provided
-    if (data.postalCode !== undefined) {
-      return (data.street !== undefined) &&
-             (data.city !== undefined) &&
-             (data.adminRegion !== undefined);
-    }
-    return true;
-  },
-  { message: "Postal code requires city, street, and adminRegion", path: ["postalCode", "street", "city", "adminRegion"] }
-)
-.refine(
-  (data) => {
-    // if street is provided, city and adminRegion must also be provided
-    if (data.street !== undefined) {
-      return (data.city !== undefined && data.adminRegion !== undefined);
-    }
-    return true;
-  }
-)
-.refine(
-  (data) => {
-    // if city is provided, adminRegion must also be provided
-    if (data.city !== undefined && data.city !== null) {
-      return data.adminRegion !== undefined;
-    }
-    return true;
-  },
-  { message: "Street requires city and adminRegion; city requires adminRegion", path: ["street", "city", "adminRegion"] }
-)
+});
 
-export const ExpPatchBodySchema = z.object({           
-  thumbnail: z.string().optional(),   
+// PATCH body (partial update)
+export const ExpPatchBodySchema = z.object({
+  thumbnail: z.string().url().optional(),
   tagIds: TagIdsSchema.optional(),
-  // Deprecated input kept for backward compatibility with existing clients.
-  keywords: z.array(z.string()).optional(),
-  descriptionEdit: z.string().optional()
-})
+  descriptionEdit: z.string().min(1).max(5000).optional(),
+});
 
-
+// List query parsing
 export const ExpListQuerySchema = z.object({
-  limit: z.string().optional(),
-  offset: z.string().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+
   sortBy: z.enum(["avgRating", "dateCreated", "reviewCount", "title"]).optional(),
   sortDirection: z.enum(["asc", "desc"]).optional(),
-  title: z.string().optional(),
-  country: z.string().length(2).optional(),
-  adminRegion: z.string().optional(),
-  city: z.string().optional(),
-  tags: z.string().optional(),
+
+  title: z.string().min(1).optional(),
+  country: Iso2CountrySchema.optional(),
+  adminRegion: z.string().min(1).optional(),
+  city: z.string().min(1).optional(),
+
+  // comma separated slugs or ids (your choice) — keeping as string for now
+  tags: z.string().min(1).optional(),
   tagMode: z.preprocess(
-    (value) => (typeof value === "string" ? value.toLowerCase() : value),
+    (v) => (typeof v === "string" ? v.toLowerCase() : v),
     z.enum(["and", "or"]).optional()
   ),
-})
-
-
+});
 
 export type ExpPutPostBody = z.infer<typeof ExpPutPostBodySchema>;
 export type ExpPatchBody = z.infer<typeof ExpPatchBodySchema>;

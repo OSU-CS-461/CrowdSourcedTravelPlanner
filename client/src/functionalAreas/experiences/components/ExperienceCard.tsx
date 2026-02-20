@@ -15,7 +15,6 @@ export type Experience = {
   description?: string | null;
   dateCreated?: string | null;
   thumbnail?: string | null;
-  keywords?: string[] | string | null;
   country?: string | null;
   adminRegion?: string | null;
   city?: string | null;
@@ -53,11 +52,6 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
   const description = experience.description?.trim();
   const date = formatDate(experience.dateCreated);
   const location = formatLocation(experience);
-  const keywords = Array.isArray(experience.keywords)
-    ? experience.keywords
-    : experience.keywords
-      ? experience.keywords.split(",").map((keyword) => keyword.trim())
-      : [];
   const categories = experience.categoryTags ?? [];
   const features = experience.featureTags ?? [];
   const updateHref =
@@ -72,7 +66,6 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       {description ? <p>{description}</p> : null}
       {date ? <p>{date}</p> : null}
       {location ? <p>{location}</p> : null}
-      {keywords.length ? <p>{keywords.join(", ")}</p> : null}
       {categories.length ? (
         <p>
           <strong>Category:</strong> {categories.map((tag) => tag.label).join(", ")}

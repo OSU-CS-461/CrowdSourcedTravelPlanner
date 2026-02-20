@@ -14,82 +14,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model User {
-  id          Int             @id @default(autoincrement())
-  email String @unique
-  username String @unique
+  id             Int          @id @default(autoincrement())
+  email          String       @unique
+  username       String       @unique
   passwordDigest String
-  experiences Experience[]
-  reviews     Review[]
+  experiences    Experience[]
+  reviews        Review[]
 }
 
 model Experience {
-  id              Int           @id @default(autoincrement())
-  createdBy       Int
-  user            User          @relation(fields: [createdBy], references: [id])
+  id        Int  @id @default(autoincrement())
+  createdBy Int
+  user      User @relation(fields: [createdBy], references: [id])
 
   title           String
-  description     String      
-  descriptionEdit String?       
-  dateCreated     DateTime      @default(now())
-  lastUpdated     DateTime      @default(now())
-  country         String
-  adminRegion     String?       
-  city            String?      
-  street          String?       
-  postalCode      String?       
-  latitude        Float?        
-  longitude       Float?        
-  thumbnail       String?       
-  avgRating       Float?     
+  description     String
+  descriptionEdit String?
+  dateCreated     DateTime @default(now())
+  lastUpdated     DateTime @updatedAt
+  latitude        Float
+  longitude       Float
+  country         String?
+  adminRegion     String?
+  city            String?
+  street          String?
+  postalCode      String?
+  thumbnail       String?
+  avgRating       Float?
+  categoryId      Int?
 
-  tags            ExperienceTag[]
-  reviews         Review[]
+  category       Category?       @relation(fields: [categoryId], references: [id])
+  experienceTags ExperienceTag[]
+  reviews        Review[]
 }
 
-enum TagType {
-  CATEGORY
-  FEATURE
+model Category {
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  label String
+
+  tags        Tag[]
+  experiences Experience[]
 }
 
 model Tag {
-  id               Int      @id @default(autoincrement())
-  slug             String   @unique
-  label            String
-  type             TagType
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  label String
 
-  parentCategoryId Int?
-  parentCategory   Tag?     @relation("CategoryFeatures", fields: [parentCategoryId], references: [id])
-  features         Tag[]    @relation("CategoryFeatures")
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  experiences      ExperienceTag[]
+  experienceTags ExperienceTag[]
 }
-
 
 model ExperienceTag {
   experienceId Int
   tagId        Int
 
-  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
-  tag          Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([experienceId, tagId])
   @@index([tagId])
   @@index([experienceId])
 }
 
-
 model Review {
-  id            Int           @id @default(autoincrement())
-  rating        Int
-  reviewText    String
-  dateCreated   DateTime      @default(now())
+  id          Int      @id @default(autoincrement())
+  rating      Int
+  reviewText  String
+  dateCreated DateTime @default(now())
 
-  experienceId  Int 
-  experience    Experience    @relation(fields: [experienceId], references: [id])
+  experienceId Int
+  experience   Experience @relation(fields: [experienceId], references: [id])
 
-  userId        Int
-  user          User          @relation(fields: [userId], references: [id])
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }

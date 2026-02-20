@@ -7,8 +7,15 @@ type ExperienceTag = {
   id: number;
   label: string;
   slug: string;
-  type: "CATEGORY" | "FEATURE";
+  type?: "CATEGORY" | "FEATURE";
+  categoryId?: number | null;
   parentCategoryId?: number | null;
+};
+
+type ExperienceCategory = {
+  id: number;
+  label: string;
+  slug: string;
 };
 
 type Experience = {
@@ -17,10 +24,11 @@ type Experience = {
   description: string;
   dateCreated: string;
   thumbnail?: string;
-  keywords?: string[];
   country?: string;
   city?: string;
   adminRegion?: string;
+  category?: ExperienceCategory | null;
+  tags?: ExperienceTag[];
   categoryTags?: ExperienceTag[];
   featureTags?: ExperienceTag[];
 };
@@ -66,13 +74,56 @@ export default function HomePage() {
       ) : (
         <div className="search-results-container">
           {experiences.map((exp) => (
+            (() => {
+              const categoryTags =
+                exp.categoryTags ??
+                (exp.category
+                  ? [
+                      {
+                        id: exp.category.id,
+                        label: exp.category.label,
+                        slug: exp.category.slug,
+                      },
+                    ]
+                  : []);
+
+              const featureTags = exp.featureTags ?? exp.tags ?? [];
+
+              return (
             <div
               key={exp.id}
               style={{
                 borderBottom: "1px solid #eee",
                 padding: "20px 0",
+                display: "flex",
+                gap: "16px",
+                alignItems: "flex-start",
               }}
             >
+              <div
+                style={{
+                  width: "160px",
+                  height: "120px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  backgroundColor: "#f1f3f4",
+                  flexShrink: 0,
+                }}
+              >
+                {exp.thumbnail ? (
+                  <img
+                    src={exp.thumbnail}
+                    alt={exp.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                ) : null}
+              </div>
+
               <div style={{ flex: 1 }}>
                 <h2
                   onClick={() =>
@@ -106,22 +157,61 @@ export default function HomePage() {
                     ? exp.description.substring(0, 160) + "..."
                     : exp.description || "Discover more about this hidden gem..."}
                 </p>
-
-                {exp.categoryTags && exp.categoryTags.length > 0 && (
-                  <p style={{ color: "#4d5156", margin: "8px 0 0 0", fontSize: "14px" }}>
-                    <strong>Category:</strong>{" "}
-                    {exp.categoryTags.map((tag) => tag.label).join(", ")}
-                  </p>
-                )}
-
-                {exp.featureTags && exp.featureTags.length > 0 && (
-                  <p style={{ color: "#4d5156", margin: "4px 0 0 0", fontSize: "14px" }}>
-                    <strong>Features:</strong>{" "}
-                    {exp.featureTags.map((tag) => tag.label).join(", ")}
-                  </p>
-                )}
               </div>
+
+              <aside style={{ width: "220px", flexShrink: 0 }}>
+                {categoryTags.length > 0 && (
+                  <div style={{ marginBottom: "8px" }}>
+                    <p style={{ margin: "0 0 6px 0", fontSize: "13px", color: "#5f6368" }}>
+                      Category
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      {categoryTags.map((tag) => (
+                        <span
+                          key={`cat-${tag.id}`}
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: "999px",
+                            background: "#e8f0fe",
+                            color: "#174ea6",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {tag.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {featureTags.length > 0 && (
+                  <div>
+                    <p style={{ margin: "0 0 6px 0", fontSize: "13px", color: "#5f6368" }}>
+                      Tags
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      {featureTags.map((tag) => (
+                        <span
+                          key={`tag-${tag.id}`}
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: "999px",
+                            background: "#f1f3f4",
+                            color: "#3c4043",
+                            fontSize: "12px",
+                          }}
+                        >
+                          {tag.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </aside>
             </div>
+              );
+            })()
           ))}
         </div>
       )}

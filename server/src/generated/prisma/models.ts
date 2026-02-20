@@ -9,6 +9,7 @@
  */
 export type * from './models/User.js'
 export type * from './models/Experience.js'
+export type * from './models/Category.js'
 export type * from './models/Tag.js'
 export type * from './models/ExperienceTag.js'
 export type * from './models/Review.js'

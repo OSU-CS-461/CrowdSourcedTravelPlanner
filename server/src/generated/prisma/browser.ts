@@ -27,6 +27,11 @@ export type User = Prisma.UserModel
  */
 export type Experience = Prisma.ExperienceModel
 /**
+ * Model Category
+ * 
+ */
+export type Category = Prisma.CategoryModel
+/**
  * Model Tag
  * 
  */

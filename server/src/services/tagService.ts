@@ -1,26 +1,18 @@
 import prisma from "../db/prisma";
-import type { TagType } from "../generated/prisma/enums";
 
-interface ListTagsParams {
-  type?: TagType;
-  parentCategoryId?: number;
+export async function listTags() {
+  return prisma.tag.findMany({
+    orderBy: {
+      label: "asc"
+    }
+  })
 }
 
-export async function listTags(params: ListTagsParams = {}) {
-  const { type, parentCategoryId } = params;
 
+export async function listByCategoryId(categoryId: number) {
   return prisma.tag.findMany({
     where: {
-      ...(type ? { type } : {}),
-      ...(parentCategoryId ? { parentCategoryId } : {}),
+      categoryId: categoryId,
     },
-    select: {
-      id: true,
-      slug: true,
-      label: true,
-      type: true,
-      parentCategoryId: true,
-    },
-    orderBy: [{ type: "asc" }, { label: "asc" }],
   });
 }
