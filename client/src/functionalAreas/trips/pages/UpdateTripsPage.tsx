@@ -7,10 +7,7 @@ import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 type ApiTrip = {
   id: number | string;
   title: string | null;
-  destination: string | null;
-  startDate: string | null;
-  endDate: string | null;
-  visibility: "private" | "public" | "unlisted" | null;
+  description: string | null;
 };
 
 export default function UpdateTripPage() {
@@ -25,14 +22,7 @@ export default function UpdateTripPage() {
   function mapApiToTripFormValues(api: ApiTrip): TripFormValues {
     return {
       title: api.title ?? "",
-      destination: api.destination ?? "",
-      startDate: api.startDate
-        ? api.startDate.slice(0, 10)
-        : "",
-      endDate: api.endDate
-        ? api.endDate.slice(0, 10)
-        : "",
-      visibility: api.visibility ?? "private",
+      description: api.description ?? "",
     };
   }
 
@@ -79,10 +69,7 @@ export default function UpdateTripPage() {
     try {
       await apiClient.put(`/trips/${id}`, {
         title: values.title,
-        destination: values.destination,
-        startDate: values.startDate,
-        endDate: values.endDate,
-        visibility: values.visibility,
+        description: values.description,
       });
 
       alert("Trip updated successfully!");
