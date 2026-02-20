@@ -110,13 +110,6 @@
   margin: 0.5rem 0;
 }
 
-.experience-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-
 .keyword-tag {
   background-color: #646cff;
   color: white;

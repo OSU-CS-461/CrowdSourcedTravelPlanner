@@ -14,22 +14,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model User {
-  id          Int             @id @default(autoincrement())
-  email String @unique
-  username String @unique
+  id             Int          @id @default(autoincrement())
+  email          String       @unique
+  username       String       @unique
   passwordDigest String
-  experiences Experience[]
-  reviews     Review[]
-  trips       Trip[]
+  experiences    Experience[]
+  reviews        Review[]
 }
 
 model Experience {
-  id              Int           @id @default(autoincrement())
-  createdBy       Int
-  user            User          @relation(fields: [createdBy], references: [id])
+  id        Int  @id @default(autoincrement())
+  createdBy Int
+  user      User @relation(fields: [createdBy], references: [id])
 
   title           String
   description     String      
@@ -81,4 +78,68 @@ model TripExperience {
   experience      Experience    @relation(fields: [experienceId], references: [id])
   @@id([tripId, experienceId])
 
+}
+  description     String
+  descriptionEdit String?
+  dateCreated     DateTime @default(now())
+  lastUpdated     DateTime @updatedAt
+  latitude        Float
+  longitude       Float
+  country         String?
+  adminRegion     String?
+  city            String?
+  street          String?
+  postalCode      String?
+  thumbnail       String?
+  avgRating       Float?
+  categoryId      Int?
+
+  category       Category?       @relation(fields: [categoryId], references: [id])
+  experienceTags ExperienceTag[]
+  reviews        Review[]
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  label String
+
+  tags        Tag[]
+  experiences Experience[]
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  label String
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  experienceTags ExperienceTag[]
+}
+
+model ExperienceTag {
+  experienceId Int
+  tagId        Int
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([experienceId, tagId])
+  @@index([tagId])
+  @@index([experienceId])
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  rating      Int
+  reviewText  String
+  dateCreated DateTime @default(now())
+
+  experienceId Int
+  experience   Experience @relation(fields: [experienceId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }

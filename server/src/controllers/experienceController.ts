@@ -1,245 +1,191 @@
-import { Request, Response, NextFunction} from "express";
-import { 
-    ExpListQuerySchema, 
-    ExpPutPostBodySchema,
-    ExpPatchBodySchema,
-    ExpPatchBody,
-    ExpPutPostBody,
-    ExpListQuery
-   } from "../models/experience";
-import { Prisma } from '../generated/prisma/client';
+import { Request, Response, NextFunction } from "express";
+import {
+  ExpListQuerySchema,
+  ExpPutPostBodySchema,
+  ExpPatchBodySchema,
+  ExpPutPostBody,
+  ExpPatchBody,
+  ExpListQuery,
+} from "../models/experience";
+import { Prisma } from "../generated/prisma/client";
 import * as experienceService from "../services/experienceService";
-
-// --- CREATE ---
-
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
-async function createExperience(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-    ) {
-    try {
-        const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
-
-        if (!req.user) {
-            throw { status: 401, message: "Unauthorized" };
-        }
-
-        const experience = await experienceService.createExperience({
-            ...body,
-            createdBy: req.user.id,
-        });
-
-        return res.status(201).json(experience);
-    } catch (err) {
-        return next(err);
-    }
+// --- tiny helper: no validation, just split/normalize ---
+function splitSlugs(csv?: string): string[] {
+  if (!csv) return [];
+  return Array.from(
+    new Set(
+      csv
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  );
 }
 
+// --- CREATE ---
+async function createExperience(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
 
+    const experience = await experienceService.createExperience(
+      req.user!.id,
+      body
+    );
 
+    return res.status(201).json(experience);
+  } catch (err) {
+    return next(err);
+  }
+}
 
 // --- READ ---
+async function getExperience(req: Request, res: Response, next: NextFunction) {
+  try {
+    const experienceId = parseInt(req.params.id);
 
+    const experience = await experienceService.getExperience(experienceId);
 
-// TODO: implement reviewCount, inTrips
-async function getExperience(
-    req: Request, 
-    res: Response,
-    next: NextFunction
-    ) {
-    try {
-        const experienceId = parseInt(req.params.id as string);
-
-        if (isNaN(experienceId) || experienceId <= 0) {
-            throw { status: 400, message: "Invalid experience ID"}
-        }
-
-        const experience = await experienceService.getExperience(experienceId);
-
-        if (!experience) {
-            throw { status: 404, message: "No experience with this id exists"}
-        }
-
-        // Include createdBy in response
-        return res.status(200).json(experience);
-    } catch (err) {
-        return next(err)
-    }
+    return res.status(200).json(experience);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-
-// TODO: implement filtering by tags, creator
-// TODO: add pagination info to response (nextOffset, prevOffset, etc)
 async function listExperiences(
-    req: Request, 
-    res: Response,
-    next: NextFunction
-    ) {
-    try {
-        const query: ExpListQuery = ExpListQuerySchema.parse(req.query);
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const query: ExpListQuery = ExpListQuerySchema.parse(req.query);
 
-        // --- Pagination ---
+    const limit = Math.min(parseInt(query.limit as unknown as string) || 20, 50);
+    const offset = parseInt(query.offset as unknown as string) || 0;
 
-        // limit must be less than 50, default is 20
-        const limit = Math.min( (parseInt(query.limit as string) || 20), 50 );
-        // offset defaults to 0
-        const offset = parseInt(req.query.offset as string) || 0;
-        
+    const where: Prisma.ExperienceWhereInput = {};
 
-        // --- Filters ---
-
-        const where: Prisma.ExperienceWhereInput = {};
-
-        if (query.title) {
-            where.title = { contains: query.title, mode: "insensitive" };
-        }
-
-        if (query.country) {
-            where.country = query.country;
-        }
-
-        if (query.adminRegion) {
-            where.adminRegion = { contains: query.adminRegion, mode: "insensitive" };
-        }
-
-        if (query.city) {
-            where.city = { contains: query.city, mode: "insensitive" };
-        }
-
-        // --- Sorting ---
-        const orderBy: Prisma.ExperienceOrderByWithRelationInput = {};
-
-        const direction = query.sortDirection || "desc";
-        switch (query.sortBy) {
-            case 'avgRating':
-                orderBy.avgRating = direction;
-                break;
-            case 'title':
-                orderBy.title = query.sortDirection || "asc";
-                break;
-            // case 'reviewCount':
-            //     orderBy.reviewCount = direction;
-            //     break;
-            default:
-                orderBy.dateCreated = direction;
-        }
-
-        const experiences = await experienceService.listExperiences({
-            limit,
-            offset,
-            where,
-            orderBy,
-        });
-
-        return res.status(200).json(experiences);
-    } catch (err) {
-        next(err);
+    if (query.title) {
+      where.title = { contains: query.title, mode: "insensitive" };
     }
+    if (query.country) {
+      where.country = query.country;
+    }
+    if (query.adminRegion) {
+      where.adminRegion = { contains: query.adminRegion, mode: "insensitive" };
+    }
+    if (query.city) {
+      where.city = { contains: query.city, mode: "insensitive" };
+    }
+
+    const tagSlugs = splitSlugs(query.tags);
+    const tagMode = query.tagMode || "or";
+
+    if (tagSlugs.length && tagMode === "and") {
+      where.AND = tagSlugs.map((slug) => ({
+        experienceTags: { some: { tag: { slug: { equals: slug } } } },
+      }));
+    } else if (tagSlugs.length) {
+      where.experienceTags = {
+        some: { tag: { slug: { in: tagSlugs } } },
+      };
+    }
+
+
+    const direction = query.sortDirection || "desc";
+    const orderBy: Prisma.ExperienceOrderByWithRelationInput =
+      query.sortBy === "avgRating"
+        ? { avgRating: direction }
+        : query.sortBy === "title"
+        ? { title: query.sortDirection || "asc" }
+        : { dateCreated: direction };
+
+    const experiences = await experienceService.listExperiences({
+      limit,
+      offset,
+      where,
+      orderBy,
+    });
+
+    return res.status(200).json(experiences);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 
-// --- UPDATE ---
-
-
+// ---- UPDATE -----
 async function updateExperience(
-    req: AuthenticatedRequest, 
-    res: Response,
-    next: NextFunction
-    ) {
-    try {
-        const experienceId = parseInt(req.params.id as string);
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const experienceId = parseInt(req.params.id);
+    const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
 
-        if (isNaN(experienceId) || experienceId <= 0) {
-            throw { status: 401, message: "Invalid experience ID"}
-        }
+    const updatedExperience = await experienceService.updateExperience({
+      experienceId,
+      userId: req.user!.id,
+      putData: body,
+    });
 
-        const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
-
-        if (!req.user) {
-            throw { status: 401, message: "Unauthorized" };
-        }
-
-        const updatedExperience = await experienceService.updateExperience({
-            experienceId: experienceId,
-            userId: req.user.id,
-            putData: body,
-        });
-
-        if (!updatedExperience) {
-            throw { status: 404, message: "Experience not found or not editable"}
-        }
-
-        return res.status(200).json(updatedExperience);
-    } catch (err) {
-        return next(err);
-    }
+    return res.status(200).json(updatedExperience);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 async function editExperience(
-    req: AuthenticatedRequest, 
-    res: Response,
-    next: NextFunction
-    ) {
-    try {
-        const experienceId = parseInt(req.params.id as string);
-        if (isNaN(experienceId) || experienceId <= 0) {
-            throw { status: 401, message: "Invalid experience ID"}
-        }
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const experienceId = parseInt(req.params.id);
+    const body: ExpPatchBody = ExpPatchBodySchema.parse(req.body);
 
-        const body: ExpPatchBody = ExpPatchBodySchema.parse(req.body);
-        if (!req.user) {
-            throw { status: 401, message: "Unauthorized" };
-        }
+    const editedExperience = await experienceService.editExperience({
+      experienceId,
+      userId: req.user!.id,
+      patchData: body,
+    });
 
-        const editedExperience = await experienceService.editExperience({
-            experienceId: experienceId,
-            userId: req.user.id,
-            patchData: body,
-        });
-
-        if (!editedExperience) {
-            throw { status: 404, message: "Experience not found"};
-        }
-
-        return res.status(200).json(editedExperience);
-    } catch (err) {
-        next(err);
-    }
+    return res.status(200).json(editedExperience);
+  } catch (err) {
+    return next(err);
+  }
 }
-
 
 async function deleteExperience(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-    ) {
-    try {
-        const experienceId = parseInt(req.params.id);
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const experienceId = parseInt(req.params.id);
 
-        if (!req.user) {
-            throw { status: 401, message: "Unauthorized" };
-        }
+    await experienceService.deleteExperience({
+      experienceId,
+      userId: req.user!.id,
+    });
 
-        await experienceService.deleteExperience({ 
-            experienceId, 
-            userId: req.user.id
-        });
-
-        return res.status(204).send();
-    } catch (err) {
-        next(err);
-    }
+    return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
 }
 
-
-
-export { 
-    createExperience, 
-    listExperiences, 
-    getExperience, 
-    updateExperience, 
-    editExperience, 
-    deleteExperience 
+export {
+  createExperience,
+  listExperiences,
+  getExperience,
+  updateExperience,
+  editExperience,
+  deleteExperience,
 };
