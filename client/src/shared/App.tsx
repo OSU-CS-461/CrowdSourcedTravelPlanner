@@ -7,6 +7,7 @@ import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
 import CreateExperiencePage from "../functionalAreas/experiences/pages/CreateExperiencePage";
 import ExperienceDetailsPage from "../functionalAreas/experiences/pages/ExperienceDetailsPage";
 import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
+import ReviewForm from "../functionalAreas/reviews/components/ReviewForm";
 import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
 import { ClientRoutes } from "./clientRoutes";
@@ -43,6 +44,14 @@ export default function App() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route path={ClientRoutes.REVIEW_CREATE} 
+        element={<ReviewForm />}
+        />
+
+        <Route path={ClientRoutes.REVIEW_UPDATE} 
+        element={<UpdateTripPage />}
+        />
 
         <Route
           path={ClientRoutes.EXPERIENCE_CREATE}

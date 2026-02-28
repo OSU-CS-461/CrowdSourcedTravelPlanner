@@ -1,6 +1,7 @@
 import { default as express } from "express";
 import * as experienceController from "../controllers/experienceController";
 import * as authMiddleware from "../middleware/authMiddleware";
+import reviewRouter from "./reviews";
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ router.delete("/:id",
     experienceController.deleteExperience
 );
 
+router.use("/:id/reviews", reviewRouter);
 
 export default router;
 

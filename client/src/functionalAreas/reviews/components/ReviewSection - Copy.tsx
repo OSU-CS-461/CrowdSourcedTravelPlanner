@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { apiClient, setAuthToken } from "../../../shared/services/api.service";
-import { ClientRoutes } from "../../../shared/clientRoutes";
+import { apiClient } from "../../../shared/services/api.service";
 
-// Define the Review type based on the project requirements
+// Define the Review type based on your project requirements
 type Review = {
   id: string;
   experienceId: string;
@@ -20,7 +18,6 @@ type ReviewsProps = {
 };
 
 export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) {
-  const navigate = useNavigate();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(5);
@@ -61,26 +58,7 @@ export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) 
 
   return (
     <section style={{ marginTop: "40px", borderTop: "1px solid #eee", paddingTop: "20px" }}>
-      <div className="detail-header">
-        <h2 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>Reviews ({reviews.length})</h2>
-
-        <button
-          onClick={() => navigate(ClientRoutes.REVIEW_CREATE.replace(":id", experienceId))}
-          style={{
-            padding: "10px 20px",
-            marginTop: "16px",
-            marginBottom: "32px",
-            cursor: "pointer",
-            backgroundColor: "#1a73e8",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            fontWeight: "bold"
-          }}
-        >
-          + Create New Reviews
-        </button>
-      </div>
+      <h2 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>Reviews ({reviews.length})</h2>
 
       {/* --- Add Review Form --- */}
       {!isOwner && (
