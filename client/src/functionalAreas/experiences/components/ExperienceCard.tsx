@@ -1,32 +1,8 @@
 import { Link } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
+import { type Experience, type ExperienceCardProps } from "../types/types.ts"
 
-type ExperienceTag = {
-  id: number | string;
-  label: string;
-  slug: string;
-  type: "CATEGORY" | "FEATURE";
-  parentCategoryId?: number | null;
-};
 
-export type Experience = {
-  id?: number | string;
-  title?: string | null;
-  description?: string | null;
-  dateCreated?: string | null;
-  thumbnail?: string | null;
-  country?: string | null;
-  adminRegion?: string | null;
-  city?: string | null;
-  street?: string | null;
-  postalCode?: string | null;
-  categoryTags?: ExperienceTag[] | null;
-  featureTags?: ExperienceTag[] | null;
-};
-
-interface ExperienceCardProps {
-  experience: Experience;
-}
 
 function formatDate(value?: string | null) {
   if (!value) return null;
@@ -66,6 +42,10 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       {description ? <p>{description}</p> : null}
       {date ? <p>{date}</p> : null}
       {location ? <p>{location}</p> : null}
+      <p>
+        <span aria-hidden="true" style={{ marginRight: 4 }}>👤</span>
+        <strong>Created By:</strong> {experience.createdByUsername ?? "Unknown"}
+      </p>
       {categories.length ? (
         <p>
           <strong>Category:</strong> {categories.map((tag) => tag.label).join(", ")}

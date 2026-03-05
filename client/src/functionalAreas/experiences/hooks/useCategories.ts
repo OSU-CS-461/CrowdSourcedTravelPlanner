@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "../../../shared/services/api.service";
-import type { CategoryOption } from "../components/ExperienceForm";
+import type { CategoryOption } from "../types/types";
 
 
 export default function useCategories() {

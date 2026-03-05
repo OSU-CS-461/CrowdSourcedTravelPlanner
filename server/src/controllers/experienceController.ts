@@ -24,6 +24,46 @@ function splitSlugs(csv?: string): string[] {
   );
 }
 
+const KM_PER_LAT_DEGREE = 111.32;
+const EARTH_RADIUS_KM = 6371;
+
+function toRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180;
+}
+
+function buildBoundingBox(lat: number, lng: number, radiusKm: number) {
+  const latDelta = radiusKm / KM_PER_LAT_DEGREE;
+  const latRad = toRadians(lat);
+  const cosLat = Math.max(Math.cos(latRad), 0.01);
+  const lngDelta = radiusKm / (KM_PER_LAT_DEGREE * cosLat);
+
+  return {
+    minLat: Math.max(-90, lat - latDelta),
+    maxLat: Math.min(90, lat + latDelta),
+    minLng: Math.max(-180, lng - lngDelta),
+    maxLng: Math.min(180, lng + lngDelta),
+  };
+}
+
+function haversineDistanceKm(
+  latA: number,
+  lngA: number,
+  latB: number,
+  lngB: number
+) {
+  const dLat = toRadians(latB - latA);
+  const dLng = toRadians(lngB - lngA);
+  const aLat = toRadians(latA);
+  const bLat = toRadians(latB);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(aLat) * Math.cos(bLat) * Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return EARTH_RADIUS_KM * c;
+}
+
 // --- CREATE ---
 async function createExperience(
   req: AuthenticatedRequest,
@@ -57,18 +97,27 @@ async function getExperience(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function listExperiences(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+async function listExperiences(req: Request, res: Response, next: NextFunction) {
   try {
     const query: ExpListQuery = ExpListQuerySchema.parse(req.query);
 
-    const limit = Math.min(parseInt(query.limit as unknown as string) || 20, 50);
-    const offset = parseInt(query.offset as unknown as string) || 0;
+    const limit = Math.min(query.limit ?? 20, 50);
+    const offset = query.offset ?? 0;
+    const hasBoundsSearch =
+      query.minLat !== undefined &&
+      query.maxLat !== undefined &&
+      query.minLng !== undefined &&
+      query.maxLng !== undefined;
+    const hasRadiusSearch =
+      !hasBoundsSearch && query.lat !== undefined && query.lng !== undefined;
+    const radiusKm = query.radiusKm ?? 25;
 
     const where: Prisma.ExperienceWhereInput = {};
+
+    // ✅ NEW: user filter (does not affect other filters)
+    if (query.createdBy !== undefined) {
+      where.createdBy = query.createdBy;
+    }
 
     if (query.title) {
       where.title = { contains: query.title, mode: "insensitive" };
@@ -81,6 +130,9 @@ async function listExperiences(
     }
     if (query.city) {
       where.city = { contains: query.city, mode: "insensitive" };
+    }
+    if (query.categoryId !== undefined) {
+      where.categoryId = query.categoryId;
     }
 
     const tagSlugs = splitSlugs(query.tags);
@@ -96,6 +148,14 @@ async function listExperiences(
       };
     }
 
+    if (hasBoundsSearch) {
+      where.latitude = { gte: query.minLat, lte: query.maxLat };
+      where.longitude = { gte: query.minLng, lte: query.maxLng };
+    } else if (hasRadiusSearch) {
+      const box = buildBoundingBox(query.lat!, query.lng!, radiusKm);
+      where.latitude = { gte: box.minLat, lte: box.maxLat };
+      where.longitude = { gte: box.minLng, lte: box.maxLng };
+    }
 
     const direction = query.sortDirection || "desc";
     const orderBy: Prisma.ExperienceOrderByWithRelationInput =
@@ -104,6 +164,31 @@ async function listExperiences(
         : query.sortBy === "title"
         ? { title: query.sortDirection || "asc" }
         : { dateCreated: direction };
+
+    if (hasRadiusSearch) {
+      const candidateLimit = Math.min(Math.max(limit + offset, 50), 200);
+      const candidates = await experienceService.listExperiences({
+        limit: candidateLimit,
+        offset: 0,
+        where,
+        orderBy: { dateCreated: "desc" },
+      });
+
+      const radiusMatches = candidates
+        .map((experience) => ({
+          ...experience,
+          distanceKm: haversineDistanceKm(
+            query.lat!,
+            query.lng!,
+            experience.latitude,
+            experience.longitude
+          ),
+        }))
+        .filter((experience) => experience.distanceKm <= radiusKm)
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+
+      return res.status(200).json(radiusMatches.slice(offset, offset + limit));
+    }
 
     const experiences = await experienceService.listExperiences({
       limit,

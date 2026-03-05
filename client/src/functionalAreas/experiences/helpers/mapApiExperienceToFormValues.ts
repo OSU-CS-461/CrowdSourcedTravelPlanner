@@ -1,4 +1,4 @@
-import type { FormValues } from "../components/ExperienceForm";
+import type { FormValues } from "../types/types.ts";
 import type { ApiExperience } from "../experienceService";
 
 export default function mapApiExperienceToFormValues(

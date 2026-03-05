@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../../../shared/services/api.service";
-import type { TagOption } from "../components/ExperienceForm";
+import type { TagOption } from "../types/types";
 
 export default function useCategoryFeatures(categoryId: number | null) {
   const [features, setFeatures] = useState<TagOption[]>([]);
@@ -35,4 +35,3 @@ export default function useCategoryFeatures(categoryId: number | null) {
 
   return { features, loading, error };
 }
-

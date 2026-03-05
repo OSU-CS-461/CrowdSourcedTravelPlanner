@@ -11,44 +11,32 @@ import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
 import InterestsPage from "../functionalAreas/interests/pages/InterestsPage";
 import { ClientRoutes } from "./clientRoutes";
-
-
-
+import RootLayout from "./RootLayout";
+import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
+import MyExperiencesPage from "../functionalAreas/experiences/pages/MyExperiencesPage";
 
 export default function App() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path={ClientRoutes.LOGIN} element={<LoginPage />} />
+        <Route path={ClientRoutes.SIGNUP} element={<SignupPage />} />
+        <Route path="*" element={<Navigate to={ClientRoutes.LOGIN} replace />} />
+      </Routes>
+    );
+  }
 
   return (
-    <>
-      <header style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginBottom: 12 }}>
-        {isAuthenticated ? <button onClick={logout}>Logout</button> : null}
-      </header>
-
-      <Routes>
-        <Route
-          path={ClientRoutes.HOME}
-          element={
-            isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
-          }
-        />
-        <Route
-          path={ClientRoutes.LOGIN}
-          element={
-            !isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path={ClientRoutes.SIGNUP}
-          element={
-            !isAuthenticated ? <SignupPage /> : <Navigate to="/" replace />
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-
+    <Routes>
+      <Route element={<RootLayout />}>
+        <Route path={ClientRoutes.HOME} element={<HomePage />} />
+        <Route path={ClientRoutes.MY_EXPERIENCES} element={<MyExperiencesPage />} />
+        <Route path={ClientRoutes.EXPLORE} element={<ExplorePage />} />
         <Route
           path={ClientRoutes.EXPERIENCE_CREATE}
-          element={
-            <CreateExperiencePage />}
+          element={<CreateExperiencePage />}
         />
         <Route
           path={ClientRoutes.EXPERIENCE_DETAILS}
@@ -56,26 +44,24 @@ export default function App() {
         />
         <Route
           path={ClientRoutes.EXPERIENCE_UPDATE}
-          element={
-            <UpdateExperiencePage />}
+          element={<UpdateExperiencePage />}
         />
-
-        <Route path={ClientRoutes.TRIP_CREATE} 
-        element={<CreateTripPage />}
+        <Route path={ClientRoutes.TRIP_CREATE} element={<CreateTripPage />} />
+        <Route path={ClientRoutes.TRIP_UPDATE} element={<UpdateTripPage />} />
+        <Route
+          path={ClientRoutes.LOGIN}
+          element={<Navigate to={ClientRoutes.HOME} replace />}
         />
-
-        <Route path={ClientRoutes.TRIP_UPDATE} 
-        element={<UpdateTripPage />}
+        <Route
+          path={ClientRoutes.SIGNUP}
+          element={<Navigate to={ClientRoutes.HOME} replace />}
         />
-
         <Route
           path={ClientRoutes.INTERESTS}
-          element={
-            isAuthenticated ? <InterestsPage /> : <Navigate to="/login" replace />
-          }
+          element={<InterestsPage />}
         />
-
-      </Routes>
-    </>
+        <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
+      </Route>
+    </Routes>
   );
 }
