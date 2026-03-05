@@ -1,8 +1,8 @@
 -- DropForeignKey
-ALTER TABLE "public"."TripExperience" DROP CONSTRAINT "TripExperience_experienceId_fkey";
+ALTER TABLE "TripExperience" DROP CONSTRAINT IF EXISTS "TripExperience_experienceId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "public"."TripExperience" DROP CONSTRAINT "TripExperience_tripId_fkey";
+ALTER TABLE "TripExperience" DROP CONSTRAINT IF EXISTS "TripExperience_tripId_fkey";
 
 -- AlterTable
 ALTER TABLE "Experience" ADD COLUMN     "keywords" TEXT[];
