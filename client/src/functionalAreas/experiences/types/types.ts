@@ -136,6 +136,8 @@ export type Experience = {
   country?: string;
   city?: string;
   adminRegion?: string;
+  street?: string | null;
+  postalCode?: string | null;
   category?: ExperienceCategory | null;
   tags?: ExperienceTag[];
   categoryTags?: ExperienceTag[];

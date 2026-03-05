@@ -135,6 +135,20 @@ function sortSearchResults(
     .map((entry) => entry.result);
 }
 
+function buildMarkerVisualProps(
+  markerId: number | string,
+  selectedMarkerId: number | string | null | undefined
+): Record<string, unknown> {
+  return {
+    icon:
+      selectedMarkerId !== undefined &&
+      selectedMarkerId !== null &&
+      String(selectedMarkerId) === String(markerId)
+        ? selectedExperienceMarkerIcon
+        : defaultExperienceMarkerIcon,
+  };
+}
+
 
 
 
@@ -163,6 +177,7 @@ export default function LocationPicker({
     attribution: "&copy; OpenStreetMap contributors",
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   } as unknown as ComponentProps<typeof TileLayer>;
+  const mapContainerProps = { minZoom: 3 } as Record<string, number>;
 
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounced(query, 400);
@@ -391,7 +406,7 @@ export default function LocationPicker({
           overflow: "hidden",
         }}
       >
-        <MapContainer style={{ height: "100%", width: "100%" }} minZoom={3}>
+        <MapContainer style={{ height: "100%", width: "100%" }} {...mapContainerProps}>
           <TileLayer {...tileLayerProps} />
           <SyncMapView center={center} zoom={12} onViewportChange={onViewportChange} />
           {allowMapSelection && <ClickToSet onPick={reversePick} />}
@@ -400,13 +415,7 @@ export default function LocationPicker({
             <Marker
               key={`marker-${marker.id}`}
               position={[marker.latitude, marker.longitude]}
-              icon={
-                selectedMarkerId !== undefined &&
-                selectedMarkerId !== null &&
-                String(selectedMarkerId) === String(marker.id)
-                  ? selectedExperienceMarkerIcon
-                  : defaultExperienceMarkerIcon
-              }
+              {...buildMarkerVisualProps(marker.id, selectedMarkerId)}
               eventHandlers={{
                 click: () => {
                   onMarkerSelect?.(marker.id);
