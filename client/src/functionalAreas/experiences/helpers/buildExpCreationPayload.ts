@@ -1,4 +1,4 @@
-import type { FormValues } from "../components/ExperienceForm";
+import type { FormValues } from "../types/types.ts";
 
 export default function buildExpCreationPayload(values: FormValues) {
   if (!values.categoryId || values.categoryId <= 0) {

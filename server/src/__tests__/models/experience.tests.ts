@@ -141,4 +141,63 @@ describe("Experience list query validation", () => {
     });
     expect(parsed.success).toBeFalsy();
   });
+
+  it("parses valid radius search params", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      lat: "44.8",
+      lng: "-122.79",
+      radiusKm: "25",
+      sortBy: "distance",
+    });
+    expect(parsed.success).toBeTruthy();
+    if (parsed.success) {
+      expect(parsed.data.lat).toBe(44.8);
+      expect(parsed.data.lng).toBe(-122.79);
+      expect(parsed.data.radiusKm).toBe(25);
+    }
+  });
+
+  it("fails when only lat is provided", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      lat: "44.8",
+      radiusKm: "25",
+    });
+    expect(parsed.success).toBeFalsy();
+  });
+
+  it("fails when sortBy=distance has no coordinates", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      sortBy: "distance",
+    });
+    expect(parsed.success).toBeFalsy();
+  });
+
+  it("parses valid map-window bounds params", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      minLat: "44.70",
+      maxLat: "45.10",
+      minLng: "-123.00",
+      maxLng: "-122.50",
+    });
+    expect(parsed.success).toBeTruthy();
+  });
+
+  it("fails when map-window bounds are incomplete", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      minLat: "44.70",
+      maxLat: "45.10",
+      minLng: "-123.00",
+    });
+    expect(parsed.success).toBeFalsy();
+  });
+
+  it("fails when minLat is greater than maxLat", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      minLat: "45.10",
+      maxLat: "44.70",
+      minLng: "-123.00",
+      maxLng: "-122.50",
+    });
+    expect(parsed.success).toBeFalsy();
+  });
 });
