@@ -65,6 +65,9 @@ const EXPERIENCE_LIST_SELECT = {
   dateCreated: true,
   lastUpdated: true,
   createdBy: true,
+  user: {
+    select: { username: true },
+  },
   categoryId: true,
   category: {
     select: { id: true, slug: true, label: true },
@@ -94,9 +97,14 @@ type ExperienceWithJoins = ExperienceListWithJoins | ExperienceDetailWithJoins;
 
 function serializeExperience(experience: ExperienceWithJoins) {
   const tags = experience.experienceTags.map((jt) => jt.tag);
-  const { experienceTags: _joined, ...rest } = experience;
+  const { experienceTags: _joined, user, ...rest } = experience;
 
-  return { ...rest, tags, tagIds: tags.map((t) => t.id) };
+  return {
+    ...rest,
+    createdByUsername: user?.username ?? null,
+    tags,
+    tagIds: tags.map((t) => t.id),
+  };
 }
 
 function badRequest(message: string) {

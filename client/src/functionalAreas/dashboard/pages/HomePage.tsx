@@ -9,6 +9,7 @@ type Experience = {
   title: string;
   description: string;
   dateCreated: string;
+  createdByUsername?: string | null;
   thumbnail?: string;
   country?: string;
   city?: string;

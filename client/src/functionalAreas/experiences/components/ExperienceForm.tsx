@@ -1,50 +1,11 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LocationSelection from "./LocationSelection";
-import type { LocationFields } from "./LocationSelection";
+import LocationSection from "./LocationSection";
+import type { LocationFields } from "./LocationSection";
 import TagSelection from "./TagSelection";
 import "./ExperienceForm.css";
+import { type FormValues, type FormTemplateProps } from "../types/types";
 
-export interface TagOption {
-  id: number;
-  slug: string;
-  label: string;
-  categoryId: number;
-}
-
-export interface CategoryOption {
-  id: number;
-  slug: string;
-  label: string;
-}
-
-export interface FormValues {
-  title: string;
-  description: string;
-  image: string;
-  categoryId: number | null;
-  tagIds: number[];
-  country: string;
-  adminRegion: string;
-  city: string;
-  street: string;
-  postalCode: string;
-  latitude: string;
-  longitude: string;
-}
-
-interface FormTemplateProps {
-  initialValues?: Partial<FormValues>;
-  onSubmit: (values: FormValues) => void | Promise<void>;
-  submitLabel?: string;
-  showTagSelector?: boolean;
-  availableCategories?: CategoryOption[];
-  availableFeatures?: TagOption[];
-  tagsLoading?: boolean;
-  featuresLoading?: boolean;
-  tagsError?: string | null;
-  onCategoryChange?: (categoryId: number | null) => void | Promise<void>;
-}
 
 function buildInitialLocation(values: Partial<FormValues>): LocationFields {
   return {
@@ -162,7 +123,7 @@ export default function ExperienceForm({
         />
       </label>
 
-      <LocationSelection
+      <LocationSection
         initialValue={buildInitialLocation(initialValues)}
         onChange={handleLocationChange}
       />
