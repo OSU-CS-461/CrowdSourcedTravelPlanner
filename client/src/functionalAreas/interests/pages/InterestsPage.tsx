@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   setAuthToken,
@@ -19,13 +19,7 @@ export default function InterestsPage() {
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("cstp.auth.token");
-    if (token) setAuthToken(token);
-    loadInterests();
-  }, []);
-
-  const loadInterests = async () => {
+  const loadInterests = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getInterests();
@@ -36,7 +30,13 @@ export default function InterestsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (token) setAuthToken(token);
+    loadInterests();
+  }, [loadInterests]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +51,6 @@ export default function InterestsPage() {
       
       // Ensure token is set before API call
       setAuthToken(token);
-      
-      // Small delay to ensure token is set in axios headers
-      await new Promise(resolve => setTimeout(resolve, 10));
 
       if (editingId) {
         await updateInterest(editingId, formData);
@@ -121,30 +118,28 @@ export default function InterestsPage() {
       await loadInterests();
     } catch (err: unknown) {
       let errorMessage = "Failed to delete interest";
-      
+
       if (err && typeof err === "object" && "response" in err) {
-        const response = (err as { response?: { data?: { error?: unknown } } }).response;
-        if (response?.data?.error) {
-          errorMessage = String(response.data.error);
+        const response = (err as {
+          response?: { data?: { error?: unknown; message?: unknown } };
+        }).response;
+        if (response?.data) {
+          errorMessage = String(
+            response.data.error || response.data.message || errorMessage
+          );
         }
       }
-      
+
       setError(errorMessage);
     }
   };
 
-  if (loading) {
-    return (
-      <main style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-        <p>Loading interests...</p>
-      </main>
-    );
-  }
-
   return (
     <main style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-      <h1>My Interests</h1>
-      <p>Manage your travel interests and preferences</p>
+      <h1 style={{ color: "#fff", marginBottom: "8px" }}>My Interests</h1>
+      <p style={{ color: "rgba(255,255,255,0.8)", marginTop: 0, marginBottom: "20px" }}>
+        Manage your travel interests and preferences
+      </p>
 
       {error && (
         <div
@@ -184,15 +179,18 @@ export default function InterestsPage() {
         <form
           onSubmit={handleSubmit}
           style={{
-            backgroundColor: "#f5f5f5",
-            padding: "20px",
+            backgroundColor: "#2d2d2d",
+            padding: "24px",
             borderRadius: "8px",
             marginBottom: "30px",
+            border: "1px solid #444",
           }}
         >
-          <h3>{editingId ? "Edit Interest" : "Create New Interest"}</h3>
+          <h3 style={{ color: "#fff", marginTop: 0, marginBottom: "20px" }}>
+            {editingId ? "Edit Interest" : "Create New Interest"}
+          </h3>
           <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
+            <label style={{ display: "block", marginBottom: "8px", color: "#e0e0e0", fontWeight: 500 }}>
               Name *
             </label>
             <input
@@ -206,14 +204,16 @@ export default function InterestsPage() {
               maxLength={100}
               style={{
                 width: "100%",
-                padding: "8px",
-                border: "1px solid #ddd",
+                padding: "10px 12px",
+                border: "1px solid #555",
                 borderRadius: "4px",
+                backgroundColor: "#1a1a1a",
+                color: "#fff",
               }}
             />
           </div>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ display: "block", marginBottom: "8px", color: "#e0e0e0", fontWeight: 500 }}>
               Description
             </label>
             <textarea
@@ -225,9 +225,11 @@ export default function InterestsPage() {
               rows={3}
               style={{
                 width: "100%",
-                padding: "8px",
-                border: "1px solid #ddd",
+                padding: "10px 12px",
+                border: "1px solid #555",
                 borderRadius: "4px",
+                backgroundColor: "#1a1a1a",
+                color: "#fff",
               }}
             />
           </div>
@@ -248,20 +250,22 @@ export default function InterestsPage() {
         </form>
       )}
 
-      {interests.length === 0 ? (
-        <p>No interests yet. Create your first one!</p>
+      {loading ? (
+        <p style={{ color: "rgba(255,255,255,0.7)" }}>Loading interests...</p>
+      ) : interests.length === 0 ? (
+        <p style={{ color: "rgba(255,255,255,0.7)" }}>No interests yet. Create your first one!</p>
       ) : (
         <div>
-          <h2>Your Interests ({interests.length})</h2>
+          <h2 style={{ color: "#fff", marginBottom: "16px" }}>Your Interests ({interests.length})</h2>
           {interests.map((interest) => (
             <div
               key={interest.id}
               style={{
-                border: "1px solid #ddd",
+                border: "1px solid #444",
                 borderRadius: "8px",
                 padding: "20px",
                 marginBottom: "15px",
-                backgroundColor: "white",
+                backgroundColor: "#2d2d2d",
               }}
             >
               <div
@@ -272,18 +276,18 @@ export default function InterestsPage() {
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: "0 0 10px 0", color: "#1a73e8" }}>
+                  <h3 style={{ margin: "0 0 10px 0", color: "#6ea8fe" }}>
                     {interest.name}
                   </h3>
                   {interest.description && (
-                    <p style={{ color: "#666", margin: "0 0 10px 0" }}>
+                    <p style={{ color: "#b0b0b0", margin: "0 0 10px 0" }}>
                       {interest.description}
                     </p>
                   )}
                   <p
                     style={{
                       fontSize: "12px",
-                      color: "#999",
+                      color: "#888",
                       margin: "0",
                     }}
                   >
@@ -333,7 +337,7 @@ export default function InterestsPage() {
                         </button>
                       </>
                     ) : (
-                      <span style={{ color: "#999", fontSize: "12px" }}>
+                      <span style={{ color: "#888", fontSize: "12px" }}>
                         (Not yours)
                       </span>
                     );

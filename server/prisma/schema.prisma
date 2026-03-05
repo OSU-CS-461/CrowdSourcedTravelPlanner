@@ -146,4 +146,5 @@ model Interest {
   lastUpdated DateTime @updatedAt
 
   @@index([createdBy])
+  @@index([dateCreated])
 }
