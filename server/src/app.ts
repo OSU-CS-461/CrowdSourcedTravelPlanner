@@ -28,6 +28,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
+import { default as interestRouter } from './routes/interests';
+app.use('/api/interests', interestRouter);
+
 
 app.use("/api/experiences", experienceRouter);
 app.use("/api/tags", tagRouter);

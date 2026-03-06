@@ -9,6 +9,7 @@ import ExperienceDetailsPage from "../functionalAreas/experiences/pages/Experien
 import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
 import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
+import InterestsPage from "../functionalAreas/interests/pages/InterestsPage";
 import { ClientRoutes } from "./clientRoutes";
 import RootLayout from "./RootLayout";
 import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
@@ -54,6 +55,10 @@ export default function App() {
         <Route
           path={ClientRoutes.SIGNUP}
           element={<Navigate to={ClientRoutes.HOME} replace />}
+        />
+        <Route
+          path={ClientRoutes.INTERESTS}
+          element={<InterestsPage />}
         />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
       </Route>

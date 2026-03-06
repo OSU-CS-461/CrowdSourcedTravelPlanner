@@ -27,6 +27,21 @@ export type User = Prisma.UserModel
  */
 export type Experience = Prisma.ExperienceModel
 /**
+ * Model Review
+ * 
+ */
+export type Review = Prisma.ReviewModel
+/**
+ * Model Trip
+ * 
+ */
+export type Trip = Prisma.TripModel
+/**
+ * Model TripExperience
+ * 
+ */
+export type TripExperience = Prisma.TripExperienceModel
+/**
  * Model Category
  * 
  */
@@ -42,7 +57,7 @@ export type Tag = Prisma.TagModel
  */
 export type ExperienceTag = Prisma.ExperienceTagModel
 /**
- * Model Review
+ * Model Interest
  * 
  */
-export type Review = Prisma.ReviewModel
+export type Interest = Prisma.InterestModel
