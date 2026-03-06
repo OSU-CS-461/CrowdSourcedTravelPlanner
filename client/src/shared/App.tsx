@@ -14,6 +14,7 @@ import { ClientRoutes } from "./clientRoutes";
 import RootLayout from "./RootLayout";
 import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
 import MyExperiencesPage from "../functionalAreas/experiences/pages/MyExperiencesPage";
+import TripDetailsPage from "../functionalAreas/trips/pages/TripDetailsPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -62,6 +63,8 @@ export default function App() {
         />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
       </Route>
+
+        <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
     </Routes>
   );
 }
