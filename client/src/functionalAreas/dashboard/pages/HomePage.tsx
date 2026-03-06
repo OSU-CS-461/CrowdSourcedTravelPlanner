@@ -125,7 +125,7 @@ export default function HomePage() {
                 className="card-title"
                 onClick={() =>
                   navigate(
-                    ClientRoutes.TRIP_UPDATE.replace(":id", trip.id.toString())
+                    ClientRoutes.TRIP_DETAILS.replace(":id", trip.id.toString())
                   )
                 }
               >

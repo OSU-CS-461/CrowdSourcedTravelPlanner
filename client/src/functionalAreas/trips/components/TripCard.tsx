@@ -30,7 +30,7 @@ export default function TripCard({ trip }: TripCardProps) {
       : null;
 
   return (
-    <article className="experience-card"> {/* reuse same styling */}
+    <article className="experience-card">
       <h3>{title}</h3>
 
       {description ? <p>{description}</p> : null}

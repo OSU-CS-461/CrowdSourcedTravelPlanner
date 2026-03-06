@@ -60,6 +60,13 @@ function LoginPage() {
       try {
         setIsSubmitting(true);
         const authData = await authLogin(values.email, values.password);
+//
+        localStorage.setItem("cstp.auth.token", authData.token);
+
+        if (authData.user) {
+          localStorage.setItem("cstp.auth.userId", String(authData.user.id));
+        }
+//
         initialize(authData);
         navigate("/");
       } catch (error) {
