@@ -29,8 +29,10 @@ app.get("/", (req: Request, res: Response) => {
 
 
 import { default as interestRouter } from './routes/interests';
-app.use('/api/interests', interestRouter);
+import { default as usersRouter } from './routes/users';
 
+app.use('/api/interests', interestRouter);
+app.use('/api/users', usersRouter);
 
 app.use("/api/experiences", experienceRouter);
 app.use("/api/tags", tagRouter);

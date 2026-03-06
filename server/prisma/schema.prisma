@@ -18,6 +18,18 @@ model User {
   reviews        Review[]
   trips          Trip[]
   interests      Interest[]
+  settings       UserSettings?
+}
+
+model UserSettings {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  preferredFeedSort  String   @default("newest") // "newest" | "highestRated" | "recommended"
+  lastUpdated        DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Experience {
