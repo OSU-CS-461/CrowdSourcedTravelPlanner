@@ -39,11 +39,13 @@ When developing locally, run the client and the server by following the README.m
 
 When the application is deployed, the client is built and served by the server. This is so we can hydrate the session on the first request, instead of serving the client and then making a request to check the session state.
 
-For more information on deployment, checkout `render.yml`.
+For more information on deployment, check out `RENDER_DEPLOY_TUTORIAL.md`.
 
 # Infra Info
 
-- Render: Node application server, PostgreSQL db
+- Frontend: Render
+- Backend: Render
+- Database: Neon (persistent free tier)
 - Cloudflare R2: Object store (for image upload)
 
 # Git Flow

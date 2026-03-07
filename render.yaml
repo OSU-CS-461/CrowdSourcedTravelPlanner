@@ -16,18 +16,24 @@ projects:
             envVars:
               - key: NODE_VERSION
                 value: 23.10.0
+              - key: NODE_ENV
+                value: production
+              - key: DATABASE_URL
+                sync: false # set this to your Neon connection string in Render
+              - key: JWT_SECRET
+                sync: false
 
             buildCommand: |
               npm ci
               npx prisma generate --no-engine
-              npx prisma migrate dev
+              npx prisma migrate deploy
 
               # build client and place it in public for the server to serve
               # so it can hydrate the session on first render
               cd ../client
               npm ci
               npm run build
-              mkdir ../server/public
+              mkdir -p ../server/public
               rm -rf ../server/public/*
               cp -r ./dist/* ../server/public
 
@@ -36,7 +42,3 @@ projects:
               pwd
               npm run start:production
               echo "Service started"
-        databases:
-          - name: db-prod
-            plan: basic-256mb # $6/month + also, can only have 1 free DB
-            region: oregon
