@@ -33,7 +33,13 @@ export async function createTrip(postBody: TripCreateInput) {
 export async function getTrip(tripId: number) {
   return prisma.trip.findUnique({
     where: { id: tripId },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      createdBy: true,
+      dateCreated: true,
+      lastUpdated: true,
       experiences: {
         include: {
           experience: true,

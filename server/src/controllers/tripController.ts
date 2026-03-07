@@ -13,6 +13,7 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
 
 // --- CREATE ---
+
 async function createTrip(
   req: AuthenticatedRequest,
   res: Response,
@@ -34,6 +35,7 @@ async function createTrip(
   }
 }
 
+
 // --- GET  ---
 
 async function getTrip(req: Request, res: Response, next: NextFunction) {
@@ -53,6 +55,7 @@ async function getTrip(req: Request, res: Response, next: NextFunction) {
     next(err);
   }
 }
+
 
 // --- LIST ---
 
@@ -186,6 +189,10 @@ async function addExperienceToTrip(
     const { experienceId } = req.body;
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
+
+    if (!experienceId) {
+      throw { status: 400, message: "experienceId is required" };
+    }
 
     const result = await tripService.addExperienceToTrip(
       tripId,
