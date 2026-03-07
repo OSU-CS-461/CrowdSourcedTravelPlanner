@@ -25,57 +25,29 @@ export default function App() {
       </header>
 
       <Routes>
-        <Route
-          path={ClientRoutes.HOME}
-          element={
-            isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
-          }
+        {/* Auth Routes */}
+        <Route path={ClientRoutes.HOME} element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />} />
+        <Route path={ClientRoutes.LOGIN} element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />} />
+        <Route path={ClientRoutes.SIGNUP} element={!isAuthenticated ? <SignupPage /> : <Navigate to="/" replace />} />
+
+        {/* Experience Routes */}
+        <Route path={ClientRoutes.EXPERIENCE_CREATE} element={<CreateExperiencePage />} />
+        <Route path={ClientRoutes.EXPERIENCE_DETAILS} element={<ExperienceDetailsPage />} />
+        <Route path={ClientRoutes.EXPERIENCE_UPDATE} element={<UpdateExperiencePage />} />
+
+        {/* Review Routes */}
+        <Route path={ClientRoutes.REVIEW_CREATE} element={<ReviewForm />} />
+        <Route 
+          path={ClientRoutes.REVIEW_UPDATE} 
+          element={<ReviewForm />} // changed from UpdateTripPage to ReviewForm
         />
-        <Route
-          path={ClientRoutes.LOGIN}
-          element={
-            !isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path={ClientRoutes.SIGNUP}
-          element={
-            !isAuthenticated ? <SignupPage /> : <Navigate to="/" replace />
-          }
-        />
+
+        {/* Trip Routes */}
+        <Route path={ClientRoutes.TRIP_CREATE} element={<CreateTripPage />} />
+        <Route path={ClientRoutes.TRIP_UPDATE} element={<UpdateTripPage />} />
+
+        {/* ⚠️ CATCH-ALL MUST BE LAST ⚠️ */}
         <Route path="*" element={<Navigate to="/" replace />} />
-
-        <Route path={ClientRoutes.REVIEW_CREATE} 
-        element={<ReviewForm />}
-        />
-
-        <Route path={ClientRoutes.REVIEW_UPDATE} 
-        element={<UpdateTripPage />}
-        />
-
-        <Route
-          path={ClientRoutes.EXPERIENCE_CREATE}
-          element={
-            <CreateExperiencePage />}
-        />
-        <Route
-          path={ClientRoutes.EXPERIENCE_DETAILS}
-          element={<ExperienceDetailsPage />}
-        />
-        <Route
-          path={ClientRoutes.EXPERIENCE_UPDATE}
-          element={
-            <UpdateExperiencePage />}
-        />
-
-        <Route path={ClientRoutes.TRIP_CREATE} 
-        element={<CreateTripPage />}
-        />
-
-        <Route path={ClientRoutes.TRIP_UPDATE} 
-        element={<UpdateTripPage />}
-        />
-
       </Routes>
     </>
   );

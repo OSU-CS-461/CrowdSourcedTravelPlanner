@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../shared/clientRoutes";
+import ReviewList from "./ReviewList";
 
 // Define the Review type based on the project requirements
 type Review = {
@@ -41,7 +42,7 @@ export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) 
     }
   };
 
-  const handleSubmitReview = async (e: React.FormEvent) => {
+const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
@@ -51,21 +52,27 @@ export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) 
         rating: newRating,
       });
       
-      setReviews([res.data, ...reviews]);
+      // Update local state so the new review appears immediately
+      setReviews(prev => [res.data, ...prev]);
       setNewComment("");
+      setNewRating(5);
+
+      // REMOVE the navigate() call if you are already on the detail page!
+      // navigate(`/experiences/${experienceId}`); 
+
     } catch (err) {
       alert("Only authenticated users can post reviews.");
       console.error(err);
     }
   };
-
+  
   return (
     <section style={{ marginTop: "40px", borderTop: "1px solid #eee", paddingTop: "20px" }}>
       <div className="detail-header">
         <h2 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>Reviews ({reviews.length})</h2>
 
         <button
-          onClick={() => navigate(ClientRoutes.REVIEW_CREATE.replace(":id", experienceId))}
+          onClick={() => navigate(`/experiences/${experienceId}/reviews/create`)}
           style={{
             padding: "10px 20px",
             marginTop: "16px",
@@ -107,29 +114,11 @@ export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) 
       {/* --- Reviews List --- */}
       {isLoading ? (
         <p>Loading reviews...</p>
-      ) : reviews.length === 0 ? (
-        <p style={{ color: "#70757a" }}>No reviews yet. Be the first to share your thoughts!</p>
       ) : (
-        <div className="reviews-container">
-          {reviews.map((rev) => (
-            <div key={rev.id} style={{ padding: "16px 0", borderBottom: "1px solid #f1f1f1" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <strong style={{ color: "#202124" }}>{rev.userName || "Anonymous Traveler"}</strong>
-                <span style={{ fontSize: "12px", color: "#70757a" }}>
-                  {new Date(rev.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              
-              <div style={{ color: "#f4b400", margin: "4px 0" }}>
-                {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
-              </div>
-
-              <p style={{ color: "#3c4043", margin: "8px 0 0 0", lineHeight: "1.5", fontSize: "14px" }}>
-                {rev.comment}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ReviewList 
+          reviews={reviews} 
+          onChange={fetchReviews} 
+        />
       )}
     </section>
   );

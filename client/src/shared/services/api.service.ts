@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.DEV ? "http://localhost:10000/api" : "/api";
+const API_BASE = "/api";
 
 export type AuthResponse = {
   token: string;

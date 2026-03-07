@@ -12,14 +12,18 @@ export async function getReviews(experienceId: ReviewId) {
   return res.json();
 }
 
+// Fixed: Matches app.use('/api/experiences/:id/reviews', reviewRouter)
 export async function createReview(data: ReviewPayload) {
-  return fetch(`${API}/reviews`, {
+  return fetch(`${API}/experiences/${data.experienceId}/reviews`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 }
 
-export async function deleteReview(id: ReviewId) {
-  return fetch(`${API}/reviews/${id}`, { method: "DELETE" });
+// Fixed: Requires experienceId to navigate the nested backend route
+export async function deleteReview(experienceId: ReviewId, reviewId: ReviewId) {
+  return fetch(`${API}/experiences/${experienceId}/reviews/${reviewId}`, { 
+    method: "DELETE" 
+  });
 }

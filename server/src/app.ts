@@ -9,6 +9,7 @@ import { default as experienceRouter } from "./routers/experience";
 import { default as tagRouter } from "./routers/tag";
 import { default as categoryRouter } from "./routers/category";
 import { default as geocodeRouter } from "./routers/geocode";
+import reviewRouter from './routers/reviews';
 
 const app = express();
 
@@ -26,10 +27,16 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/experiences", experienceRouter);
+app.use('/api/experiences/:id/reviews', reviewRouter);
 app.use("/api/tags", tagRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/geocode", geocodeRouter);
 
+app.use(cors({
+  origin: "http://localhost:5173", // Your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
+}));
 
 app.post(Routes.POST__AUTH_REGISTER, register);
 app.post(Routes.POST__AUTH_LOGIN, login);

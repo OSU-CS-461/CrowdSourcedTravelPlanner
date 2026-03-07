@@ -8,5 +8,5 @@ export const ClientRoutes = {
   TRIP_CREATE: "/trips/create",
   TRIP_UPDATE: "/trips/:id/update",
   REVIEW_CREATE: "/experiences/:id/reviews/create",
-  REVIEW_UPDATE: "/experiences/:id/reviews/:id/update",
+  REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update", 
 };
