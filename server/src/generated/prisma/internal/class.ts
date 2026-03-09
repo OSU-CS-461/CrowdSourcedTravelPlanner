@@ -22,7 +22,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "C:\\Users\\jiayi\\Downloads\\CrowdSourcedTravelPlanner-1\\server\\src\\generated\\prisma",
+      "value": "/Users/traviskuenzi/Documents/OSU/Capstone/CrowdSourcedTravelPlanner/server/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -31,12 +31,12 @@ const config: runtime.GetPrismaClientConfig = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "darwin-arm64",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\jiayi\\Downloads\\CrowdSourcedTravelPlanner-1\\server\\prisma\\schema.prisma",
+    "sourceFilePath": "/Users/traviskuenzi/Documents/OSU/Capstone/CrowdSourcedTravelPlanner/server/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativePath": "../../../prisma",
@@ -57,7 +57,7 @@ const config: runtime.GetPrismaClientConfig = {
   },
   "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id             Int    @id @default(autoincrement())\n  email          String @unique\n  username       String @unique\n  passwordDigest String\n\n  experiences Experience[]\n  reviews     Review[]\n  trips       Trip[]\n  interests   Interest[]\n  settings    UserSettings?\n}\n\nmodel UserSettings {\n  id     Int  @id @default(autoincrement())\n  userId Int  @unique\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  preferredFeedSort String   @default(\"newest\") // \"newest\" | \"highestRated\" | \"recommended\"\n  lastUpdated       DateTime @updatedAt\n\n  @@index([userId])\n}\n\nmodel Experience {\n  id Int @id @default(autoincrement())\n\n  createdBy Int\n  user      User @relation(fields: [createdBy], references: [id])\n\n  title           String\n  description     String\n  descriptionEdit String?\n\n  dateCreated DateTime @default(now())\n  lastUpdated DateTime @updatedAt\n\n  latitude  Float\n  longitude Float\n\n  country     String?\n  adminRegion String?\n  city        String?\n  street      String?\n  postalCode  String?\n\n  thumbnail String?\n  avgRating Float?\n\n  keywords String[]\n\n  categoryId Int?\n  category   Category? @relation(fields: [categoryId], references: [id])\n\n  experienceTags ExperienceTag[]\n  trips          TripExperience[]\n  reviews        Review[]\n\n  @@index([createdBy])\n  @@index([categoryId])\n}\n\nmodel Review {\n  id          Int      @id @default(autoincrement())\n  rating      Int\n  reviewText  String\n  dateCreated DateTime @default(now())\n\n  experienceId Int\n  experience   Experience @relation(fields: [experienceId], references: [id])\n\n  userId Int\n  user   User @relation(fields: [userId], references: [id])\n\n  @@index([experienceId])\n  @@index([userId])\n}\n\nmodel Trip {\n  id Int @id @default(autoincrement())\n\n  createdBy Int\n  user      User @relation(fields: [createdBy], references: [id])\n\n  title       String\n  description String?\n\n  dateCreated DateTime @default(now())\n  lastUpdated DateTime @updatedAt\n\n  experiences TripExperience[]\n\n  @@index([createdBy])\n}\n\nmodel TripExperience {\n  tripId       Int\n  experienceId Int\n\n  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)\n  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)\n\n  @@id([tripId, experienceId])\n  @@index([experienceId])\n}\n\nmodel Category {\n  id    Int    @id @default(autoincrement())\n  slug  String @unique\n  label String\n\n  tags        Tag[]\n  experiences Experience[]\n}\n\nmodel Tag {\n  id    Int    @id @default(autoincrement())\n  slug  String @unique\n  label String\n\n  categoryId Int\n  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)\n\n  experienceTags ExperienceTag[]\n}\n\nmodel ExperienceTag {\n  experienceId Int\n  tagId        Int\n\n  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)\n  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)\n\n  @@id([experienceId, tagId])\n  @@index([tagId])\n  @@index([experienceId])\n}\n\nmodel Interest {\n  id        Int  @id @default(autoincrement())\n  createdBy Int\n  user      User @relation(fields: [createdBy], references: [id])\n\n  name        String\n  description String?\n\n  dateCreated DateTime @default(now())\n  lastUpdated DateTime @updatedAt\n\n  @@index([createdBy])\n  @@index([dateCreated])\n}\n",
   "inlineSchemaHash": "94485d3a361394fe755dfc823f8945533b3a16550207157da3a33fdcc27e3915",
-  "copyEngine": true,
+  "copyEngine": false,
   "runtimeDataModel": {
     "models": {},
     "enums": {},

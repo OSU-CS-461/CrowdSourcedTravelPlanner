@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function startServer() {
-  const PORT = 10000;
+  const PORT = Number(process.env.PORT) || 10000;
   try {
     await prisma.$connect();
   } catch {
