@@ -184,7 +184,6 @@ export async function createExperience(userId: number, postBody: ExpPutPostBody)
         postalCode: postBody.postalCode ?? null,
         latitude: postBody.latitude,
         longitude: postBody.longitude,
-
         thumbnail: postBody.thumbnail ?? null,
       },
       select: { id: true },
@@ -204,6 +203,9 @@ export async function createExperience(userId: number, postBody: ExpPutPostBody)
       where: { id: created.id },
       select: EXPERIENCE_DETAIL_SELECT,
     });
+  }, {
+    maxWait: 5000,
+    timeout: 10000
   });
 
   return serializeExperience(createdExperience);

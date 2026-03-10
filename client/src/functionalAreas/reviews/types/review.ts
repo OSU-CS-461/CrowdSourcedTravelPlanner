@@ -1,9 +1,10 @@
 export type Review = {
   id: number | string;
-  // each review is tied to ONE experience
   experienceId: number | string;
+  userId: number | string;
+  userName?: string;
   rating: number;
   comment: string;
-  createdBy: number | string;
   createdAt: string;
+  createdBy?: number | string;
 };

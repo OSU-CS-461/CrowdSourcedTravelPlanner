@@ -7,6 +7,7 @@ import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
 import CreateExperiencePage from "../functionalAreas/experiences/pages/CreateExperiencePage";
 import ExperienceDetailsPage from "../functionalAreas/experiences/pages/ExperienceDetailsPage";
 import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
+import ReviewForm from "../functionalAreas/reviews/components/ReviewForm";
 import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
 import InterestsPage from "../functionalAreas/interests/pages/InterestsPage";
@@ -46,6 +47,14 @@ export default function App() {
         <Route
           path={ClientRoutes.EXPERIENCE_UPDATE}
           element={<UpdateExperiencePage />}
+        />
+        <Route
+          path={ClientRoutes.REVIEW_CREATE}
+          element={<ReviewForm onSuccess={undefined} />}
+        />
+        <Route
+          path={ClientRoutes.REVIEW_UPDATE}
+          element={<ReviewForm onSuccess={undefined} />}
         />
         <Route path={ClientRoutes.TRIP_CREATE} element={<CreateTripPage />} />
         <Route path={ClientRoutes.TRIP_UPDATE} element={<UpdateTripPage />} />

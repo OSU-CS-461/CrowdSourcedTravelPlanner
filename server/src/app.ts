@@ -10,7 +10,9 @@ import { default as tripRouter } from './routes/trips';
 import { default as tagRouter } from "./routers/tag";
 import { default as categoryRouter } from "./routers/category";
 import { default as geocodeRouter } from "./routers/geocode";
-
+import reviewRouter from './routers/reviews';
+import { default as interestRouter } from './routes/interests';
+import { default as usersRouter } from './routes/users';
 
 const app = express();
 
@@ -28,18 +30,17 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
-import { default as interestRouter } from './routes/interests';
-import { default as usersRouter } from './routes/users';
+
 
 app.use('/api/interests', interestRouter);
 app.use('/api/users', usersRouter);
 
 app.use("/api/experiences", experienceRouter);
+app.use('/api/experiences/:id/reviews', reviewRouter);
 app.use("/api/tags", tagRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/geocode", geocodeRouter);
 app.use('/api/trips', tripRouter);
-app.use('/api/experiences', experienceRouter);
 
 app.post(Routes.POST__AUTH_REGISTER, register);
 app.post(Routes.POST__AUTH_LOGIN, login);
