@@ -48,6 +48,14 @@ export default function App() {
           path={ClientRoutes.EXPERIENCE_UPDATE}
           element={<UpdateExperiencePage />}
         />
+        <Route
+          path={ClientRoutes.REVIEW_CREATE}
+          element={<ReviewForm onSuccess={undefined} />}
+        />
+        <Route
+          path={ClientRoutes.REVIEW_UPDATE}
+          element={<ReviewForm onSuccess={undefined} />}
+        />
         <Route path={ClientRoutes.TRIP_CREATE} element={<CreateTripPage />} />
         <Route path={ClientRoutes.TRIP_UPDATE} element={<UpdateTripPage />} />
         <Route

@@ -22,7 +22,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "C:\\Users\\mulia\\Documents\\1 Oregon State Univ\\10 Winter 2026 -- CS 462\\GitHub-Affairs\\CrowdSourcedTravelPlanner\\server\\src\\generated\\prisma",
+      "value": "/Users/traviskuenzi/Documents/OSU/Capstone/CrowdSourcedTravelPlanner/server/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -31,12 +31,12 @@ const config: runtime.GetPrismaClientConfig = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "darwin-arm64",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\mulia\\Documents\\1 Oregon State Univ\\10 Winter 2026 -- CS 462\\GitHub-Affairs\\CrowdSourcedTravelPlanner\\server\\prisma\\schema.prisma",
+    "sourceFilePath": "/Users/traviskuenzi/Documents/OSU/Capstone/CrowdSourcedTravelPlanner/server/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativePath": "../../../prisma",
@@ -46,7 +46,6 @@ const config: runtime.GetPrismaClientConfig = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
