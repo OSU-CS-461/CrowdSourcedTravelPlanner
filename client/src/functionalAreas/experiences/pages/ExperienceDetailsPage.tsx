@@ -25,6 +25,7 @@ type Experience = {
   title: string;
   description: string;
   dateCreated: string;
+  createdByUsername?: string | null;
   lastUpdated?: string;
   thumbnail?: string;
   country?: string;
@@ -280,6 +281,10 @@ export default function ExperienceDetailPage() {
           <footer className="detail-meta">
             <p>
               <strong>Created:</strong> {formatDate(experience.dateCreated)}
+            </p>
+            <p>
+              <span aria-hidden="true" style={{ marginRight: 4 }}>👤</span>
+              <strong>Created By:</strong> {experience.createdByUsername ?? "Unknown"}
             </p>
             {experience.lastUpdated &&
               experience.lastUpdated !== experience.dateCreated && (

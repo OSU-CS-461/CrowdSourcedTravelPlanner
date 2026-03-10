@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 import ExperienceForm from "../components/ExperienceForm";
-import type { FormValues } from "../components/ExperienceForm";
+import type { FormValues } from "../types/types";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
 import { createExperience } from "../experienceService";

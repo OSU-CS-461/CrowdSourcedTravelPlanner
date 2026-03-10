@@ -49,11 +49,15 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 export const ModelName = {
   User: 'User',
+  UserSettings: 'UserSettings',
   Experience: 'Experience',
+  Review: 'Review',
+  Trip: 'Trip',
+  TripExperience: 'TripExperience',
   Category: 'Category',
   Tag: 'Tag',
   ExperienceTag: 'ExperienceTag',
-  Review: 'Review'
+  Interest: 'Interest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -82,6 +86,16 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const UserSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  preferredFeedSort: 'preferredFeedSort',
+  lastUpdated: 'lastUpdated'
+} as const
+
+export type UserSettingsScalarFieldEnum = (typeof UserSettingsScalarFieldEnum)[keyof typeof UserSettingsScalarFieldEnum]
+
+
 export const ExperienceScalarFieldEnum = {
   id: 'id',
   createdBy: 'createdBy',
@@ -99,10 +113,43 @@ export const ExperienceScalarFieldEnum = {
   postalCode: 'postalCode',
   thumbnail: 'thumbnail',
   avgRating: 'avgRating',
+  keywords: 'keywords',
   categoryId: 'categoryId'
 } as const
 
 export type ExperienceScalarFieldEnum = (typeof ExperienceScalarFieldEnum)[keyof typeof ExperienceScalarFieldEnum]
+
+
+export const ReviewScalarFieldEnum = {
+  id: 'id',
+  rating: 'rating',
+  reviewText: 'reviewText',
+  dateCreated: 'dateCreated',
+  experienceId: 'experienceId',
+  userId: 'userId'
+} as const
+
+export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const TripScalarFieldEnum = {
+  id: 'id',
+  createdBy: 'createdBy',
+  title: 'title',
+  description: 'description',
+  dateCreated: 'dateCreated',
+  lastUpdated: 'lastUpdated'
+} as const
+
+export type TripScalarFieldEnum = (typeof TripScalarFieldEnum)[keyof typeof TripScalarFieldEnum]
+
+
+export const TripExperienceScalarFieldEnum = {
+  tripId: 'tripId',
+  experienceId: 'experienceId'
+} as const
+
+export type TripExperienceScalarFieldEnum = (typeof TripExperienceScalarFieldEnum)[keyof typeof TripExperienceScalarFieldEnum]
 
 
 export const CategoryScalarFieldEnum = {
@@ -132,16 +179,16 @@ export const ExperienceTagScalarFieldEnum = {
 export type ExperienceTagScalarFieldEnum = (typeof ExperienceTagScalarFieldEnum)[keyof typeof ExperienceTagScalarFieldEnum]
 
 
-export const ReviewScalarFieldEnum = {
+export const InterestScalarFieldEnum = {
   id: 'id',
-  rating: 'rating',
-  reviewText: 'reviewText',
+  createdBy: 'createdBy',
+  name: 'name',
+  description: 'description',
   dateCreated: 'dateCreated',
-  experienceId: 'experienceId',
-  userId: 'userId'
+  lastUpdated: 'lastUpdated'
 } as const
 
-export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+export type InterestScalarFieldEnum = (typeof InterestScalarFieldEnum)[keyof typeof InterestScalarFieldEnum]
 
 
 export const SortOrder = {

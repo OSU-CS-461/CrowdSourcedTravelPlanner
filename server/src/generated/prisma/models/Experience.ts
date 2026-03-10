@@ -100,6 +100,7 @@ export type ExperienceCountAggregateOutputType = {
   postalCode: number
   thumbnail: number
   avgRating: number
+  keywords: number
   categoryId: number
   _all: number
 }
@@ -180,6 +181,7 @@ export type ExperienceCountAggregateInputType = {
   postalCode?: true
   thumbnail?: true
   avgRating?: true
+  keywords?: true
   categoryId?: true
   _all?: true
 }
@@ -287,6 +289,7 @@ export type ExperienceGroupByOutputType = {
   postalCode: string | null
   thumbnail: string | null
   avgRating: number | null
+  keywords: string[]
   categoryId: number | null
   _count: ExperienceCountAggregateOutputType | null
   _avg: ExperienceAvgAggregateOutputType | null
@@ -330,10 +333,12 @@ export type ExperienceWhereInput = {
   postalCode?: Prisma.StringNullableFilter<"Experience"> | string | null
   thumbnail?: Prisma.StringNullableFilter<"Experience"> | string | null
   avgRating?: Prisma.FloatNullableFilter<"Experience"> | number | null
+  keywords?: Prisma.StringNullableListFilter<"Experience">
   categoryId?: Prisma.IntNullableFilter<"Experience"> | number | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   experienceTags?: Prisma.ExperienceTagListRelationFilter
+  trips?: Prisma.TripExperienceListRelationFilter
   reviews?: Prisma.ReviewListRelationFilter
 }
 
@@ -354,10 +359,12 @@ export type ExperienceOrderByWithRelationInput = {
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
   avgRating?: Prisma.SortOrderInput | Prisma.SortOrder
+  keywords?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   category?: Prisma.CategoryOrderByWithRelationInput
   experienceTags?: Prisma.ExperienceTagOrderByRelationAggregateInput
+  trips?: Prisma.TripExperienceOrderByRelationAggregateInput
   reviews?: Prisma.ReviewOrderByRelationAggregateInput
 }
 
@@ -381,10 +388,12 @@ export type ExperienceWhereUniqueInput = Prisma.AtLeast<{
   postalCode?: Prisma.StringNullableFilter<"Experience"> | string | null
   thumbnail?: Prisma.StringNullableFilter<"Experience"> | string | null
   avgRating?: Prisma.FloatNullableFilter<"Experience"> | number | null
+  keywords?: Prisma.StringNullableListFilter<"Experience">
   categoryId?: Prisma.IntNullableFilter<"Experience"> | number | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   experienceTags?: Prisma.ExperienceTagListRelationFilter
+  trips?: Prisma.TripExperienceListRelationFilter
   reviews?: Prisma.ReviewListRelationFilter
 }, "id">
 
@@ -405,6 +414,7 @@ export type ExperienceOrderByWithAggregationInput = {
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
   avgRating?: Prisma.SortOrderInput | Prisma.SortOrder
+  keywords?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ExperienceCountOrderByAggregateInput
   _avg?: Prisma.ExperienceAvgOrderByAggregateInput
@@ -433,6 +443,7 @@ export type ExperienceScalarWhereWithAggregatesInput = {
   postalCode?: Prisma.StringNullableWithAggregatesFilter<"Experience"> | string | null
   thumbnail?: Prisma.StringNullableWithAggregatesFilter<"Experience"> | string | null
   avgRating?: Prisma.FloatNullableWithAggregatesFilter<"Experience"> | number | null
+  keywords?: Prisma.StringNullableListFilter<"Experience">
   categoryId?: Prisma.IntNullableWithAggregatesFilter<"Experience"> | number | null
 }
 
@@ -451,9 +462,11 @@ export type ExperienceCreateInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   user: Prisma.UserCreateNestedOneWithoutExperiencesInput
   category?: Prisma.CategoryCreateNestedOneWithoutExperiencesInput
   experienceTags?: Prisma.ExperienceTagCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutExperienceInput
 }
 
@@ -474,8 +487,10 @@ export type ExperienceUncheckedCreateInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   categoryId?: number | null
   experienceTags?: Prisma.ExperienceTagUncheckedCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceUncheckedCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutExperienceInput
 }
 
@@ -494,9 +509,11 @@ export type ExperienceUpdateInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   user?: Prisma.UserUpdateOneRequiredWithoutExperiencesNestedInput
   category?: Prisma.CategoryUpdateOneWithoutExperiencesNestedInput
   experienceTags?: Prisma.ExperienceTagUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutExperienceNestedInput
 }
 
@@ -517,8 +534,10 @@ export type ExperienceUncheckedUpdateInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   experienceTags?: Prisma.ExperienceTagUncheckedUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUncheckedUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutExperienceNestedInput
 }
 
@@ -539,6 +558,7 @@ export type ExperienceCreateManyInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   categoryId?: number | null
 }
 
@@ -557,6 +577,7 @@ export type ExperienceUpdateManyMutationInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
 }
 
 export type ExperienceUncheckedUpdateManyInput = {
@@ -576,6 +597,7 @@ export type ExperienceUncheckedUpdateManyInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -587,6 +609,14 @@ export type ExperienceListRelationFilter = {
 
 export type ExperienceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type ExperienceCountOrderByAggregateInput = {
@@ -606,6 +636,7 @@ export type ExperienceCountOrderByAggregateInput = {
   postalCode?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
   avgRating?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
 }
 
@@ -714,12 +745,12 @@ export type ExperienceUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.ExperienceScalarWhereInput | Prisma.ExperienceScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
+export type ExperienceCreatekeywordsInput = {
+  set: string[]
 }
 
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type FloatFieldUpdateOperationsInput = {
@@ -738,12 +769,45 @@ export type NullableFloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type ExperienceUpdatekeywordsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type ExperienceCreateNestedOneWithoutReviewsInput = {
+  create?: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
+  connectOrCreate?: Prisma.ExperienceCreateOrConnectWithoutReviewsInput
+  connect?: Prisma.ExperienceWhereUniqueInput
+}
+
+export type ExperienceUpdateOneRequiredWithoutReviewsNestedInput = {
+  create?: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
+  connectOrCreate?: Prisma.ExperienceCreateOrConnectWithoutReviewsInput
+  upsert?: Prisma.ExperienceUpsertWithoutReviewsInput
+  connect?: Prisma.ExperienceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ExperienceUpdateToOneWithWhereWithoutReviewsInput, Prisma.ExperienceUpdateWithoutReviewsInput>, Prisma.ExperienceUncheckedUpdateWithoutReviewsInput>
+}
+
+export type ExperienceCreateNestedOneWithoutTripsInput = {
+  create?: Prisma.XOR<Prisma.ExperienceCreateWithoutTripsInput, Prisma.ExperienceUncheckedCreateWithoutTripsInput>
+  connectOrCreate?: Prisma.ExperienceCreateOrConnectWithoutTripsInput
+  connect?: Prisma.ExperienceWhereUniqueInput
+}
+
+export type ExperienceUpdateOneRequiredWithoutTripsNestedInput = {
+  create?: Prisma.XOR<Prisma.ExperienceCreateWithoutTripsInput, Prisma.ExperienceUncheckedCreateWithoutTripsInput>
+  connectOrCreate?: Prisma.ExperienceCreateOrConnectWithoutTripsInput
+  upsert?: Prisma.ExperienceUpsertWithoutTripsInput
+  connect?: Prisma.ExperienceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ExperienceUpdateToOneWithWhereWithoutTripsInput, Prisma.ExperienceUpdateWithoutTripsInput>, Prisma.ExperienceUncheckedUpdateWithoutTripsInput>
 }
 
 export type ExperienceCreateNestedManyWithoutCategoryInput = {
@@ -802,20 +866,6 @@ export type ExperienceUpdateOneRequiredWithoutExperienceTagsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ExperienceUpdateToOneWithWhereWithoutExperienceTagsInput, Prisma.ExperienceUpdateWithoutExperienceTagsInput>, Prisma.ExperienceUncheckedUpdateWithoutExperienceTagsInput>
 }
 
-export type ExperienceCreateNestedOneWithoutReviewsInput = {
-  create?: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
-  connectOrCreate?: Prisma.ExperienceCreateOrConnectWithoutReviewsInput
-  connect?: Prisma.ExperienceWhereUniqueInput
-}
-
-export type ExperienceUpdateOneRequiredWithoutReviewsNestedInput = {
-  create?: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
-  connectOrCreate?: Prisma.ExperienceCreateOrConnectWithoutReviewsInput
-  upsert?: Prisma.ExperienceUpsertWithoutReviewsInput
-  connect?: Prisma.ExperienceWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ExperienceUpdateToOneWithWhereWithoutReviewsInput, Prisma.ExperienceUpdateWithoutReviewsInput>, Prisma.ExperienceUncheckedUpdateWithoutReviewsInput>
-}
-
 export type ExperienceCreateWithoutUserInput = {
   title: string
   description: string
@@ -831,8 +881,10 @@ export type ExperienceCreateWithoutUserInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   category?: Prisma.CategoryCreateNestedOneWithoutExperiencesInput
   experienceTags?: Prisma.ExperienceTagCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutExperienceInput
 }
 
@@ -852,8 +904,10 @@ export type ExperienceUncheckedCreateWithoutUserInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   categoryId?: number | null
   experienceTags?: Prisma.ExperienceTagUncheckedCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceUncheckedCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutExperienceInput
 }
 
@@ -903,7 +957,220 @@ export type ExperienceScalarWhereInput = {
   postalCode?: Prisma.StringNullableFilter<"Experience"> | string | null
   thumbnail?: Prisma.StringNullableFilter<"Experience"> | string | null
   avgRating?: Prisma.FloatNullableFilter<"Experience"> | number | null
+  keywords?: Prisma.StringNullableListFilter<"Experience">
   categoryId?: Prisma.IntNullableFilter<"Experience"> | number | null
+}
+
+export type ExperienceCreateWithoutReviewsInput = {
+  title: string
+  description: string
+  descriptionEdit?: string | null
+  dateCreated?: Date | string
+  lastUpdated?: Date | string
+  latitude: number
+  longitude: number
+  country?: string | null
+  adminRegion?: string | null
+  city?: string | null
+  street?: string | null
+  postalCode?: string | null
+  thumbnail?: string | null
+  avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
+  user: Prisma.UserCreateNestedOneWithoutExperiencesInput
+  category?: Prisma.CategoryCreateNestedOneWithoutExperiencesInput
+  experienceTags?: Prisma.ExperienceTagCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceCreateNestedManyWithoutExperienceInput
+}
+
+export type ExperienceUncheckedCreateWithoutReviewsInput = {
+  id?: number
+  createdBy: number
+  title: string
+  description: string
+  descriptionEdit?: string | null
+  dateCreated?: Date | string
+  lastUpdated?: Date | string
+  latitude: number
+  longitude: number
+  country?: string | null
+  adminRegion?: string | null
+  city?: string | null
+  street?: string | null
+  postalCode?: string | null
+  thumbnail?: string | null
+  avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
+  categoryId?: number | null
+  experienceTags?: Prisma.ExperienceTagUncheckedCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceUncheckedCreateNestedManyWithoutExperienceInput
+}
+
+export type ExperienceCreateOrConnectWithoutReviewsInput = {
+  where: Prisma.ExperienceWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
+}
+
+export type ExperienceUpsertWithoutReviewsInput = {
+  update: Prisma.XOR<Prisma.ExperienceUpdateWithoutReviewsInput, Prisma.ExperienceUncheckedUpdateWithoutReviewsInput>
+  create: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
+  where?: Prisma.ExperienceWhereInput
+}
+
+export type ExperienceUpdateToOneWithWhereWithoutReviewsInput = {
+  where?: Prisma.ExperienceWhereInput
+  data: Prisma.XOR<Prisma.ExperienceUpdateWithoutReviewsInput, Prisma.ExperienceUncheckedUpdateWithoutReviewsInput>
+}
+
+export type ExperienceUpdateWithoutReviewsInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  descriptionEdit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastUpdated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
+  user?: Prisma.UserUpdateOneRequiredWithoutExperiencesNestedInput
+  category?: Prisma.CategoryUpdateOneWithoutExperiencesNestedInput
+  experienceTags?: Prisma.ExperienceTagUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUpdateManyWithoutExperienceNestedInput
+}
+
+export type ExperienceUncheckedUpdateWithoutReviewsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdBy?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  descriptionEdit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastUpdated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  experienceTags?: Prisma.ExperienceTagUncheckedUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUncheckedUpdateManyWithoutExperienceNestedInput
+}
+
+export type ExperienceCreateWithoutTripsInput = {
+  title: string
+  description: string
+  descriptionEdit?: string | null
+  dateCreated?: Date | string
+  lastUpdated?: Date | string
+  latitude: number
+  longitude: number
+  country?: string | null
+  adminRegion?: string | null
+  city?: string | null
+  street?: string | null
+  postalCode?: string | null
+  thumbnail?: string | null
+  avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
+  user: Prisma.UserCreateNestedOneWithoutExperiencesInput
+  category?: Prisma.CategoryCreateNestedOneWithoutExperiencesInput
+  experienceTags?: Prisma.ExperienceTagCreateNestedManyWithoutExperienceInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutExperienceInput
+}
+
+export type ExperienceUncheckedCreateWithoutTripsInput = {
+  id?: number
+  createdBy: number
+  title: string
+  description: string
+  descriptionEdit?: string | null
+  dateCreated?: Date | string
+  lastUpdated?: Date | string
+  latitude: number
+  longitude: number
+  country?: string | null
+  adminRegion?: string | null
+  city?: string | null
+  street?: string | null
+  postalCode?: string | null
+  thumbnail?: string | null
+  avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
+  categoryId?: number | null
+  experienceTags?: Prisma.ExperienceTagUncheckedCreateNestedManyWithoutExperienceInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutExperienceInput
+}
+
+export type ExperienceCreateOrConnectWithoutTripsInput = {
+  where: Prisma.ExperienceWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExperienceCreateWithoutTripsInput, Prisma.ExperienceUncheckedCreateWithoutTripsInput>
+}
+
+export type ExperienceUpsertWithoutTripsInput = {
+  update: Prisma.XOR<Prisma.ExperienceUpdateWithoutTripsInput, Prisma.ExperienceUncheckedUpdateWithoutTripsInput>
+  create: Prisma.XOR<Prisma.ExperienceCreateWithoutTripsInput, Prisma.ExperienceUncheckedCreateWithoutTripsInput>
+  where?: Prisma.ExperienceWhereInput
+}
+
+export type ExperienceUpdateToOneWithWhereWithoutTripsInput = {
+  where?: Prisma.ExperienceWhereInput
+  data: Prisma.XOR<Prisma.ExperienceUpdateWithoutTripsInput, Prisma.ExperienceUncheckedUpdateWithoutTripsInput>
+}
+
+export type ExperienceUpdateWithoutTripsInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  descriptionEdit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastUpdated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
+  user?: Prisma.UserUpdateOneRequiredWithoutExperiencesNestedInput
+  category?: Prisma.CategoryUpdateOneWithoutExperiencesNestedInput
+  experienceTags?: Prisma.ExperienceTagUpdateManyWithoutExperienceNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutExperienceNestedInput
+}
+
+export type ExperienceUncheckedUpdateWithoutTripsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdBy?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  descriptionEdit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastUpdated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  experienceTags?: Prisma.ExperienceTagUncheckedUpdateManyWithoutExperienceNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutExperienceNestedInput
 }
 
 export type ExperienceCreateWithoutCategoryInput = {
@@ -921,8 +1188,10 @@ export type ExperienceCreateWithoutCategoryInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   user: Prisma.UserCreateNestedOneWithoutExperiencesInput
   experienceTags?: Prisma.ExperienceTagCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutExperienceInput
 }
 
@@ -943,7 +1212,9 @@ export type ExperienceUncheckedCreateWithoutCategoryInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   experienceTags?: Prisma.ExperienceTagUncheckedCreateNestedManyWithoutExperienceInput
+  trips?: Prisma.TripExperienceUncheckedCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutExperienceInput
 }
 
@@ -988,8 +1259,10 @@ export type ExperienceCreateWithoutExperienceTagsInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   user: Prisma.UserCreateNestedOneWithoutExperiencesInput
   category?: Prisma.CategoryCreateNestedOneWithoutExperiencesInput
+  trips?: Prisma.TripExperienceCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutExperienceInput
 }
 
@@ -1010,7 +1283,9 @@ export type ExperienceUncheckedCreateWithoutExperienceTagsInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   categoryId?: number | null
+  trips?: Prisma.TripExperienceUncheckedCreateNestedManyWithoutExperienceInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutExperienceInput
 }
 
@@ -1045,8 +1320,10 @@ export type ExperienceUpdateWithoutExperienceTagsInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   user?: Prisma.UserUpdateOneRequiredWithoutExperiencesNestedInput
   category?: Prisma.CategoryUpdateOneWithoutExperiencesNestedInput
+  trips?: Prisma.TripExperienceUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutExperienceNestedInput
 }
 
@@ -1067,106 +1344,10 @@ export type ExperienceUncheckedUpdateWithoutExperienceTagsInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  trips?: Prisma.TripExperienceUncheckedUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutExperienceNestedInput
-}
-
-export type ExperienceCreateWithoutReviewsInput = {
-  title: string
-  description: string
-  descriptionEdit?: string | null
-  dateCreated?: Date | string
-  lastUpdated?: Date | string
-  latitude: number
-  longitude: number
-  country?: string | null
-  adminRegion?: string | null
-  city?: string | null
-  street?: string | null
-  postalCode?: string | null
-  thumbnail?: string | null
-  avgRating?: number | null
-  user: Prisma.UserCreateNestedOneWithoutExperiencesInput
-  category?: Prisma.CategoryCreateNestedOneWithoutExperiencesInput
-  experienceTags?: Prisma.ExperienceTagCreateNestedManyWithoutExperienceInput
-}
-
-export type ExperienceUncheckedCreateWithoutReviewsInput = {
-  id?: number
-  createdBy: number
-  title: string
-  description: string
-  descriptionEdit?: string | null
-  dateCreated?: Date | string
-  lastUpdated?: Date | string
-  latitude: number
-  longitude: number
-  country?: string | null
-  adminRegion?: string | null
-  city?: string | null
-  street?: string | null
-  postalCode?: string | null
-  thumbnail?: string | null
-  avgRating?: number | null
-  categoryId?: number | null
-  experienceTags?: Prisma.ExperienceTagUncheckedCreateNestedManyWithoutExperienceInput
-}
-
-export type ExperienceCreateOrConnectWithoutReviewsInput = {
-  where: Prisma.ExperienceWhereUniqueInput
-  create: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
-}
-
-export type ExperienceUpsertWithoutReviewsInput = {
-  update: Prisma.XOR<Prisma.ExperienceUpdateWithoutReviewsInput, Prisma.ExperienceUncheckedUpdateWithoutReviewsInput>
-  create: Prisma.XOR<Prisma.ExperienceCreateWithoutReviewsInput, Prisma.ExperienceUncheckedCreateWithoutReviewsInput>
-  where?: Prisma.ExperienceWhereInput
-}
-
-export type ExperienceUpdateToOneWithWhereWithoutReviewsInput = {
-  where?: Prisma.ExperienceWhereInput
-  data: Prisma.XOR<Prisma.ExperienceUpdateWithoutReviewsInput, Prisma.ExperienceUncheckedUpdateWithoutReviewsInput>
-}
-
-export type ExperienceUpdateWithoutReviewsInput = {
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  descriptionEdit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateCreated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lastUpdated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
-  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
-  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  adminRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  user?: Prisma.UserUpdateOneRequiredWithoutExperiencesNestedInput
-  category?: Prisma.CategoryUpdateOneWithoutExperiencesNestedInput
-  experienceTags?: Prisma.ExperienceTagUpdateManyWithoutExperienceNestedInput
-}
-
-export type ExperienceUncheckedUpdateWithoutReviewsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  createdBy?: Prisma.IntFieldUpdateOperationsInput | number
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  descriptionEdit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateCreated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lastUpdated?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  latitude?: Prisma.FloatFieldUpdateOperationsInput | number
-  longitude?: Prisma.FloatFieldUpdateOperationsInput | number
-  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  adminRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  experienceTags?: Prisma.ExperienceTagUncheckedUpdateManyWithoutExperienceNestedInput
 }
 
 export type ExperienceCreateManyUserInput = {
@@ -1185,6 +1366,7 @@ export type ExperienceCreateManyUserInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
   categoryId?: number | null
 }
 
@@ -1203,8 +1385,10 @@ export type ExperienceUpdateWithoutUserInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   category?: Prisma.CategoryUpdateOneWithoutExperiencesNestedInput
   experienceTags?: Prisma.ExperienceTagUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutExperienceNestedInput
 }
 
@@ -1224,8 +1408,10 @@ export type ExperienceUncheckedUpdateWithoutUserInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   experienceTags?: Prisma.ExperienceTagUncheckedUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUncheckedUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutExperienceNestedInput
 }
 
@@ -1245,6 +1431,7 @@ export type ExperienceUncheckedUpdateManyWithoutUserInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -1265,6 +1452,7 @@ export type ExperienceCreateManyCategoryInput = {
   postalCode?: string | null
   thumbnail?: string | null
   avgRating?: number | null
+  keywords?: Prisma.ExperienceCreatekeywordsInput | string[]
 }
 
 export type ExperienceUpdateWithoutCategoryInput = {
@@ -1282,8 +1470,10 @@ export type ExperienceUpdateWithoutCategoryInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   user?: Prisma.UserUpdateOneRequiredWithoutExperiencesNestedInput
   experienceTags?: Prisma.ExperienceTagUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutExperienceNestedInput
 }
 
@@ -1304,7 +1494,9 @@ export type ExperienceUncheckedUpdateWithoutCategoryInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
   experienceTags?: Prisma.ExperienceTagUncheckedUpdateManyWithoutExperienceNestedInput
+  trips?: Prisma.TripExperienceUncheckedUpdateManyWithoutExperienceNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutExperienceNestedInput
 }
 
@@ -1325,6 +1517,7 @@ export type ExperienceUncheckedUpdateManyWithoutCategoryInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avgRating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keywords?: Prisma.ExperienceUpdatekeywordsInput | string[]
 }
 
 
@@ -1334,11 +1527,13 @@ export type ExperienceUncheckedUpdateManyWithoutCategoryInput = {
 
 export type ExperienceCountOutputType = {
   experienceTags: number
+  trips: number
   reviews: number
 }
 
 export type ExperienceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   experienceTags?: boolean | ExperienceCountOutputTypeCountExperienceTagsArgs
+  trips?: boolean | ExperienceCountOutputTypeCountTripsArgs
   reviews?: boolean | ExperienceCountOutputTypeCountReviewsArgs
 }
 
@@ -1357,6 +1552,13 @@ export type ExperienceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.E
  */
 export type ExperienceCountOutputTypeCountExperienceTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ExperienceTagWhereInput
+}
+
+/**
+ * ExperienceCountOutputType without action
+ */
+export type ExperienceCountOutputTypeCountTripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TripExperienceWhereInput
 }
 
 /**
@@ -1384,10 +1586,12 @@ export type ExperienceSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   postalCode?: boolean
   thumbnail?: boolean
   avgRating?: boolean
+  keywords?: boolean
   categoryId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Experience$categoryArgs<ExtArgs>
   experienceTags?: boolean | Prisma.Experience$experienceTagsArgs<ExtArgs>
+  trips?: boolean | Prisma.Experience$tripsArgs<ExtArgs>
   reviews?: boolean | Prisma.Experience$reviewsArgs<ExtArgs>
   _count?: boolean | Prisma.ExperienceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["experience"]>
@@ -1409,6 +1613,7 @@ export type ExperienceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   postalCode?: boolean
   thumbnail?: boolean
   avgRating?: boolean
+  keywords?: boolean
   categoryId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Experience$categoryArgs<ExtArgs>
@@ -1431,6 +1636,7 @@ export type ExperienceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   postalCode?: boolean
   thumbnail?: boolean
   avgRating?: boolean
+  keywords?: boolean
   categoryId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Experience$categoryArgs<ExtArgs>
@@ -1453,14 +1659,16 @@ export type ExperienceSelectScalar = {
   postalCode?: boolean
   thumbnail?: boolean
   avgRating?: boolean
+  keywords?: boolean
   categoryId?: boolean
 }
 
-export type ExperienceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdBy" | "title" | "description" | "descriptionEdit" | "dateCreated" | "lastUpdated" | "latitude" | "longitude" | "country" | "adminRegion" | "city" | "street" | "postalCode" | "thumbnail" | "avgRating" | "categoryId", ExtArgs["result"]["experience"]>
+export type ExperienceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdBy" | "title" | "description" | "descriptionEdit" | "dateCreated" | "lastUpdated" | "latitude" | "longitude" | "country" | "adminRegion" | "city" | "street" | "postalCode" | "thumbnail" | "avgRating" | "keywords" | "categoryId", ExtArgs["result"]["experience"]>
 export type ExperienceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Experience$categoryArgs<ExtArgs>
   experienceTags?: boolean | Prisma.Experience$experienceTagsArgs<ExtArgs>
+  trips?: boolean | Prisma.Experience$tripsArgs<ExtArgs>
   reviews?: boolean | Prisma.Experience$reviewsArgs<ExtArgs>
   _count?: boolean | Prisma.ExperienceCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1479,6 +1687,7 @@ export type $ExperiencePayload<ExtArgs extends runtime.Types.Extensions.Internal
     user: Prisma.$UserPayload<ExtArgs>
     category: Prisma.$CategoryPayload<ExtArgs> | null
     experienceTags: Prisma.$ExperienceTagPayload<ExtArgs>[]
+    trips: Prisma.$TripExperiencePayload<ExtArgs>[]
     reviews: Prisma.$ReviewPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1498,6 +1707,7 @@ export type $ExperiencePayload<ExtArgs extends runtime.Types.Extensions.Internal
     postalCode: string | null
     thumbnail: string | null
     avgRating: number | null
+    keywords: string[]
     categoryId: number | null
   }, ExtArgs["result"]["experience"]>
   composites: {}
@@ -1896,6 +2106,7 @@ export interface Prisma__ExperienceClient<T, Null = never, ExtArgs extends runti
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   category<T extends Prisma.Experience$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Experience$categoryArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   experienceTags<T extends Prisma.Experience$experienceTagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Experience$experienceTagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExperienceTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  trips<T extends Prisma.Experience$tripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Experience$tripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviews<T extends Prisma.Experience$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Experience$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1942,6 +2153,7 @@ export interface ExperienceFieldRefs {
   readonly postalCode: Prisma.FieldRef<"Experience", 'String'>
   readonly thumbnail: Prisma.FieldRef<"Experience", 'String'>
   readonly avgRating: Prisma.FieldRef<"Experience", 'Float'>
+  readonly keywords: Prisma.FieldRef<"Experience", 'String[]'>
   readonly categoryId: Prisma.FieldRef<"Experience", 'Int'>
 }
     
@@ -2379,6 +2591,30 @@ export type Experience$experienceTagsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.ExperienceTagScalarFieldEnum | Prisma.ExperienceTagScalarFieldEnum[]
+}
+
+/**
+ * Experience.trips
+ */
+export type Experience$tripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TripExperience
+   */
+  select?: Prisma.TripExperienceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TripExperience
+   */
+  omit?: Prisma.TripExperienceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TripExperienceInclude<ExtArgs> | null
+  where?: Prisma.TripExperienceWhereInput
+  orderBy?: Prisma.TripExperienceOrderByWithRelationInput | Prisma.TripExperienceOrderByWithRelationInput[]
+  cursor?: Prisma.TripExperienceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TripExperienceScalarFieldEnum | Prisma.TripExperienceScalarFieldEnum[]
 }
 
 /**

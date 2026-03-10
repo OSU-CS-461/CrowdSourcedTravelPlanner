@@ -209,6 +209,9 @@ export type UserWhereInput = {
   passwordDigest?: Prisma.StringFilter<"User"> | string
   experiences?: Prisma.ExperienceListRelationFilter
   reviews?: Prisma.ReviewListRelationFilter
+  trips?: Prisma.TripListRelationFilter
+  interests?: Prisma.InterestListRelationFilter
+  settings?: Prisma.XOR<Prisma.UserSettingsNullableScalarRelationFilter, Prisma.UserSettingsWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -218,6 +221,9 @@ export type UserOrderByWithRelationInput = {
   passwordDigest?: Prisma.SortOrder
   experiences?: Prisma.ExperienceOrderByRelationAggregateInput
   reviews?: Prisma.ReviewOrderByRelationAggregateInput
+  trips?: Prisma.TripOrderByRelationAggregateInput
+  interests?: Prisma.InterestOrderByRelationAggregateInput
+  settings?: Prisma.UserSettingsOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -230,6 +236,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordDigest?: Prisma.StringFilter<"User"> | string
   experiences?: Prisma.ExperienceListRelationFilter
   reviews?: Prisma.ReviewListRelationFilter
+  trips?: Prisma.TripListRelationFilter
+  interests?: Prisma.InterestListRelationFilter
+  settings?: Prisma.XOR<Prisma.UserSettingsNullableScalarRelationFilter, Prisma.UserSettingsWhereInput> | null
 }, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -260,6 +269,9 @@ export type UserCreateInput = {
   passwordDigest: string
   experiences?: Prisma.ExperienceCreateNestedManyWithoutUserInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -269,6 +281,9 @@ export type UserUncheckedCreateInput = {
   passwordDigest: string
   experiences?: Prisma.ExperienceUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -277,6 +292,9 @@ export type UserUpdateInput = {
   passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
   experiences?: Prisma.ExperienceUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -286,6 +304,9 @@ export type UserUncheckedUpdateInput = {
   passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
   experiences?: Prisma.ExperienceUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUncheckedUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -354,6 +375,20 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type UserCreateNestedOneWithoutSettingsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSettingsInput, Prisma.UserUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSettingsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSettingsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSettingsInput, Prisma.UserUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSettingsInput
+  upsert?: Prisma.UserUpsertWithoutSettingsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSettingsInput, Prisma.UserUpdateWithoutSettingsInput>, Prisma.UserUncheckedUpdateWithoutSettingsInput>
+}
+
 export type UserCreateNestedOneWithoutExperiencesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutExperiencesInput, Prisma.UserUncheckedCreateWithoutExperiencesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutExperiencesInput
@@ -382,11 +417,100 @@ export type UserUpdateOneRequiredWithoutReviewsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewsInput, Prisma.UserUpdateWithoutReviewsInput>, Prisma.UserUncheckedUpdateWithoutReviewsInput>
 }
 
+export type UserCreateNestedOneWithoutTripsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTripsInput, Prisma.UserUncheckedCreateWithoutTripsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTripsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTripsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTripsInput, Prisma.UserUncheckedCreateWithoutTripsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTripsInput
+  upsert?: Prisma.UserUpsertWithoutTripsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTripsInput, Prisma.UserUpdateWithoutTripsInput>, Prisma.UserUncheckedUpdateWithoutTripsInput>
+}
+
+export type UserCreateNestedOneWithoutInterestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInterestsInput, Prisma.UserUncheckedCreateWithoutInterestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInterestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutInterestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInterestsInput, Prisma.UserUncheckedCreateWithoutInterestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInterestsInput
+  upsert?: Prisma.UserUpsertWithoutInterestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInterestsInput, Prisma.UserUpdateWithoutInterestsInput>, Prisma.UserUncheckedUpdateWithoutInterestsInput>
+}
+
+export type UserCreateWithoutSettingsInput = {
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSettingsInput = {
+  id?: number
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSettingsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSettingsInput, Prisma.UserUncheckedCreateWithoutSettingsInput>
+}
+
+export type UserUpsertWithoutSettingsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSettingsInput, Prisma.UserUncheckedUpdateWithoutSettingsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSettingsInput, Prisma.UserUncheckedCreateWithoutSettingsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSettingsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSettingsInput, Prisma.UserUncheckedUpdateWithoutSettingsInput>
+}
+
+export type UserUpdateWithoutSettingsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSettingsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUncheckedUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateWithoutExperiencesInput = {
   email: string
   username: string
   passwordDigest: string
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutExperiencesInput = {
@@ -395,6 +519,9 @@ export type UserUncheckedCreateWithoutExperiencesInput = {
   username: string
   passwordDigest: string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutExperiencesInput = {
@@ -418,6 +545,9 @@ export type UserUpdateWithoutExperiencesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExperiencesInput = {
@@ -426,6 +556,9 @@ export type UserUncheckedUpdateWithoutExperiencesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUncheckedUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReviewsInput = {
@@ -433,6 +566,9 @@ export type UserCreateWithoutReviewsInput = {
   username: string
   passwordDigest: string
   experiences?: Prisma.ExperienceCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsInput = {
@@ -441,6 +577,9 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   username: string
   passwordDigest: string
   experiences?: Prisma.ExperienceUncheckedCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsInput = {
@@ -464,6 +603,9 @@ export type UserUpdateWithoutReviewsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
   experiences?: Prisma.ExperienceUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -472,6 +614,125 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
   experiences?: Prisma.ExperienceUncheckedUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUncheckedUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTripsInput = {
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTripsInput = {
+  id?: number
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTripsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTripsInput, Prisma.UserUncheckedCreateWithoutTripsInput>
+}
+
+export type UserUpsertWithoutTripsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTripsInput, Prisma.UserUncheckedUpdateWithoutTripsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTripsInput, Prisma.UserUncheckedCreateWithoutTripsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTripsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTripsInput, Prisma.UserUncheckedUpdateWithoutTripsInput>
+}
+
+export type UserUpdateWithoutTripsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTripsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutInterestsInput = {
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutInterestsInput = {
+  id?: number
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutInterestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInterestsInput, Prisma.UserUncheckedCreateWithoutInterestsInput>
+}
+
+export type UserUpsertWithoutInterestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInterestsInput, Prisma.UserUncheckedUpdateWithoutInterestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInterestsInput, Prisma.UserUncheckedCreateWithoutInterestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInterestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInterestsInput, Prisma.UserUncheckedUpdateWithoutInterestsInput>
+}
+
+export type UserUpdateWithoutInterestsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInterestsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUncheckedUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -482,11 +743,15 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
 export type UserCountOutputType = {
   experiences: number
   reviews: number
+  trips: number
+  interests: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   experiences?: boolean | UserCountOutputTypeCountExperiencesArgs
   reviews?: boolean | UserCountOutputTypeCountReviewsArgs
+  trips?: boolean | UserCountOutputTypeCountTripsArgs
+  interests?: boolean | UserCountOutputTypeCountInterestsArgs
 }
 
 /**
@@ -513,6 +778,20 @@ export type UserCountOutputTypeCountReviewsArgs<ExtArgs extends runtime.Types.Ex
   where?: Prisma.ReviewWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TripWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInterestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InterestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -521,6 +800,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordDigest?: boolean
   experiences?: boolean | Prisma.User$experiencesArgs<ExtArgs>
   reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>
+  trips?: boolean | Prisma.User$tripsArgs<ExtArgs>
+  interests?: boolean | Prisma.User$interestsArgs<ExtArgs>
+  settings?: boolean | Prisma.User$settingsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -549,6 +831,9 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   experiences?: boolean | Prisma.User$experiencesArgs<ExtArgs>
   reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>
+  trips?: boolean | Prisma.User$tripsArgs<ExtArgs>
+  interests?: boolean | Prisma.User$interestsArgs<ExtArgs>
+  settings?: boolean | Prisma.User$settingsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -559,6 +844,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     experiences: Prisma.$ExperiencePayload<ExtArgs>[]
     reviews: Prisma.$ReviewPayload<ExtArgs>[]
+    trips: Prisma.$TripPayload<ExtArgs>[]
+    interests: Prisma.$InterestPayload<ExtArgs>[]
+    settings: Prisma.$UserSettingsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -961,6 +1249,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   experiences<T extends Prisma.User$experiencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviews<T extends Prisma.User$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  trips<T extends Prisma.User$tripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  interests<T extends Prisma.User$interestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$interestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InterestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  settings<T extends Prisma.User$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$settingsArgs<ExtArgs>>): Prisma.Prisma__UserSettingsClient<runtime.Types.Result.GetResult<Prisma.$UserSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1427,6 +1718,73 @@ export type User$reviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[]
+}
+
+/**
+ * User.trips
+ */
+export type User$tripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Trip
+   */
+  select?: Prisma.TripSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Trip
+   */
+  omit?: Prisma.TripOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TripInclude<ExtArgs> | null
+  where?: Prisma.TripWhereInput
+  orderBy?: Prisma.TripOrderByWithRelationInput | Prisma.TripOrderByWithRelationInput[]
+  cursor?: Prisma.TripWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TripScalarFieldEnum | Prisma.TripScalarFieldEnum[]
+}
+
+/**
+ * User.interests
+ */
+export type User$interestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Interest
+   */
+  select?: Prisma.InterestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Interest
+   */
+  omit?: Prisma.InterestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InterestInclude<ExtArgs> | null
+  where?: Prisma.InterestWhereInput
+  orderBy?: Prisma.InterestOrderByWithRelationInput | Prisma.InterestOrderByWithRelationInput[]
+  cursor?: Prisma.InterestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InterestScalarFieldEnum | Prisma.InterestScalarFieldEnum[]
+}
+
+/**
+ * User.settings
+ */
+export type User$settingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserSettings
+   */
+  select?: Prisma.UserSettingsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserSettings
+   */
+  omit?: Prisma.UserSettingsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserSettingsInclude<ExtArgs> | null
+  where?: Prisma.UserSettingsWhereInput
 }
 
 /**

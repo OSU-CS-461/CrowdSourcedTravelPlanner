@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClientRoutes } from "../../../shared/clientRoutes";
 import ExperienceForm from "../components/ExperienceForm";
-import type { FormValues } from "../components/ExperienceForm";
+import { type FormValues } from "../types/types";
 import { getExperienceById, updateExperience } from "../experienceService";
 import buildExpCreationPayload from "../helpers/buildExpCreationPayload";
 import mapApiExperienceToFormValues from "../helpers/mapApiExperienceToFormValues";
@@ -66,7 +65,7 @@ export default function UpdateExperiencePage() {
 
       // TODO: at some point we should navigate to the updated experience's details
       // page instead of home
-      navigate(ClientRoutes.HOME);
+      navigate(`/experiences/${id}`);
     } catch (err) {
       // TODO: at some point we'll need better error handling/UI, but this is fine for now
       alert(

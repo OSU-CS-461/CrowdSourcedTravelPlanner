@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { CategoryOption, TagOption } from "./ExperienceForm";
+import type { CategoryOption, TagOption } from "../types/types";
 
 interface TagSelectionProps {
   initialCategoryId?: number | null;

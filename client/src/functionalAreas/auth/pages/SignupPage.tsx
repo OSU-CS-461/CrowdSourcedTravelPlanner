@@ -91,8 +91,8 @@ function SignupPage() {
         navigate("/");
       } catch (error) {
         const message =
-          isAxiosError(error) && error.response?.data?.message
-            ? String(error.response.data.message)
+          isAxiosError(error) && (error.response?.data?.error || error.response?.data?.message)
+            ? String(error.response.data.error || error.response.data.message)
             : "We couldn't create your account. Please try again.";
         setFormError(message);
       } finally {

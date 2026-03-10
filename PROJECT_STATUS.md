@@ -58,6 +58,21 @@
   - `DELETE /api/experiences/:id` - Delete experience (requires auth)
   - **Status**: Fully implemented and working
 
+#### Interests Management (Frontend & Backend)
+- **Interests Page** (`/interests`)
+  - List all user interests
+  - Create, edit, delete interests
+  - Ownership protection (users can only modify their own interests)
+  - **Status**: Fully implemented and working
+
+- **Backend Interests API**
+  - `POST /api/interests` - Create interest (requires auth)
+  - `GET /api/interests` - List all interests (public)
+  - `GET /api/interests/:id` - Get single interest (public)
+  - `PUT /api/interests/:id` - Update interest (requires auth + ownership)
+  - `DELETE /api/interests/:id` - Delete interest (requires auth + ownership)
+  - **Status**: Fully implemented and working
+
 ### What You Can Do
 
 1. **Sign Up**: Create a new account
@@ -89,6 +104,13 @@
    - View experience details
    - Click "Delete" button
    - Confirm deletion
+
+7. **Manage Interests**: Create and manage travel interests
+   - Click "My Interests" button on home page
+   - Create new interests (name, description)
+   - Edit your own interests
+   - Delete your own interests
+   - View all interests (public list)
 
 ###  UI/UX Features
 
@@ -135,8 +157,10 @@
 The project has all core functionality implemented and working:
 - User authentication (signup, login, logout)
 - Experience CRUD operations (create, read, update, delete)
+- Interests CRUD operations (create, read, update, delete)
 - Beautiful, modern UI
 - Proper security and permissions
+- Ownership protection for user content
 - Complete Windows setup documentation
 
 The application is ready for use and further development!

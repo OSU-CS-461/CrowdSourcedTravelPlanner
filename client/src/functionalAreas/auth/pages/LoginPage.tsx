@@ -60,12 +60,19 @@ function LoginPage() {
       try {
         setIsSubmitting(true);
         const authData = await authLogin(values.email, values.password);
+//
+        localStorage.setItem("cstp.auth.token", authData.token);
+
+        if (authData.user) {
+          localStorage.setItem("cstp.auth.userId", String(authData.user.id));
+        }
+//
         initialize(authData);
         navigate("/");
       } catch (error) {
         const message =
-          isAxiosError(error) && error.response?.data?.message
-            ? String(error.response.data.message)
+          isAxiosError(error) && (error.response?.data?.error || error.response?.data?.message)
+            ? String(error.response.data.error || error.response.data.message)
             : "We couldn't sign you in. Please double-check your credentials.";
         setFormError(message);
       } finally {
