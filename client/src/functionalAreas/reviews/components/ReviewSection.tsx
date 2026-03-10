@@ -1,19 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiClient, setAuthToken } from "../../../shared/services/api.service";
-import { ClientRoutes } from "../../../shared/clientRoutes";
+import { apiClient } from "../../../shared/services/api.service";
 import ReviewList from "./ReviewList";
-
-// Define the Review type based on the project requirements
-type Review = {
-  id: string;
-  experienceId: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-};
+import type { Review } from "../types/review";
 
 type ReviewsProps = {
   experienceId: string;
@@ -27,11 +16,7 @@ export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) 
   const [newRating, setNewRating] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [experienceId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const res = await apiClient.get(`/experiences/${experienceId}/reviews`);
       setReviews(res.data);
@@ -40,7 +25,11 @@ export default function ReviewsSection({ experienceId, isOwner }: ReviewsProps) 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [experienceId]);
+
+  useEffect(() => {
+    void fetchReviews();
+  }, [fetchReviews]);
 
 const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();

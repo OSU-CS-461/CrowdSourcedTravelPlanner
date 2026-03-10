@@ -1,8 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { deleteReview } from "../../../shared/services/reviewService";
-import StarRating from "../common/StarRating";
+import type { Review } from "../types/review";
 
-export default function ReviewItem({ review, onChange }: { review: any, onChange: () => void }) {
+type ReviewItemProps = {
+  review: Review;
+  onChange: () => void;
+};
+
+export default function ReviewItem({ review, onChange }: ReviewItemProps) {
   const navigate = useNavigate();
   
   const handleEdit = () => {

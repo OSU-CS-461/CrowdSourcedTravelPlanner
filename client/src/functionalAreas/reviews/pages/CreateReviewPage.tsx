@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
-import ReviewForm from "../components/ReviewForm";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
-import StarRating from "../components/common/StarRating";
+import StarRating from "../common/StarRating";
 
 export default function CreateReviewPage() {
   const navigate = useNavigate();
@@ -77,7 +76,18 @@ export default function CreateReviewPage() {
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
             Rating
           </label>
-          <StarRating value={rating} onChange={setRating} />
+          <StarRating rating={rating} />
+          <select
+            value={rating}
+            onChange={(e) => setRating(Number(e.target.value))}
+            style={{ marginTop: "8px" }}
+          >
+            {[5, 4, 3, 2, 1].map((num) => (
+              <option key={num} value={num}>
+                {num} Stars
+              </option>
+            ))}
+          </select>
         </div>
 
         <div style={{ marginBottom: "20px" }}>

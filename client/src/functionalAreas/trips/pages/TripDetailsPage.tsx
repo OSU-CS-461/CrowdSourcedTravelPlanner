@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../shared/clientRoutes";
@@ -35,7 +35,7 @@ export default function TripDetailsPage() {
 
   const userId = Number(localStorage.getItem("cstp.auth.userId"));
 
-  async function loadTrip() {
+  const loadTrip = useCallback(async () => {
     try {
       const token = localStorage.getItem("cstp.auth.token");
       if (token) setAuthToken(token);
@@ -47,21 +47,21 @@ export default function TripDetailsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
 
-  async function loadExperiences() {
+  const loadExperiences = useCallback(async () => {
     try {
       const res = await apiClient.get("/experiences");
       setExperiences(res.data);
     } catch (err) {
       console.error(err);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadTrip();
-    loadExperiences();
-  }, [id]);
+    void loadTrip();
+    void loadExperiences();
+  }, [loadTrip, loadExperiences]);
 
   async function removeExperience(experienceId: number) {
     try {

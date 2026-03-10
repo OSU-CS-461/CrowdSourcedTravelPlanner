@@ -1,28 +1,38 @@
-import { useState, useEffect } from "react"; // Added useEffect
+import { useEffect, useState, type FormEvent } from "react";
 import { apiClient } from "../../../shared/services/api.service";
 import { useParams, useNavigate } from "react-router-dom";
 
-export default function ReviewForm({ onSuccess }) {
-  const { id, reviewId } = useParams();
+type ReviewFormProps = {
+  onSuccess?: () => void;
+};
+
+type ReviewApiModel = {
+  id: number | string;
+  rating: number;
+  comment?: string;
+};
+
+export default function ReviewForm({ onSuccess }: ReviewFormProps) {
+  const { id, reviewId } = useParams<{ id: string; reviewId?: string }>();
   const navigate = useNavigate();
   
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const isEdit = Boolean(reviewId);
 
-  // Define this at the top level so all functions can see it
-  const targetPath = `/experiences/${id}`;
+  const targetPath = id ? `/experiences/${id}` : "/";
 
   useEffect(() => {
-    if (isEdit) {
+    if (isEdit && id) {
       const fetchReview = async () => {
         try {
           const res = await apiClient.get(`/experiences/${id}/reviews`);
-          const existingReview = res.data.find(r => String(r.id) === String(reviewId));
+          const existingReview = (res.data as ReviewApiModel[]).find(
+            (r: ReviewApiModel) => String(r.id) === String(reviewId)
+          );
           
           if (existingReview) {
             setRating(existingReview.rating);
-            // Match the field names from your backend formatter
             setText(existingReview.comment || ""); 
           }
         } catch (err) {
@@ -33,8 +43,12 @@ export default function ReviewForm({ onSuccess }) {
     }
   }, [isEdit, id, reviewId]);
 
-  const submit = async (e) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!id) {
+      alert("No experience ID found.");
+      return;
+    }
 
     try {
       if (isEdit) {
@@ -58,7 +72,7 @@ export default function ReviewForm({ onSuccess }) {
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate(targetPath); // Now accessible
+        navigate(targetPath);
       }
     } catch (err) {
       console.error("Submission Error:", err);
@@ -100,7 +114,6 @@ export default function ReviewForm({ onSuccess }) {
         {isEdit ? "Save Changes" : "Submit Review"}
       </button>
 
-      {/* Cancel button now has access to targetPath */}
       {isEdit && (
         <button 
           type="button" 

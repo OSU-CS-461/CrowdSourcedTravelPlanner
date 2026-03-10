@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
     }));
 
     res.json(formattedReviews);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
