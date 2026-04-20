@@ -88,8 +88,16 @@ async function createExperience(
 async function getExperience(req: Request, res: Response, next: NextFunction) {
   try {
     const experienceId = parseInt(req.params.id);
+    const reviewSort = req.query.sort as experienceService.ReviewSortOption | undefined;
 
-    const experience = await experienceService.getExperience(experienceId);
+    const experience = await experienceService.getExperience({ 
+      experienceId, 
+      reviewSort 
+    });
+
+    if (!experience) {
+      return res.status(404).json({ message: "Experience not found" });
+    }
 
     return res.status(200).json(experience);
   } catch (err) {
@@ -114,7 +122,6 @@ async function listExperiences(req: Request, res: Response, next: NextFunction) 
 
     const where: Prisma.ExperienceWhereInput = {};
 
-    // ✅ NEW: user filter (does not affect other filters)
     if (query.createdBy !== undefined) {
       where.createdBy = query.createdBy;
     }

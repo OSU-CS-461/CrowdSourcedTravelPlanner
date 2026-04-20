@@ -1,18 +1,23 @@
 import { Router } from 'express';
-import prisma from '../prismaClient'; 
+import prisma from '../prismaClient';
+import { authenticate } from '../middleware/auth';
+import * as reviewService from '../services/reviewService';
 
 const router = Router({ mergeParams: true });
 
+// --- GET (Public) ---
 router.get('/', async (req, res) => {
   try {
-    const { id } = req.params; // 'id' comes from the parent route defined in app.use
+    const { id } = req.params;
     const reviews = await prisma.review.findMany({
       where: { experienceId: Number(id) },
-      include: { user: true }, // To get the userName
+      include: { 
+        user: true, 
+        media: true
+      },
       orderBy: { dateCreated: 'desc' }
     });
     
-    // Map DB fields to match your Frontend 'Review' type
     const formattedReviews = reviews.map(rev => ({
       id: rev.id.toString(),
       experienceId: rev.experienceId.toString(),
@@ -20,7 +25,14 @@ router.get('/', async (req, res) => {
       userName: rev.user?.username || "Anonymous",
       rating: rev.rating,
       comment: rev.reviewText,
-      createdAt: rev.dateCreated
+      createdAt: rev.dateCreated,
+      
+      media: rev.media?.map((m: any) => ({
+        id: m.id.toString(),
+        url: m.url,
+        type: m.type, // 'image' or 'video'
+        alt: m.altText || ""
+      })) || []
     }));
 
     res.json(formattedReviews);
@@ -29,62 +41,54 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+// --- POST (Protected) ---
+router.post('/', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const { rating, comment } = req.body; 
-
-    const newReview = await prisma.review.create({
-      data: {
-        rating: Number(rating),
-        reviewText: comment,        // Use reviewText from Schema
-        experienceId: Number(id),
-        userId: 1,                  // Hardcode ID 1 for now just to test
-      }
-    });
+    const userId = req.user.id;
+    
+    const newReview = await reviewService.createReview(
+      Number(id), 
+      userId, 
+      req.body
+    );
     res.status(201).json(newReview);
-  } catch (error) {
-    console.error("CRASH PREVENTED:", error); 
-    res.status(500).json({ error: "Database error" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Database error" });
   }
 });
 
-router.put('/:reviewId', async (req, res) => {
+// --- PUT (Protected + Ownership Check) ---
+router.put('/:reviewId', authenticate, async (req, res) => {
   try {
     const { reviewId } = req.params;
-    const { rating, comment } = req.body;
+    const userId = req.user.id;
 
-    const updatedReview = await prisma.review.update({
-      where: { id: Number(reviewId) }, // <--- THIS IS IT
-      data: {
-        rating: Number(rating),
-        reviewText: comment,
-      },
-    });
+    const updatedReview = await reviewService.updateReview(
+      Number(reviewId),
+      userId,
+      req.body
+    );
 
     res.json(updatedReview);
-  } catch (error) {
-    console.error("UPDATE ERROR:", error);
-    res.status(500).json({ error: "Failed to update review" });
+  } catch (error: any) {
+    const status = error.message.includes("Forbidden") ? 403 : 500;
+    res.status(status).json({ error: error.message });
   }
 });
 
-router.delete('/:reviewId', async (req, res) => {
+// --- DELETE (Protected + Ownership Check) ---
+router.delete('/:reviewId', authenticate, async (req, res) => {
   try {
     const { reviewId } = req.params;
+    const userId = req.user.id;
 
-    const idNum = Number(reviewId);
-
-    await prisma.review.delete({
-      where: { id: idNum },
-    });
-
+    await reviewService.deleteReview(Number(reviewId), userId);
+    
     res.status(204).send(); 
-  } catch (error) {
-    // If Prisma can't find the record, it throws an error. 
-    // We catch it here so the server doesn't "500".
-    console.error("DELETE ERROR:", error);
-    res.status(404).json({ error: "Review not found or already deleted" });
+  } catch (error: any) {
+    const status = error.message.includes("Forbidden") ? 403 : 404;
+    res.status(status).json({ error: error.message });
   }
 });
 

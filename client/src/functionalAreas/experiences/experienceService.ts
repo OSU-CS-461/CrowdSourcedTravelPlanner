@@ -1,5 +1,7 @@
 import { apiClient } from "../../shared/services/api.service";
 
+export type ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'media';
+
 export interface CreateExperienceDto {
   title: string;
   description: string;
@@ -34,6 +36,7 @@ export interface ApiExperience {
   postalCode: string | null;
   latitude: number | null;
   longitude: number | null;
+  reviews?: any[]; 
 }
 
 // experience.service.ts
@@ -41,8 +44,9 @@ export async function createExperience(payload: CreateExperienceDto) {
   return apiClient.post("/experiences", payload);
 }
 
-export async function getExperienceById(id: number | string) {
-  return apiClient.get<ApiExperience>(`/experiences/${id}`);
+export async function getExperienceById(id: number | string, sort?: ReviewSortOption) {
+  const url = sort ? `/experiences/${id}?sort=${sort}` : `/experiences/${id}`;
+  return apiClient.get<ApiExperience>(url);
 }
 
 export async function updateExperience(

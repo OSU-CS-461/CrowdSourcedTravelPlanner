@@ -71,7 +71,6 @@ export const ExpListQuerySchema = z
     city: z.string().min(1).optional(),
     categoryId: z.coerce.number().int().positive().optional(),
 
-    // ✅ NEW: filter by creator user id
     createdBy: z.coerce.number().int().positive().optional(),
 
     lat: z.coerce.number().min(-90).max(90).optional(),

@@ -3,6 +3,13 @@ import { Prisma } from "../generated/prisma/client";
 import prisma from "../db/prisma";
 import type { ExpPutPostBody, ExpPatchBody } from "../models/experience";
 
+export type ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'media';
+
+export interface GetExperienceParams {
+  experienceId: number;
+  reviewSort?: ReviewSortOption;
+}
+
 /**
  * New architecture assumptions:
  * - Controller validates req.body with Zod and passes typed ExpPutPostBody / ExpPatchBody.
@@ -81,17 +88,31 @@ const EXPERIENCE_LIST_SELECT = {
   },
 } satisfies Prisma.ExperienceSelect;
 
-const EXPERIENCE_DETAIL_SELECT = {
-  ...EXPERIENCE_LIST_SELECT,
-  description: true,
-  descriptionEdit: true,
-} satisfies Prisma.ExperienceSelect;
+const EXPERIENCE_DETAIL_SELECT = (reviewSort?: ReviewSortOption) => {
+  let reviewOrder: Prisma.ReviewOrderByWithRelationInput = { dateCreated: 'desc' };
+  
+  if (reviewSort === 'highest') reviewOrder = { rating: 'desc' };
+  if (reviewSort === 'lowest') reviewOrder = { rating: 'asc' };
+
+  return {
+    ...EXPERIENCE_LIST_SELECT,
+    description: true,
+    descriptionEdit: true,
+    reviews: {
+      where: reviewSort === 'media' ? { imageUrl: { not: null } } : {},
+      orderBy: reviewOrder,
+      include: {
+        user: { select: { username: true } }
+      }
+    }
+  } satisfies Prisma.ExperienceSelect;
+};
 
 type ExperienceListWithJoins = Prisma.ExperienceGetPayload<{
   select: typeof EXPERIENCE_LIST_SELECT;
 }>;
 type ExperienceDetailWithJoins = Prisma.ExperienceGetPayload<{
-  select: typeof EXPERIENCE_DETAIL_SELECT;
+  select: ReturnType<typeof EXPERIENCE_DETAIL_SELECT>;
 }>;
 type ExperienceWithJoins = ExperienceListWithJoins | ExperienceDetailWithJoins;
 
@@ -104,6 +125,7 @@ function serializeExperience(experience: ExperienceWithJoins) {
     createdByUsername: user?.username ?? null,
     tags,
     tagIds: tags.map((t) => t.id),
+    reviews: (experience as any).reviews ?? [], 
   };
 }
 
@@ -201,7 +223,7 @@ export async function createExperience(userId: number, postBody: ExpPutPostBody)
 
     return tx.experience.findUniqueOrThrow({
       where: { id: created.id },
-      select: EXPERIENCE_DETAIL_SELECT,
+      select: EXPERIENCE_DETAIL_SELECT(),
     });
   }, {
     maxWait: 5000,
@@ -214,10 +236,12 @@ export async function createExperience(userId: number, postBody: ExpPutPostBody)
 // -----------------------------------------------------------------------------
 // READ ONE
 // -----------------------------------------------------------------------------
-export async function getExperience(experienceId: number) {
+export async function getExperience(params: GetExperienceParams) {
+  const { experienceId, reviewSort } = params;
+  
   const experience = await prisma.experience.findUnique({
     where: { id: experienceId },
-    select: EXPERIENCE_DETAIL_SELECT,
+    select: EXPERIENCE_DETAIL_SELECT(reviewSort),
   });
 
   return experience ? serializeExperience(experience) : null;
@@ -290,7 +314,7 @@ export async function updateExperience(params: UpdateExperienceParams) {
 
     return tx.experience.findUniqueOrThrow({
       where: { id: experienceId },
-      select: EXPERIENCE_DETAIL_SELECT,
+      select: EXPERIENCE_DETAIL_SELECT(),
     });
   });
 
@@ -331,7 +355,7 @@ export async function editExperience(params: EditExperienceParams) {
 
     return tx.experience.findUniqueOrThrow({
       where: { id: experienceId },
-      select: EXPERIENCE_DETAIL_SELECT,
+      select: EXPERIENCE_DETAIL_SELECT(),
     });
   });
 

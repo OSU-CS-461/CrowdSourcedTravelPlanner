@@ -7,6 +7,8 @@ import { USER_STORAGE_KEY } from "../../auth/context/auth-context";
 import ReviewsSection from "../../reviews/components/ReviewSection";
 import "./ExperienceDetailPage.css";
 
+type ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'media';
+
 type Category = {
   id: number | string;
   label: string;
@@ -95,6 +97,7 @@ export default function ExperienceDetailPage() {
   const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sortBy, setSortBy] = useState<ReviewSortOption>('recent');
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -132,6 +135,21 @@ export default function ExperienceDetailPage() {
         }
         setLoading(false);
       });
+      
+    apiClient
+      .get(`/experiences/${id}?sort=${sortBy}`)
+      .then((res) => {
+        setExperience(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!previewMatchesRoute) {
+          setError("Failed to load experience");
+        }
+        setLoading(false);
+      });
+      
   }, [id, previewExperience, previewMatchesRoute]);
 
   const currentUserId = useMemo(() => {
@@ -251,7 +269,8 @@ export default function ExperienceDetailPage() {
             <div className="detail-panel">
               <h2>Location</h2>
               <p>{getLocationString(experience)}</p>
-              {experience.latitude != null && experience.longitude != null && (
+              {experience.latitude != null && experience
+            initialReviews={experience.reviews}.longitude != null && (
                 <p className="detail-muted">
                   {experience.latitude}, {experience.longitude}
                 </p>
@@ -294,9 +313,27 @@ export default function ExperienceDetailPage() {
               )}
           </footer>
 
+          <section className="reviews-header-group">
+            <h2>Reviews</h2>
+            <div className="sort-controls">
+              <label htmlFor="review-sort">Sort by: </label>
+              <select 
+                id="review-sort" 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value as ReviewSortOption)}
+              >
+                <option value="recent">Most Recent</option>
+                <option value="highest">Highest Rated</option>
+                <option value="lowest">Lowest Rated</option>
+                <option value="media">With Photos</option>
+              </select>
+            </div>
+          </section>
+
           <ReviewsSection
             experienceId={String(experience.id)}
             isOwner={canManageExperience}
+            initialReviews={experience.reviews}
           />
         </div>
       </article>
