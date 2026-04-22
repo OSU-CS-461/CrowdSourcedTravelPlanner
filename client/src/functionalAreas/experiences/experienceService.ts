@@ -1,19 +1,8 @@
 import { apiClient } from "../../shared/services/api.service";
 
-export interface CreateExperienceDto {
-  title: string;
-  description: string;
-  categoryId: number;
-  country: string;
-  latitude: number;
-  longitude: number;
-  adminRegion?: string;
-  city?: string;
-  street?: string;
-  postalCode?: string;
-  thumbnail?: string;
-  tagIds: number[];
-}
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
 
 export interface ApiExperience {
   id: number | string;
@@ -27,6 +16,9 @@ export interface ApiExperience {
     label: string;
   } | null;
   tagIds?: number[];
+  tags?: Array<{
+    id: number | string;
+  }> | null;
   country: string | null;
   adminRegion: string | null;
   city: string | null;
@@ -34,12 +26,29 @@ export interface ApiExperience {
   postalCode: string | null;
   latitude: number | null;
   longitude: number | null;
+  images?:
+    | Array<
+        | string
+        | {
+            id?: number | string;
+            url?: string | null;
+          }
+        | null
+      >
+    | null;
 }
 
-// experience.service.ts
-export async function createExperience(payload: CreateExperienceDto) {
-  return apiClient.post("/experiences", payload);
+// -----------------------------------------------------------------------------
+// CREATE (multipart/form-data)
+// -----------------------------------------------------------------------------
+
+export async function createExperience(formData: FormData) {
+  return apiClient.post("/experiences", formData, {});
 }
+
+// -----------------------------------------------------------------------------
+// READ
+// -----------------------------------------------------------------------------
 
 export async function getExperienceById(id: number | string) {
   return apiClient.get<ApiExperience>(`/experiences/${id}`);
@@ -47,7 +56,7 @@ export async function getExperienceById(id: number | string) {
 
 export async function updateExperience(
   id: number | string,
-  payload: CreateExperienceDto
+  formData: FormData,
 ) {
-  return apiClient.put(`/experiences/${id}`, payload);
+  return apiClient.put(`/experiences/${id}`, formData, {});
 }

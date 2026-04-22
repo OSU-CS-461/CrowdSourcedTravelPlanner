@@ -16,6 +16,7 @@ import RootLayout from "./RootLayout";
 import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
 import MyExperiencesPage from "../functionalAreas/experiences/pages/MyExperiencesPage";
 import TripDetailsPage from "../functionalAreas/trips/pages/TripDetailsPage";
+import MediaGalleryPage from "../functionalAreas/experiences/pages/MediaGalleryPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -25,7 +26,10 @@ export default function App() {
       <Routes>
         <Route path={ClientRoutes.LOGIN} element={<LoginPage />} />
         <Route path={ClientRoutes.SIGNUP} element={<SignupPage />} />
-        <Route path="*" element={<Navigate to={ClientRoutes.LOGIN} replace />} />
+        <Route
+          path="*"
+          element={<Navigate to={ClientRoutes.LOGIN} replace />}
+        />
       </Routes>
     );
   }
@@ -34,16 +38,19 @@ export default function App() {
     <Routes>
       <Route element={<RootLayout />}>
         <Route path={ClientRoutes.HOME} element={<HomePage />} />
-        <Route path={ClientRoutes.MY_EXPERIENCES} element={<MyExperiencesPage />} />
+        <Route
+          path={ClientRoutes.MY_EXPERIENCES}
+          element={<MyExperiencesPage />}
+        />
         <Route path={ClientRoutes.EXPLORE} element={<ExplorePage />} />
         <Route
           path={ClientRoutes.EXPERIENCE_CREATE}
           element={<CreateExperiencePage />}
         />
-        <Route
-          path={ClientRoutes.EXPERIENCE_DETAILS}
-          element={<ExperienceDetailsPage />}
-        />
+        <Route path={ClientRoutes.EXPERIENCE_DETAILS}>
+          <Route index element={<ExperienceDetailsPage />} />
+          <Route path="photos" element={<MediaGalleryPage />} />
+        </Route>
         <Route
           path={ClientRoutes.EXPERIENCE_UPDATE}
           element={<UpdateExperiencePage />}
@@ -66,14 +73,11 @@ export default function App() {
           path={ClientRoutes.SIGNUP}
           element={<Navigate to={ClientRoutes.HOME} replace />}
         />
-        <Route
-          path={ClientRoutes.INTERESTS}
-          element={<InterestsPage />}
-        />
+        <Route path={ClientRoutes.INTERESTS} element={<InterestsPage />} />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
       </Route>
 
-        <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
+      <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
     </Routes>
   );
 }

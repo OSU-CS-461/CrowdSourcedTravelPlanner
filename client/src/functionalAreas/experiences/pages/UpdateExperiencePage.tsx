@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ExperienceForm from "../components/ExperienceForm";
 import { type FormValues } from "../types/types";
-import { getExperienceById, updateExperience } from "../experienceService";
-import buildExpCreationPayload from "../helpers/buildExpCreationPayload";
+import {
+  getExperienceById,
+  updateExperience,
+} from "../experienceService";
 import mapApiExperienceToFormValues from "../helpers/mapApiExperienceToFormValues";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
@@ -53,15 +55,14 @@ export default function UpdateExperiencePage() {
     void fetchExperience();
   }, [id]);
 
-  const handleUpdateExperience = async (values: FormValues) => {
+  const handleUpdateExperience = async (formData: FormData) => {
     if (!id) {
       alert("Missing experience ID in URL.");
       return;
     }
 
     try {
-      const payload = buildExpCreationPayload(values);
-      await updateExperience(id, payload);
+      await updateExperience(id, formData);
 
       // TODO: at some point we should navigate to the updated experience's details
       // page instead of home

@@ -71,6 +71,14 @@ export default function errorHandlerMiddleware(
           error: "Record not found",
         });
       }
+      case "P2021": {
+        // Table does not exist (schema out of sync with Prisma schema/client)
+        return res.status(500).json({
+          error:
+            "Database schema is out of date. Run Prisma migrations (prisma migrate deploy).",
+          details: { code: err.code },
+        });
+      }
       case "P5010": {
         return res.status(500).json({
           error: "Failed to contact the database.",

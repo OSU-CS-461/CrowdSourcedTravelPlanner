@@ -19,6 +19,7 @@ model User {
   trips          Trip[]
   interests      Interest[]
   settings       UserSettings?
+  images         Image[]
 }
 
 model UserSettings {
@@ -65,26 +66,61 @@ model Experience {
   experienceTags  ExperienceTag[]
   trips           TripExperience[]
   reviews         Review[]
+  images          Image[]
 
   @@index([createdBy])
   @@index([categoryId])
 }
 
 model Review {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   rating        Int
   reviewText    String
-  dateCreated   DateTime @default(now())
+  dateCreated   DateTime   @default(now())
 
   experienceId  Int
-  experience    Experience @relation(fields: [experienceId], references: [id])
+  experience    Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
 
   userId        Int
-  user          User @relation(fields: [userId], references: [id])
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  images        Image[]
 
   @@index([experienceId])
   @@index([userId])
 }
+
+model Image {
+  id               Int        @id @default(autoincrement())
+
+  createdBy        Int
+  user             User       @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  experienceId     Int
+  experience       Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  reviewId         Int?
+  review           Review?    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  storageKey       String     @unique
+  originalFilename String
+  mimeType         String?
+  fileSizeBytes    Int?
+  url              String
+  altText          String?
+  caption          String?
+
+  sortOrder        Int        @default(0)
+  dateCreated      DateTime   @default(now())
+  lastUpdated      DateTime   @updatedAt
+
+  @@index([createdBy])
+  @@index([experienceId])
+  @@index([reviewId])
+  @@index([experienceId, sortOrder])
+  @@index([reviewId, sortOrder])
+}
+
 
 model Trip {
   id            Int      @id @default(autoincrement())
@@ -124,12 +160,12 @@ model Category {
 }
 
 model Tag {
-  id          Int      @id @default(autoincrement())
-  slug        String   @unique
-  label       String
+  id             Int      @id @default(autoincrement())
+  slug           String   @unique
+  label          String
 
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId     Int
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   experienceTags ExperienceTag[]
 }

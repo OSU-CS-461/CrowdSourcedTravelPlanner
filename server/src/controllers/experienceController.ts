@@ -19,9 +19,70 @@ function splitSlugs(csv?: string): string[] {
       csv
         .split(",")
         .map((s) => s.trim().toLowerCase())
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
+}
+
+function firstString(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    for (let i = value.length - 1; i >= 0; i -= 1) {
+      const item = firstString(value[i]);
+      if (item !== undefined) return item;
+    }
+    return undefined;
+  }
+  if (typeof value === "string") return value;
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return undefined;
+}
+
+function optionalString(value: unknown): string | undefined {
+  const raw = firstString(value);
+  if (raw === undefined) return undefined;
+  const trimmed = raw.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
+function numberField(value: unknown): number | undefined {
+  const raw = optionalString(value);
+  return raw === undefined ? undefined : Number(raw);
+}
+
+function numberArrayField(value: unknown): number[] | undefined {
+  const rawValues = Array.isArray(value) ? value : [value];
+  const parsed = rawValues
+    .flatMap((entry) => {
+      if (typeof entry === "string") return entry.split(",");
+      if (typeof entry === "number" && Number.isFinite(entry)) {
+        return [String(entry)];
+      }
+      return [];
+    })
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => Number(entry));
+
+  return parsed.length ? parsed : undefined;
+}
+
+function normalizeCreateBody(rawBody: Record<string, unknown>) {
+  return {
+    title: optionalString(rawBody.title),
+    description: optionalString(rawBody.description),
+    categoryId: numberField(rawBody.categoryId),
+    country: optionalString(rawBody.country),
+    adminRegion: optionalString(rawBody.adminRegion),
+    city: optionalString(rawBody.city),
+    street: optionalString(rawBody.street),
+    postalCode: optionalString(rawBody.postalCode),
+    latitude: numberField(rawBody.latitude),
+    longitude: numberField(rawBody.longitude),
+    thumbnail: optionalString(rawBody.thumbnail),
+    tagIds: numberArrayField(rawBody.tagIds),
+  };
 }
 
 const KM_PER_LAT_DEGREE = 111.32;
@@ -49,7 +110,7 @@ function haversineDistanceKm(
   latA: number,
   lngA: number,
   latB: number,
-  lngB: number
+  lngB: number,
 ) {
   const dLat = toRadians(latB - latA);
   const dLng = toRadians(lngB - lngA);
@@ -68,15 +129,21 @@ function haversineDistanceKm(
 async function createExperience(
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
-
-    const experience = await experienceService.createExperience(
-      req.user!.id,
-      body
+    const normalizedBody = normalizeCreateBody(
+      req.body as Record<string, unknown>,
     );
+    const body: ExpPutPostBody = ExpPutPostBodySchema.parse(normalizedBody);
+
+    const files = (req.files as Express.Multer.File[]) ?? [];
+
+    const experience = await experienceService.createExperience({
+      userId: req.user!.id,
+      postBody: body,
+      files,
+    });
 
     return res.status(201).json(experience);
   } catch (err) {
@@ -97,7 +164,11 @@ async function getExperience(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function listExperiences(req: Request, res: Response, next: NextFunction) {
+async function listExperiences(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const query: ExpListQuery = ExpListQuerySchema.parse(req.query);
 
@@ -162,8 +233,8 @@ async function listExperiences(req: Request, res: Response, next: NextFunction) 
       query.sortBy === "avgRating"
         ? { avgRating: direction }
         : query.sortBy === "title"
-        ? { title: query.sortDirection || "asc" }
-        : { dateCreated: direction };
+          ? { title: query.sortDirection || "asc" }
+          : { dateCreated: direction };
 
     if (hasRadiusSearch) {
       const candidateLimit = Math.min(Math.max(limit + offset, 50), 200);
@@ -181,7 +252,7 @@ async function listExperiences(req: Request, res: Response, next: NextFunction) 
             query.lat!,
             query.lng!,
             experience.latitude,
-            experience.longitude
+            experience.longitude,
           ),
         }))
         .filter((experience) => experience.distanceKm <= radiusKm)
@@ -203,21 +274,25 @@ async function listExperiences(req: Request, res: Response, next: NextFunction) 
   }
 }
 
-
 // ---- UPDATE -----
 async function updateExperience(
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const experienceId = parseInt(req.params.id);
-    const body: ExpPutPostBody = ExpPutPostBodySchema.parse(req.body);
+    const normalizedBody = normalizeCreateBody(
+      req.body as Record<string, unknown>,
+    );
+    const body: ExpPutPostBody = ExpPutPostBodySchema.parse(normalizedBody);
+    const files = (req.files as Express.Multer.File[]) ?? [];
 
     const updatedExperience = await experienceService.updateExperience({
       experienceId,
       userId: req.user!.id,
       putData: body,
+      files,
     });
 
     return res.status(200).json(updatedExperience);
@@ -229,7 +304,7 @@ async function updateExperience(
 async function editExperience(
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const experienceId = parseInt(req.params.id);
@@ -250,7 +325,7 @@ async function editExperience(
 async function deleteExperience(
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const experienceId = parseInt(req.params.id);

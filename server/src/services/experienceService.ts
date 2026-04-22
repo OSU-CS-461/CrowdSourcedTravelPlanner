@@ -1,14 +1,15 @@
 // src/services/experience.service.ts
+
 import { Prisma } from "../generated/prisma/client";
 import prisma from "../db/prisma";
 import type { ExpPutPostBody, ExpPatchBody } from "../models/experience";
+import { uploadExperienceImages } from "./imageService";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { r2 } from "../lib/r2";
 
-/**
- * New architecture assumptions:
- * - Controller validates req.body with Zod and passes typed ExpPutPostBody / ExpPatchBody.
- * - Controller supplies userId (createdBy) separately.
- * - Service is DB-only: no validation, minimal branching.
- */
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
 
 export interface ListExperiencesParams {
   limit: number;
@@ -19,22 +20,32 @@ export interface ListExperiencesParams {
 
 export interface UpdateExperienceParams {
   experienceId: number;
-  userId: number; // kept for consistency; optionally enforce ownership later
+  userId: number;
   putData: ExpPutPostBody;
+  files?: Express.Multer.File[];
 }
 
 export interface EditExperienceParams {
   experienceId: number;
-  userId: number; // kept for consistency; optionally enforce ownership later
+  userId: number;
   patchData: ExpPatchBody;
 }
 
 export interface DeleteExperienceParams {
   experienceId: number;
-  userId: number; // kept for consistency; optionally enforce ownership later
+  userId: number;
 }
 
-// --- SELECTS (updated for new Tag/Category schema; removed type/parentCategoryId) ---
+// NEW: create with images
+export interface CreateExperienceParams {
+  userId: number;
+  postBody: ExpPutPostBody;
+  files?: Express.Multer.File[];
+}
+
+// -----------------------------------------------------------------------------
+// SELECTS
+// -----------------------------------------------------------------------------
 
 const TAG_SELECT = {
   id: true,
@@ -85,15 +96,31 @@ const EXPERIENCE_DETAIL_SELECT = {
   ...EXPERIENCE_LIST_SELECT,
   description: true,
   descriptionEdit: true,
+  images: {
+    select: {
+      id: true,
+      url: true,
+    },
+  },
 } satisfies Prisma.ExperienceSelect;
+
+// -----------------------------------------------------------------------------
+// TYPES (derived)
+// -----------------------------------------------------------------------------
 
 type ExperienceListWithJoins = Prisma.ExperienceGetPayload<{
   select: typeof EXPERIENCE_LIST_SELECT;
 }>;
+
 type ExperienceDetailWithJoins = Prisma.ExperienceGetPayload<{
   select: typeof EXPERIENCE_DETAIL_SELECT;
 }>;
+
 type ExperienceWithJoins = ExperienceListWithJoins | ExperienceDetailWithJoins;
+
+// -----------------------------------------------------------------------------
+// HELPERS
+// -----------------------------------------------------------------------------
 
 function serializeExperience(experience: ExperienceWithJoins) {
   const tags = experience.experienceTags.map((jt) => jt.tag);
@@ -111,16 +138,13 @@ function badRequest(message: string) {
   return { status: 400, message };
 }
 
-// --- helper: replace join-table rows safely in a transaction ---
 async function replaceExperienceTags(
   tx: Prisma.TransactionClient,
   experienceId: number,
-  tagIds: number[]
+  tagIds: number[],
 ) {
-  // Clear existing
   await tx.experienceTag.deleteMany({ where: { experienceId } });
 
-  // Recreate if any
   if (!tagIds.length) return;
 
   await tx.experienceTag.createMany({
@@ -132,7 +156,7 @@ async function replaceExperienceTags(
 async function assertCategoryAndTags(
   tx: Prisma.TransactionClient,
   categoryId: number,
-  tagIds: number[]
+  tagIds: number[],
 ) {
   const category = await tx.category.findUnique({
     where: { id: categoryId },
@@ -155,65 +179,141 @@ async function assertCategoryAndTags(
   }
 
   const hasCrossCategoryTag = tags.some((tag) => tag.categoryId !== categoryId);
+
   if (hasCrossCategoryTag) {
     throw badRequest("All tagIds must belong to the selected categoryId.");
   }
 }
 
 // -----------------------------------------------------------------------------
-// CREATE
+// CREATE (WITH IMAGE SUPPORT)
 // -----------------------------------------------------------------------------
-export async function createExperience(userId: number, postBody: ExpPutPostBody) {
-  const createdExperience = await prisma.$transaction(async (tx) => {
-    const tagIds = postBody.tagIds ?? [];
-    await assertCategoryAndTags(tx, postBody.categoryId, tagIds);
 
-    const created = await tx.experience.create({
-      data: {
-        createdBy: userId,
-        title: postBody.title,
-        description: postBody.description,
-        categoryId: postBody.categoryId,
+export async function createExperience({
+  userId,
+  postBody,
+  files = [],
+}: CreateExperienceParams) {
+  let experienceId: number | null = null;
+  let uploadedImages: Awaited<ReturnType<typeof uploadExperienceImages>> = [];
 
-        // Country is ISO-2 validated by Zod; store as-is
-        country: postBody.country,
+  try {
+    // STEP 1: Create experience (existing logic)
+    await prisma.$transaction(async (tx) => {
+      const tagIds = postBody.tagIds ?? [];
+      await assertCategoryAndTags(tx, postBody.categoryId, tagIds);
 
-        adminRegion: postBody.adminRegion ?? null,
-        city: postBody.city ?? null,
-        street: postBody.street ?? null,
-        postalCode: postBody.postalCode ?? null,
-        latitude: postBody.latitude,
-        longitude: postBody.longitude,
-        thumbnail: postBody.thumbnail ?? null,
-      },
-      select: { id: true },
+      const created = await tx.experience.create({
+        data: {
+          createdBy: userId,
+          title: postBody.title,
+          description: postBody.description,
+          categoryId: postBody.categoryId,
+          country: postBody.country,
+          adminRegion: postBody.adminRegion ?? null,
+          city: postBody.city ?? null,
+          street: postBody.street ?? null,
+          postalCode: postBody.postalCode ?? null,
+          latitude: postBody.latitude,
+          longitude: postBody.longitude,
+          thumbnail: postBody.thumbnail ?? null,
+        },
+        select: { id: true },
+      });
+
+      experienceId = created.id;
+
+      if (tagIds.length) {
+        await tx.experienceTag.createMany({
+          data: tagIds.map((tagId) => ({
+            experienceId: created.id,
+            tagId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      return tx.experience.findUniqueOrThrow({
+        where: { id: created.id },
+        select: EXPERIENCE_DETAIL_SELECT,
+      });
     });
 
-    if (tagIds.length) {
-      await tx.experienceTag.createMany({
-        data: tagIds.map((tagId) => ({
-          experienceId: created.id,
-          tagId,
-        })),
-        skipDuplicates: true,
+    // STEP 2: Upload images
+    if (files.length > 0 && experienceId) {
+      uploadedImages = await uploadExperienceImages({
+        createdBy: userId,
+        experienceId,
+        files,
       });
+
+      // 🔥 NEW: auto-set thumbnail if not provided
+      if (!postBody.thumbnail && uploadedImages.length > 0) {
+        await prisma.experience.update({
+          where: { id: experienceId },
+          data: {
+            thumbnail: uploadedImages[0].url,
+          },
+        });
+      }
     }
 
-    return tx.experience.findUniqueOrThrow({
-      where: { id: created.id },
+    // STEP 3: Return final result
+    const finalExperience = await prisma.experience.findUniqueOrThrow({
+      where: { id: experienceId! },
       select: EXPERIENCE_DETAIL_SELECT,
     });
-  }, {
-    maxWait: 5000,
-    timeout: 10000
-  });
 
-  return serializeExperience(createdExperience);
+    return {
+      ...serializeExperience(finalExperience),
+      images: uploadedImages,
+    };
+  } catch (error) {
+    // 🔥 rollback
+
+    if (uploadedImages.length > 0) {
+      try {
+        await prisma.image.deleteMany({
+          where: { id: { in: uploadedImages.map((i) => i.id) } },
+        });
+      } catch {
+        // keep original error
+      }
+
+      try {
+        await Promise.allSettled(
+          uploadedImages.map((img) =>
+            r2.send(
+              new DeleteObjectCommand({
+                Bucket: process.env.R2_BUCKET!,
+                Key: img.storageKey,
+              }),
+            ),
+          ),
+        );
+      } catch {
+        // keep original error
+      }
+    }
+
+    if (experienceId) {
+      try {
+        await prisma.experience.deleteMany({
+          where: { id: experienceId },
+        });
+      } catch {
+        // keep original error
+      }
+    }
+
+    throw error;
+  }
 }
 
 // -----------------------------------------------------------------------------
 // READ ONE
 // -----------------------------------------------------------------------------
+
 export async function getExperience(experienceId: number) {
   const experience = await prisma.experience.findUnique({
     where: { id: experienceId },
@@ -226,6 +326,7 @@ export async function getExperience(experienceId: number) {
 // -----------------------------------------------------------------------------
 // LIST
 // -----------------------------------------------------------------------------
+
 export async function listExperiences(params: ListExperiencesParams) {
   const { limit, offset, where, orderBy } = params;
 
@@ -241,21 +342,26 @@ export async function listExperiences(params: ListExperiencesParams) {
 }
 
 // -----------------------------------------------------------------------------
-// FULL UPDATE (PUT semantics)
+// UPDATE (PUT)
 // -----------------------------------------------------------------------------
+
 export async function updateExperience(params: UpdateExperienceParams) {
-  const { experienceId, putData } = params;
+  const { experienceId, userId, putData, files = [] } = params;
 
   const exists = await prisma.experience.findUnique({
     where: { id: experienceId },
     select: { id: true, categoryId: true },
   });
+
   if (!exists) return null;
 
   const updated = await prisma.$transaction(async (tx) => {
     const tagIds = putData.tagIds ?? [];
 
-    if (putData.tagIds === undefined && exists.categoryId !== putData.categoryId) {
+    if (
+      putData.tagIds === undefined &&
+      exists.categoryId !== putData.categoryId
+    ) {
       throw badRequest("tagIds is required when changing categoryId.");
     }
 
@@ -268,22 +374,17 @@ export async function updateExperience(params: UpdateExperienceParams) {
         description: putData.description,
         categoryId: putData.categoryId,
         country: putData.country,
-
         adminRegion: putData.adminRegion ?? null,
         city: putData.city ?? null,
         street: putData.street ?? null,
         postalCode: putData.postalCode ?? null,
         latitude: putData.latitude,
         longitude: putData.longitude,
-
-        thumbnail: putData.thumbnail ?? null,
-
-        // If lastUpdated is @updatedAt in Prisma schema, you can remove this line.
+        thumbnail: putData.thumbnail ?? undefined,
         lastUpdated: new Date(),
       },
     });
 
-    // With Zod, tagIds is optional: only replace if provided
     if (putData.tagIds !== undefined) {
       await replaceExperienceTags(tx, experienceId, tagIds);
     }
@@ -294,12 +395,40 @@ export async function updateExperience(params: UpdateExperienceParams) {
     });
   });
 
-  return serializeExperience(updated);
+  if (files.length > 0) {
+    const uploadedImages = await uploadExperienceImages({
+      createdBy: userId,
+      experienceId,
+      files,
+    });
+
+    if (
+      putData.thumbnail === undefined &&
+      !updated.thumbnail &&
+      uploadedImages.length > 0
+    ) {
+      await prisma.experience.update({
+        where: { id: experienceId },
+        data: {
+          thumbnail: uploadedImages[0].url,
+          lastUpdated: new Date(),
+        },
+      });
+    }
+  }
+
+  const refreshed = await prisma.experience.findUniqueOrThrow({
+    where: { id: experienceId },
+    select: EXPERIENCE_DETAIL_SELECT,
+  });
+
+  return serializeExperience(refreshed);
 }
 
 // -----------------------------------------------------------------------------
-// PARTIAL UPDATE (PATCH semantics)
+// PATCH
 // -----------------------------------------------------------------------------
+
 export async function editExperience(params: EditExperienceParams) {
   const { experienceId, patchData } = params;
 
@@ -307,6 +436,7 @@ export async function editExperience(params: EditExperienceParams) {
     where: { id: experienceId },
     select: { id: true, categoryId: true },
   });
+
   if (!exists) return null;
 
   const edited = await prisma.$transaction(async (tx) => {
@@ -315,16 +445,17 @@ export async function editExperience(params: EditExperienceParams) {
       data: {
         thumbnail: patchData.thumbnail ?? undefined,
         descriptionEdit: patchData.descriptionEdit ?? undefined,
-
-        // If lastUpdated is @updatedAt in Prisma schema, you can remove this line.
         lastUpdated: new Date(),
       },
     });
 
     if (patchData.tagIds !== undefined) {
       if (!exists.categoryId) {
-        throw badRequest("Cannot set tagIds for an experience without categoryId.");
+        throw badRequest(
+          "Cannot set tagIds for an experience without categoryId.",
+        );
       }
+
       await assertCategoryAndTags(tx, exists.categoryId, patchData.tagIds);
       await replaceExperienceTags(tx, experienceId, patchData.tagIds);
     }
@@ -341,6 +472,7 @@ export async function editExperience(params: EditExperienceParams) {
 // -----------------------------------------------------------------------------
 // DELETE
 // -----------------------------------------------------------------------------
+
 export async function deleteExperience(params: DeleteExperienceParams) {
   const { experienceId } = params;
   await prisma.experience.delete({ where: { id: experienceId } });
