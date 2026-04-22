@@ -1,5 +1,7 @@
 import { apiClient } from "../../shared/services/api.service";
 
+export type ReviewSortOption = "recent" | "highest" | "lowest" | "media";
+
 // -----------------------------------------------------------------------------
 // TYPES
 // -----------------------------------------------------------------------------
@@ -26,16 +28,15 @@ export interface ApiExperience {
   postalCode: string | null;
   latitude: number | null;
   longitude: number | null;
-  images?:
-    | Array<
-        | string
-        | {
-            id?: number | string;
-            url?: string | null;
-          }
-        | null
-      >
-    | null;
+  reviews?: any[];
+  images?: Array<
+    | string
+    | {
+        id?: number | string;
+        url?: string | null;
+      }
+    | null
+  > | null;
 }
 
 // -----------------------------------------------------------------------------
@@ -50,8 +51,16 @@ export async function createExperience(formData: FormData) {
 // READ
 // -----------------------------------------------------------------------------
 
-export async function getExperienceById(id: number | string) {
-  return apiClient.get<ApiExperience>(`/experiences/${id}`);
+// -----------------------------------------------------------------------------
+// READ
+// -----------------------------------------------------------------------------
+
+export async function getExperienceById(
+  id: number | string,
+  sort?: ReviewSortOption,
+) {
+  const url = sort ? `/experiences/${id}?sort=${sort}` : `/experiences/${id}`;
+  return apiClient.get<ApiExperience>(url);
 }
 
 export async function updateExperience(
