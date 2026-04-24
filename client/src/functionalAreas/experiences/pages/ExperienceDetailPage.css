@@ -21,6 +21,32 @@
 .toolbar-actions {
   display: flex;
   gap: 0.7rem;
+  align-items: center;
+}
+
+.toolbar-like {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+}
+
+.toolbar-like:hover:not(:disabled) {
+  border-color: rgba(255, 120, 160, 0.55);
+}
+
+.toolbar-like:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.toolbar-like.is-liked {
+  border-color: rgba(255, 105, 150, 0.85);
+  background: rgba(255, 105, 150, 0.12);
 }
 
 .toolbar-back,
@@ -163,6 +189,23 @@
   font-size: 0.82rem;
   line-height: 1.3;
   background: var(--chip-bg);
+}
+
+a.tag-pill-link {
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  background: var(--chip-bg);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+a.tag-pill-link:hover {
+  border-color: rgba(106, 143, 232, 0.65);
+  background: rgba(106, 143, 232, 0.12);
 }
 
 .detail-meta {

@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
-import { apiClient, setAuthToken } from "../../../shared/services/api.service";
+import {
+  apiClient,
+  getMyLikedExperiencesStatus,
+  likeExperience,
+  setAuthToken,
+  unlikeExperience,
+} from "../../../shared/services/api.service";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { USER_STORAGE_KEY } from "../../auth/context/auth-context";
 import ReviewsSection from "../../reviews/components/ReviewSection";
@@ -95,6 +101,9 @@ export default function ExperienceDetailPage() {
   const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [likeStatusLoaded, setLikeStatusLoaded] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -134,6 +143,36 @@ export default function ExperienceDetailPage() {
       });
   }, [id, previewExperience, previewMatchesRoute]);
 
+  useEffect(() => {
+    if (!id) return;
+    const experienceId = Number(id);
+    if (!Number.isFinite(experienceId) || experienceId <= 0) return;
+
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) return;
+    setAuthToken(token);
+
+    let cancelled = false;
+    setLikeStatusLoaded(false);
+    void (async () => {
+      try {
+        const { liked: isLiked } = await getMyLikedExperiencesStatus(experienceId);
+        if (!cancelled) {
+          setLiked(isLiked);
+          setLikeStatusLoaded(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setLikeStatusLoaded(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
   const currentUserId = useMemo(() => {
     if (user?.id !== undefined && user?.id !== null) {
       return user.id;
@@ -159,6 +198,34 @@ export default function ExperienceDetailPage() {
       a.label.localeCompare(b.label)
     );
   }, [experience?.tags]);
+
+  async function handleToggleLike() {
+    if (!id || likeLoading) return;
+    const experienceId = Number(id);
+    if (!Number.isFinite(experienceId) || experienceId <= 0) return;
+
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) {
+      alert("Please sign in to save experiences.");
+      return;
+    }
+    setAuthToken(token);
+    setLikeLoading(true);
+    try {
+      if (liked) {
+        await unlikeExperience(experienceId);
+        setLiked(false);
+      } else {
+        await likeExperience(experienceId);
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Could not update saved experience. Try again.");
+    } finally {
+      setLikeLoading(false);
+    }
+  }
 
   async function handleDelete() {
     if (!id || !experience) return;
@@ -209,25 +276,38 @@ export default function ExperienceDetailPage() {
           Back
         </button>
 
-        {canManageExperience && (
-          <div className="toolbar-actions">
-            <button
-              className="toolbar-edit"
-              onClick={() =>
-                navigate(ClientRoutes.EXPERIENCE_UPDATE.replace(":id", id!))
-              }
-            >
-              Edit
-            </button>
-            <button
-              className="toolbar-delete"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </button>
-          </div>
-        )}
+        <div className="toolbar-actions">
+          <button
+            type="button"
+            className={`toolbar-like${liked ? " is-liked" : ""}`}
+            onClick={() => void handleToggleLike()}
+            disabled={likeLoading || !likeStatusLoaded}
+            title={liked ? "Remove from saved" : "Save experience"}
+            aria-pressed={liked}
+            aria-label={liked ? "Remove from saved experiences" : "Save experience"}
+          >
+            {liked ? "♥" : "♡"}
+          </button>
+          {canManageExperience && (
+            <>
+              <button
+                className="toolbar-edit"
+                onClick={() =>
+                  navigate(ClientRoutes.EXPERIENCE_UPDATE.replace(":id", id!))
+                }
+              >
+                Edit
+              </button>
+              <button
+                className="toolbar-delete"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <article className="detail-card">
@@ -267,9 +347,13 @@ export default function ExperienceDetailPage() {
               <div className="tag-list">
                 {sortedTags.length ? (
                   sortedTags.map((tag) => (
-                    <span key={tag.id} className="tag-pill">
+                    <Link
+                      key={tag.id}
+                      className="tag-pill-link"
+                      to={ClientRoutes.TAG_DETAILS.replace(":id", String(tag.id))}
+                    >
                       {tag.label}
-                    </span>
+                    </Link>
                   ))
                 ) : (
                   <span className="detail-muted">No tags</span>
