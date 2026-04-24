@@ -103,3 +103,8 @@ export type UserLikedExperience = Prisma.UserLikedExperienceModel
  * 
  */
 export type UserLikedTag = Prisma.UserLikedTagModel
+/**
+ * Model UserLikedTrip
+ * 
+ */
+export type UserLikedTrip = Prisma.UserLikedTripModel

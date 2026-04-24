@@ -59,7 +59,8 @@ export const ModelName = {
   ExperienceTag: 'ExperienceTag',
   Interest: 'Interest',
   UserLikedExperience: 'UserLikedExperience',
-  UserLikedTag: 'UserLikedTag'
+  UserLikedTag: 'UserLikedTag',
+  UserLikedTrip: 'UserLikedTrip'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -209,6 +210,15 @@ export const UserLikedTagScalarFieldEnum = {
 } as const
 
 export type UserLikedTagScalarFieldEnum = (typeof UserLikedTagScalarFieldEnum)[keyof typeof UserLikedTagScalarFieldEnum]
+
+
+export const UserLikedTripScalarFieldEnum = {
+  userId: 'userId',
+  tripId: 'tripId',
+  dateCreated: 'dateCreated'
+} as const
+
+export type UserLikedTripScalarFieldEnum = (typeof UserLikedTripScalarFieldEnum)[keyof typeof UserLikedTripScalarFieldEnum]
 
 
 export const SortOrder = {

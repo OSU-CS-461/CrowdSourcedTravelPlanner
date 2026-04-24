@@ -400,7 +400,8 @@ export const ModelName = {
   ExperienceTag: 'ExperienceTag',
   Interest: 'Interest',
   UserLikedExperience: 'UserLikedExperience',
-  UserLikedTag: 'UserLikedTag'
+  UserLikedTag: 'UserLikedTag',
+  UserLikedTrip: 'UserLikedTrip'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userSettings" | "experience" | "review" | "trip" | "tripExperience" | "category" | "tag" | "experienceTag" | "interest" | "userLikedExperience" | "userLikedTag"
+    modelProps: "user" | "userSettings" | "experience" | "review" | "trip" | "tripExperience" | "category" | "tag" | "experienceTag" | "interest" | "userLikedExperience" | "userLikedTag" | "userLikedTrip"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1308,6 +1309,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserLikedTrip: {
+      payload: Prisma.$UserLikedTripPayload<ExtArgs>
+      fields: Prisma.UserLikedTripFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserLikedTripFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserLikedTripFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>
+        }
+        findFirst: {
+          args: Prisma.UserLikedTripFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserLikedTripFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>
+        }
+        findMany: {
+          args: Prisma.UserLikedTripFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>[]
+        }
+        create: {
+          args: Prisma.UserLikedTripCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>
+        }
+        createMany: {
+          args: Prisma.UserLikedTripCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserLikedTripCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>[]
+        }
+        delete: {
+          args: Prisma.UserLikedTripDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>
+        }
+        update: {
+          args: Prisma.UserLikedTripUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserLikedTripDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserLikedTripUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserLikedTripUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserLikedTripUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTripPayload>
+        }
+        aggregate: {
+          args: Prisma.UserLikedTripAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserLikedTrip>
+        }
+        groupBy: {
+          args: Prisma.UserLikedTripGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLikedTripGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserLikedTripCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLikedTripCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1478,6 +1553,15 @@ export const UserLikedTagScalarFieldEnum = {
 } as const
 
 export type UserLikedTagScalarFieldEnum = (typeof UserLikedTagScalarFieldEnum)[keyof typeof UserLikedTagScalarFieldEnum]
+
+
+export const UserLikedTripScalarFieldEnum = {
+  userId: 'userId',
+  tripId: 'tripId',
+  dateCreated: 'dateCreated'
+} as const
+
+export type UserLikedTripScalarFieldEnum = (typeof UserLikedTripScalarFieldEnum)[keyof typeof UserLikedTripScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1664,6 +1748,7 @@ export type GlobalOmitConfig = {
   interest?: Prisma.InterestOmit
   userLikedExperience?: Prisma.UserLikedExperienceOmit
   userLikedTag?: Prisma.UserLikedTagOmit
+  userLikedTrip?: Prisma.UserLikedTripOmit
 }
 
 /* Types for Logging */

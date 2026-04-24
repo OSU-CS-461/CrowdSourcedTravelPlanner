@@ -214,6 +214,7 @@ export type UserWhereInput = {
   settings?: Prisma.XOR<Prisma.UserSettingsNullableScalarRelationFilter, Prisma.UserSettingsWhereInput> | null
   likedExperiences?: Prisma.UserLikedExperienceListRelationFilter
   likedTags?: Prisma.UserLikedTagListRelationFilter
+  likedTrips?: Prisma.UserLikedTripListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -228,6 +229,7 @@ export type UserOrderByWithRelationInput = {
   settings?: Prisma.UserSettingsOrderByWithRelationInput
   likedExperiences?: Prisma.UserLikedExperienceOrderByRelationAggregateInput
   likedTags?: Prisma.UserLikedTagOrderByRelationAggregateInput
+  likedTrips?: Prisma.UserLikedTripOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -245,6 +247,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   settings?: Prisma.XOR<Prisma.UserSettingsNullableScalarRelationFilter, Prisma.UserSettingsWhereInput> | null
   likedExperiences?: Prisma.UserLikedExperienceListRelationFilter
   likedTags?: Prisma.UserLikedTagListRelationFilter
+  likedTrips?: Prisma.UserLikedTripListRelationFilter
 }, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -280,6 +283,7 @@ export type UserCreateInput = {
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -294,6 +298,7 @@ export type UserUncheckedCreateInput = {
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -307,6 +312,7 @@ export type UserUpdateInput = {
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -321,6 +327,7 @@ export type UserUncheckedUpdateInput = {
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -487,6 +494,20 @@ export type UserUpdateOneRequiredWithoutLikedTagsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLikedTagsInput, Prisma.UserUpdateWithoutLikedTagsInput>, Prisma.UserUncheckedUpdateWithoutLikedTagsInput>
 }
 
+export type UserCreateNestedOneWithoutLikedTripsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLikedTripsInput, Prisma.UserUncheckedCreateWithoutLikedTripsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLikedTripsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLikedTripsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLikedTripsInput, Prisma.UserUncheckedCreateWithoutLikedTripsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLikedTripsInput
+  upsert?: Prisma.UserUpsertWithoutLikedTripsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLikedTripsInput, Prisma.UserUpdateWithoutLikedTripsInput>, Prisma.UserUncheckedUpdateWithoutLikedTripsInput>
+}
+
 export type UserCreateWithoutSettingsInput = {
   email: string
   username: string
@@ -497,6 +518,7 @@ export type UserCreateWithoutSettingsInput = {
   interests?: Prisma.InterestCreateNestedManyWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSettingsInput = {
@@ -510,6 +532,7 @@ export type UserUncheckedCreateWithoutSettingsInput = {
   interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSettingsInput = {
@@ -538,6 +561,7 @@ export type UserUpdateWithoutSettingsInput = {
   interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSettingsInput = {
@@ -551,6 +575,7 @@ export type UserUncheckedUpdateWithoutSettingsInput = {
   interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutExperiencesInput = {
@@ -563,6 +588,7 @@ export type UserCreateWithoutExperiencesInput = {
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutExperiencesInput = {
@@ -576,6 +602,7 @@ export type UserUncheckedCreateWithoutExperiencesInput = {
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutExperiencesInput = {
@@ -604,6 +631,7 @@ export type UserUpdateWithoutExperiencesInput = {
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExperiencesInput = {
@@ -617,6 +645,7 @@ export type UserUncheckedUpdateWithoutExperiencesInput = {
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReviewsInput = {
@@ -629,6 +658,7 @@ export type UserCreateWithoutReviewsInput = {
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsInput = {
@@ -642,6 +672,7 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsInput = {
@@ -670,6 +701,7 @@ export type UserUpdateWithoutReviewsInput = {
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -683,6 +715,7 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTripsInput = {
@@ -695,6 +728,7 @@ export type UserCreateWithoutTripsInput = {
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTripsInput = {
@@ -708,6 +742,7 @@ export type UserUncheckedCreateWithoutTripsInput = {
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTripsInput = {
@@ -736,6 +771,7 @@ export type UserUpdateWithoutTripsInput = {
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTripsInput = {
@@ -749,6 +785,7 @@ export type UserUncheckedUpdateWithoutTripsInput = {
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInterestsInput = {
@@ -761,6 +798,7 @@ export type UserCreateWithoutInterestsInput = {
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInterestsInput = {
@@ -774,6 +812,7 @@ export type UserUncheckedCreateWithoutInterestsInput = {
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInterestsInput = {
@@ -802,6 +841,7 @@ export type UserUpdateWithoutInterestsInput = {
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInterestsInput = {
@@ -815,6 +855,7 @@ export type UserUncheckedUpdateWithoutInterestsInput = {
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLikedExperiencesInput = {
@@ -827,6 +868,7 @@ export type UserCreateWithoutLikedExperiencesInput = {
   interests?: Prisma.InterestCreateNestedManyWithoutUserInput
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLikedExperiencesInput = {
@@ -840,6 +882,7 @@ export type UserUncheckedCreateWithoutLikedExperiencesInput = {
   interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLikedExperiencesInput = {
@@ -868,6 +911,7 @@ export type UserUpdateWithoutLikedExperiencesInput = {
   interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLikedExperiencesInput = {
@@ -881,6 +925,7 @@ export type UserUncheckedUpdateWithoutLikedExperiencesInput = {
   interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLikedTagsInput = {
@@ -893,6 +938,7 @@ export type UserCreateWithoutLikedTagsInput = {
   interests?: Prisma.InterestCreateNestedManyWithoutUserInput
   settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLikedTagsInput = {
@@ -906,6 +952,7 @@ export type UserUncheckedCreateWithoutLikedTagsInput = {
   interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
   settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
+  likedTrips?: Prisma.UserLikedTripUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLikedTagsInput = {
@@ -934,6 +981,7 @@ export type UserUpdateWithoutLikedTagsInput = {
   interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
   settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLikedTagsInput = {
@@ -947,6 +995,77 @@ export type UserUncheckedUpdateWithoutLikedTagsInput = {
   interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
   settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
   likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
+  likedTrips?: Prisma.UserLikedTripUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLikedTripsInput = {
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  likedExperiences?: Prisma.UserLikedExperienceCreateNestedManyWithoutUserInput
+  likedTags?: Prisma.UserLikedTagCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutLikedTripsInput = {
+  id?: number
+  email: string
+  username: string
+  passwordDigest: string
+  experiences?: Prisma.ExperienceUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutUserInput
+  interests?: Prisma.InterestUncheckedCreateNestedManyWithoutUserInput
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  likedExperiences?: Prisma.UserLikedExperienceUncheckedCreateNestedManyWithoutUserInput
+  likedTags?: Prisma.UserLikedTagUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutLikedTripsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLikedTripsInput, Prisma.UserUncheckedCreateWithoutLikedTripsInput>
+}
+
+export type UserUpsertWithoutLikedTripsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLikedTripsInput, Prisma.UserUncheckedUpdateWithoutLikedTripsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLikedTripsInput, Prisma.UserUncheckedCreateWithoutLikedTripsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLikedTripsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLikedTripsInput, Prisma.UserUncheckedUpdateWithoutLikedTripsInput>
+}
+
+export type UserUpdateWithoutLikedTripsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  likedExperiences?: Prisma.UserLikedExperienceUpdateManyWithoutUserNestedInput
+  likedTags?: Prisma.UserLikedTagUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLikedTripsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordDigest?: Prisma.StringFieldUpdateOperationsInput | string
+  experiences?: Prisma.ExperienceUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  trips?: Prisma.TripUncheckedUpdateManyWithoutUserNestedInput
+  interests?: Prisma.InterestUncheckedUpdateManyWithoutUserNestedInput
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  likedExperiences?: Prisma.UserLikedExperienceUncheckedUpdateManyWithoutUserNestedInput
+  likedTags?: Prisma.UserLikedTagUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -961,6 +1080,7 @@ export type UserCountOutputType = {
   interests: number
   likedExperiences: number
   likedTags: number
+  likedTrips: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -970,6 +1090,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   interests?: boolean | UserCountOutputTypeCountInterestsArgs
   likedExperiences?: boolean | UserCountOutputTypeCountLikedExperiencesArgs
   likedTags?: boolean | UserCountOutputTypeCountLikedTagsArgs
+  likedTrips?: boolean | UserCountOutputTypeCountLikedTripsArgs
 }
 
 /**
@@ -1024,6 +1145,13 @@ export type UserCountOutputTypeCountLikedTagsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.UserLikedTagWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLikedTripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserLikedTripWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1037,6 +1165,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   settings?: boolean | Prisma.User$settingsArgs<ExtArgs>
   likedExperiences?: boolean | Prisma.User$likedExperiencesArgs<ExtArgs>
   likedTags?: boolean | Prisma.User$likedTagsArgs<ExtArgs>
+  likedTrips?: boolean | Prisma.User$likedTripsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1070,6 +1199,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   settings?: boolean | Prisma.User$settingsArgs<ExtArgs>
   likedExperiences?: boolean | Prisma.User$likedExperiencesArgs<ExtArgs>
   likedTags?: boolean | Prisma.User$likedTagsArgs<ExtArgs>
+  likedTrips?: boolean | Prisma.User$likedTripsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1085,6 +1215,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     settings: Prisma.$UserSettingsPayload<ExtArgs> | null
     likedExperiences: Prisma.$UserLikedExperiencePayload<ExtArgs>[]
     likedTags: Prisma.$UserLikedTagPayload<ExtArgs>[]
+    likedTrips: Prisma.$UserLikedTripPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1492,6 +1623,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   settings<T extends Prisma.User$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$settingsArgs<ExtArgs>>): Prisma.Prisma__UserSettingsClient<runtime.Types.Result.GetResult<Prisma.$UserSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   likedExperiences<T extends Prisma.User$likedExperiencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$likedExperiencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserLikedExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   likedTags<T extends Prisma.User$likedTagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$likedTagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserLikedTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  likedTrips<T extends Prisma.User$likedTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$likedTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserLikedTripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2073,6 +2205,30 @@ export type User$likedTagsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.UserLikedTagScalarFieldEnum | Prisma.UserLikedTagScalarFieldEnum[]
+}
+
+/**
+ * User.likedTrips
+ */
+export type User$likedTripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserLikedTrip
+   */
+  select?: Prisma.UserLikedTripSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserLikedTrip
+   */
+  omit?: Prisma.UserLikedTripOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserLikedTripInclude<ExtArgs> | null
+  where?: Prisma.UserLikedTripWhereInput
+  orderBy?: Prisma.UserLikedTripOrderByWithRelationInput | Prisma.UserLikedTripOrderByWithRelationInput[]
+  cursor?: Prisma.UserLikedTripWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserLikedTripScalarFieldEnum | Prisma.UserLikedTripScalarFieldEnum[]
 }
 
 /**
