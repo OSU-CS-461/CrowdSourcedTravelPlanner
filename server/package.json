@@ -10,6 +10,7 @@
     "start:production": "cross-env NODE_ENV=production tsx src/index.ts",
     "prisma:generate": "prisma generate --no-engine",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "db:create-test-user": "tsx create-test-user.ts",
     "test:unit": "cross-env NODE_ENV=test vitest --run",
     "test:unit:coverage": "cross-env NODE_ENV=test vitest run --coverage",
     "test:unit:watch": "cross-env NODE_ENV=test vitest --reporter=verbose",
