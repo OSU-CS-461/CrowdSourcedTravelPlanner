@@ -30,6 +30,7 @@ export default function ExperienceForm({
   featuresLoading = false,
   tagsError = null,
   onCategoryChange,
+  likedTags = [],
 }: FormTemplateProps) {
   const navigate = useNavigate();
   const [title, setTitle] = useState(initialValues.title ?? "");
@@ -156,6 +157,7 @@ export default function ExperienceForm({
           tagsError={tagsError}
           onCategoryChange={handleCategoryChange}
           onTagIdsChange={handleTagIdsChange}
+          likedTags={likedTags}
         />
       )}
 
