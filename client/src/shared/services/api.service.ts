@@ -78,3 +78,68 @@ export const updateInterest = async (id: number, input: {
 export const deleteInterest = async (id: number) => {
   await apiClient.delete(`/interests/${id}`);
 };
+
+export type LikedExperienceSummary = {
+  id: number;
+  title: string;
+  thumbnail?: string | null;
+  city?: string | null;
+  country?: string | null;
+  createdByUsername?: string | null;
+  dateCreated: string;
+};
+
+export type LikedTagSummary = {
+  id: number;
+  slug: string;
+  label: string;
+  categoryId: number;
+  category?: { id: number; slug: string; label: string };
+};
+
+export const getMyLikedExperiencesStatus = async (experienceId: number) => {
+  const response = await apiClient.get<{ liked: boolean }>(
+    `/users/me/liked-experiences/status/${experienceId}`
+  );
+  return response.data;
+};
+
+export const getMyLikedExperiences = async () => {
+  const response = await apiClient.get<LikedExperienceSummary[]>(
+    "/users/me/liked-experiences"
+  );
+  return response.data;
+};
+
+export const likeExperience = async (experienceId: number) => {
+  await apiClient.post("/users/me/liked-experiences", { experienceId });
+};
+
+export const unlikeExperience = async (experienceId: number) => {
+  await apiClient.delete(`/users/me/liked-experiences/${experienceId}`);
+};
+
+export const getTagById = async (id: number) => {
+  const response = await apiClient.get<LikedTagSummary>(`/tags/${id}`);
+  return response.data;
+};
+
+export const getMyLikedTagsStatus = async (tagId: number) => {
+  const response = await apiClient.get<{ liked: boolean }>(
+    `/users/me/liked-tags/status/${tagId}`
+  );
+  return response.data;
+};
+
+export const getMyLikedTags = async () => {
+  const response = await apiClient.get<LikedTagSummary[]>("/users/me/liked-tags");
+  return response.data;
+};
+
+export const likeTag = async (tagId: number) => {
+  await apiClient.post("/users/me/liked-tags", { tagId });
+};
+
+export const unlikeTag = async (tagId: number) => {
+  await apiClient.delete(`/users/me/liked-tags/${tagId}`);
+};

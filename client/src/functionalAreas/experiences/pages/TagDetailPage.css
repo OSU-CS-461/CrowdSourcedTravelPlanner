@@ -1,0 +1,103 @@
+.tag-detail-page {
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-border: rgba(255, 255, 255, 0.16);
+  --text-muted: rgba(255, 255, 255, 0.72);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem 3rem;
+}
+
+.tag-detail-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.tag-detail-page .toolbar-back {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.45rem 0.8rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+}
+
+.tag-detail-page .toolbar-back:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.tag-detail-toolbar h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.tag-detail-meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0.35rem 0 0;
+}
+
+.tag-detail-like {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font-size: 1.15rem;
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+}
+
+.tag-detail-like:hover:not(:disabled) {
+  border-color: rgba(255, 120, 160, 0.55);
+}
+
+.tag-detail-like:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tag-detail-like.is-liked {
+  border-color: rgba(255, 105, 150, 0.85);
+  background: rgba(255, 105, 150, 0.12);
+}
+
+.tag-detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tag-detail-list li {
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  background: var(--surface);
+}
+
+.tag-detail-list a {
+  display: block;
+  padding: 1rem 1.1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tag-detail-list a:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tag-detail-list .exp-title {
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.tag-detail-list .exp-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}

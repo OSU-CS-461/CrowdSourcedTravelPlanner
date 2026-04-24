@@ -16,6 +16,7 @@ import RootLayout from "./RootLayout";
 import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
 import MyExperiencesPage from "../functionalAreas/experiences/pages/MyExperiencesPage";
 import TripDetailsPage from "../functionalAreas/trips/pages/TripDetailsPage";
+import TagDetailPage from "../functionalAreas/experiences/pages/TagDetailPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -70,6 +71,7 @@ export default function App() {
           path={ClientRoutes.INTERESTS}
           element={<InterestsPage />}
         />
+        <Route path={ClientRoutes.TAG_DETAILS} element={<TagDetailPage />} />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
       </Route>
 
