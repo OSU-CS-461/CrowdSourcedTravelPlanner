@@ -66,3 +66,13 @@ export type ExperienceTag = Prisma.ExperienceTagModel
  * 
  */
 export type Interest = Prisma.InterestModel
+/**
+ * Model UserLikedExperience
+ * 
+ */
+export type UserLikedExperience = Prisma.UserLikedExperienceModel
+/**
+ * Model UserLikedTag
+ * 
+ */
+export type UserLikedTag = Prisma.UserLikedTagModel

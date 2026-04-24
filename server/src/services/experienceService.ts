@@ -50,7 +50,7 @@ const TAG_SELECT = {
   },
 } satisfies Prisma.TagSelect;
 
-const EXPERIENCE_LIST_SELECT = {
+export const EXPERIENCE_LIST_SELECT = {
   id: true,
   title: true,
   country: true,
@@ -95,7 +95,7 @@ type ExperienceDetailWithJoins = Prisma.ExperienceGetPayload<{
 }>;
 type ExperienceWithJoins = ExperienceListWithJoins | ExperienceDetailWithJoins;
 
-function serializeExperience(experience: ExperienceWithJoins) {
+export function serializeExperience(experience: ExperienceWithJoins) {
   const tags = experience.experienceTags.map((jt) => jt.tag);
   const { experienceTags: _joined, user, ...rest } = experience;
 
