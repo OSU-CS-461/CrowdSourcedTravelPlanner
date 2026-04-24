@@ -1,5 +1,5 @@
-# Local PostgreSQL for development. Start with: docker compose up -d
-# Then from /server: npm run prisma:migrate:deploy && npm run db:create-test-user
+# Optional local PostgreSQL (not required). Default dev DB is Prisma dev — see WINDOWS_SETUP.md.
+# docker compose up -d  then set server/.env DATABASE_URL to the postgresql://... string for this container.
 services:
   db:
     image: postgres:16-alpine
