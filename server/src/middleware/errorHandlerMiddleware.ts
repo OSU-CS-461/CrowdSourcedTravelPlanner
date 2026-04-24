@@ -76,10 +76,20 @@ export default function errorHandlerMiddleware(
           error: "Failed to contact the database.",
         });
       }
+      case "P1000":
+      case "P1001":
+      case "P1002":
+      case "P1003": {
+        return res.status(503).json({
+          error:
+            "Cannot reach the database. Check DATABASE_URL, that Prisma dev (or Postgres) is running, then restart the API.",
+          details: { code: err.code },
+        });
+      }
       default: {
-        // Fallback for other Prisma codes
-        return res.status(400).json({
-          error: "Database error",
+        // Other Prisma engine/query errors — include code so the UI is not a blind "Database error"
+        return res.status(500).json({
+          error: err.message || "Database error",
           details: { code: err.code },
         });
       }
