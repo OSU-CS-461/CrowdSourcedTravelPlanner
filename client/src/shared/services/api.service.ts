@@ -119,6 +119,35 @@ export const unlikeExperience = async (experienceId: number) => {
   await apiClient.delete(`/users/me/liked-experiences/${experienceId}`);
 };
 
+export type LikedTripSummary = {
+  id: number;
+  title: string;
+  dateCreated: string;
+  createdByUsername?: string | null;
+};
+
+export const getMyLikedTripsStatus = async (tripId: number) => {
+  const response = await apiClient.get<{ liked: boolean }>(
+    `/users/me/liked-trips/status/${tripId}`
+  );
+  return response.data;
+};
+
+export const getMyLikedTrips = async () => {
+  const response = await apiClient.get<LikedTripSummary[]>(
+    "/users/me/liked-trips"
+  );
+  return response.data;
+};
+
+export const likeTrip = async (tripId: number) => {
+  await apiClient.post("/users/me/liked-trips", { tripId });
+};
+
+export const unlikeTrip = async (tripId: number) => {
+  await apiClient.delete(`/users/me/liked-trips/${tripId}`);
+};
+
 export const getTagById = async (id: number) => {
   const response = await apiClient.get<LikedTagSummary>(`/tags/${id}`);
   return response.data;

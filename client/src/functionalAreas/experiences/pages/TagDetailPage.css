@@ -45,11 +45,17 @@
 
 .tag-detail-like {
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--surface);
   color: inherit;
-  font-size: 1.15rem;
-  padding: 0.45rem 0.65rem;
+  font-size: 1.85rem;
+  line-height: 1;
+  padding: 0.55rem 0.85rem;
+  min-width: 2.85rem;
+  min-height: 2.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 

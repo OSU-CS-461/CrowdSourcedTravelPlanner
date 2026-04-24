@@ -162,6 +162,32 @@
   text-align: left;
 }
 
+.home-api-error {
+  background: #fee;
+  color: #8b0000;
+  border: 1px solid #f5c2c7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.home-api-error p {
+  margin: 0 0 8px;
+}
+
+.home-api-error p:last-child {
+  margin-bottom: 0;
+}
+
+.home-api-error-hint {
+  font-size: 0.9rem;
+  color: #5c1018;
+}
+
+.home-api-error code {
+  font-size: 0.85rem;
+}
+
 .button-group {
   margin-top: 16px;
   margin-bottom: 32px;
@@ -186,11 +212,6 @@
   color: white;
 }
 
-.btn-interests {
-  background-color: #34a853;
-  color: white;
-}
-
 .section-title {
   margin-top: 40px;
 }
@@ -199,6 +220,51 @@
 .card {
   border-bottom: 1px solid #eee;
   padding: 20px 0;
+}
+
+.card--dashboard {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.card--dashboard .card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-like-btn {
+  flex-shrink: 0;
+  align-self: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-size: 1.75rem;
+  line-height: 1;
+  padding: 0.5rem 0.75rem;
+  min-width: 3rem;
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dashboard-like-btn:hover:not(:disabled) {
+  border-color: rgba(255, 120, 160, 0.55);
+}
+
+.dashboard-like-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dashboard-like-btn.is-liked {
+  border-color: rgba(255, 105, 150, 0.85);
+  background: rgba(255, 105, 150, 0.16);
 }
 
 .card-title {
