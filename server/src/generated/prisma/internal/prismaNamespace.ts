@@ -398,7 +398,9 @@ export const ModelName = {
   Category: 'Category',
   Tag: 'Tag',
   ExperienceTag: 'ExperienceTag',
-  Interest: 'Interest'
+  Interest: 'Interest',
+  UserLikedExperience: 'UserLikedExperience',
+  UserLikedTag: 'UserLikedTag'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userSettings" | "experience" | "review" | "trip" | "tripExperience" | "category" | "tag" | "experienceTag" | "interest"
+    modelProps: "user" | "userSettings" | "experience" | "review" | "trip" | "tripExperience" | "category" | "tag" | "experienceTag" | "interest" | "userLikedExperience" | "userLikedTag"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1158,6 +1160,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserLikedExperience: {
+      payload: Prisma.$UserLikedExperiencePayload<ExtArgs>
+      fields: Prisma.UserLikedExperienceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserLikedExperienceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserLikedExperienceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>
+        }
+        findFirst: {
+          args: Prisma.UserLikedExperienceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserLikedExperienceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>
+        }
+        findMany: {
+          args: Prisma.UserLikedExperienceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>[]
+        }
+        create: {
+          args: Prisma.UserLikedExperienceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>
+        }
+        createMany: {
+          args: Prisma.UserLikedExperienceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserLikedExperienceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>[]
+        }
+        delete: {
+          args: Prisma.UserLikedExperienceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>
+        }
+        update: {
+          args: Prisma.UserLikedExperienceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>
+        }
+        deleteMany: {
+          args: Prisma.UserLikedExperienceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserLikedExperienceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserLikedExperienceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>[]
+        }
+        upsert: {
+          args: Prisma.UserLikedExperienceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedExperiencePayload>
+        }
+        aggregate: {
+          args: Prisma.UserLikedExperienceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserLikedExperience>
+        }
+        groupBy: {
+          args: Prisma.UserLikedExperienceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLikedExperienceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserLikedExperienceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLikedExperienceCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserLikedTag: {
+      payload: Prisma.$UserLikedTagPayload<ExtArgs>
+      fields: Prisma.UserLikedTagFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserLikedTagFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserLikedTagFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>
+        }
+        findFirst: {
+          args: Prisma.UserLikedTagFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserLikedTagFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>
+        }
+        findMany: {
+          args: Prisma.UserLikedTagFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>[]
+        }
+        create: {
+          args: Prisma.UserLikedTagCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>
+        }
+        createMany: {
+          args: Prisma.UserLikedTagCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserLikedTagCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>[]
+        }
+        delete: {
+          args: Prisma.UserLikedTagDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>
+        }
+        update: {
+          args: Prisma.UserLikedTagUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserLikedTagDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserLikedTagUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserLikedTagUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserLikedTagUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLikedTagPayload>
+        }
+        aggregate: {
+          args: Prisma.UserLikedTagAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserLikedTag>
+        }
+        groupBy: {
+          args: Prisma.UserLikedTagGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLikedTagGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserLikedTagCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLikedTagCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1310,6 +1460,24 @@ export const InterestScalarFieldEnum = {
 } as const
 
 export type InterestScalarFieldEnum = (typeof InterestScalarFieldEnum)[keyof typeof InterestScalarFieldEnum]
+
+
+export const UserLikedExperienceScalarFieldEnum = {
+  userId: 'userId',
+  experienceId: 'experienceId',
+  dateCreated: 'dateCreated'
+} as const
+
+export type UserLikedExperienceScalarFieldEnum = (typeof UserLikedExperienceScalarFieldEnum)[keyof typeof UserLikedExperienceScalarFieldEnum]
+
+
+export const UserLikedTagScalarFieldEnum = {
+  userId: 'userId',
+  tagId: 'tagId',
+  dateCreated: 'dateCreated'
+} as const
+
+export type UserLikedTagScalarFieldEnum = (typeof UserLikedTagScalarFieldEnum)[keyof typeof UserLikedTagScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1494,6 +1662,8 @@ export type GlobalOmitConfig = {
   tag?: Prisma.TagOmit
   experienceTag?: Prisma.ExperienceTagOmit
   interest?: Prisma.InterestOmit
+  userLikedExperience?: Prisma.UserLikedExperienceOmit
+  userLikedTag?: Prisma.UserLikedTagOmit
 }
 
 /* Types for Logging */

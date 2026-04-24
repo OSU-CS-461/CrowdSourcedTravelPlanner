@@ -57,7 +57,9 @@ export const ModelName = {
   Category: 'Category',
   Tag: 'Tag',
   ExperienceTag: 'ExperienceTag',
-  Interest: 'Interest'
+  Interest: 'Interest',
+  UserLikedExperience: 'UserLikedExperience',
+  UserLikedTag: 'UserLikedTag'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -189,6 +191,24 @@ export const InterestScalarFieldEnum = {
 } as const
 
 export type InterestScalarFieldEnum = (typeof InterestScalarFieldEnum)[keyof typeof InterestScalarFieldEnum]
+
+
+export const UserLikedExperienceScalarFieldEnum = {
+  userId: 'userId',
+  experienceId: 'experienceId',
+  dateCreated: 'dateCreated'
+} as const
+
+export type UserLikedExperienceScalarFieldEnum = (typeof UserLikedExperienceScalarFieldEnum)[keyof typeof UserLikedExperienceScalarFieldEnum]
+
+
+export const UserLikedTagScalarFieldEnum = {
+  userId: 'userId',
+  tagId: 'tagId',
+  dateCreated: 'dateCreated'
+} as const
+
+export type UserLikedTagScalarFieldEnum = (typeof UserLikedTagScalarFieldEnum)[keyof typeof UserLikedTagScalarFieldEnum]
 
 
 export const SortOrder = {
