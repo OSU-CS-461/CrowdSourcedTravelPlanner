@@ -22,7 +22,7 @@ vi.mock("../../lib/r2", () => ({
 }));
 
 import prisma from "../../db/prisma";
-import { createExperience } from "../../services/experienceService";
+import { createExperience, getExperience } from "../../services/experienceService";
 
 const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
@@ -97,5 +97,52 @@ describe("experienceService.createExperience rollback", () => {
     expect(prismaMock.experience.deleteMany).toHaveBeenCalledWith({
       where: { id: 77 },
     });
+  });
+});
+
+describe("experienceService.getExperience reviewCount", () => {
+  beforeEach(() => {
+    mockReset(prismaMock);
+    vi.clearAllMocks();
+  });
+
+  it("returns reviewCount as 0 when an experience has no reviews", async () => {
+    (prismaMock.experience.findUnique as unknown as ReturnType<typeof vi.fn>)
+      .mockResolvedValue({
+        id: 44,
+        title: "Quiet Trail",
+        description: "Scenic and quiet trail for beginner hikers.",
+        avgRating: null,
+        experienceTags: [],
+        user: { username: "alex" },
+        reviews: [],
+        _count: { reviews: 0 },
+      });
+
+    const result = await getExperience({ experienceId: 44 });
+
+    expect(result).not.toBeNull();
+    expect(result?.reviewCount).toBe(0);
+    expect(result?.avgRating).toBeNull();
+  });
+
+  it("returns reviewCount from Prisma _count when reviews exist", async () => {
+    (prismaMock.experience.findUnique as unknown as ReturnType<typeof vi.fn>)
+      .mockResolvedValue({
+        id: 55,
+        title: "City Food Tour",
+        description: "Walking food tour through multiple local restaurants.",
+        avgRating: 4.3,
+        experienceTags: [],
+        user: { username: "jamie" },
+        reviews: [{ id: 1 }, { id: 2 }],
+        _count: { reviews: 2 },
+      });
+
+    const result = await getExperience({ experienceId: 55 });
+
+    expect(result).not.toBeNull();
+    expect(result?.avgRating).toBe(4.3);
+    expect(result?.reviewCount).toBe(2);
   });
 });

@@ -21,7 +21,7 @@ export default function ReviewItem({ review, onChange }: ReviewItemProps) {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this review?")) {
       try {
-        await deleteReview(review.id);
+        await deleteReview(review.experienceId, review.id);
         onChange();
       } catch (err: any) {
         if (err.response?.status === 403) {

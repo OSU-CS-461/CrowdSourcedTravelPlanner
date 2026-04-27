@@ -28,6 +28,7 @@ export interface ApiExperience {
   postalCode: string | null;
   latitude: number | null;
   longitude: number | null;
+  reviewCount?: number;
   reviews?: any[];
   images?: Array<
     | string

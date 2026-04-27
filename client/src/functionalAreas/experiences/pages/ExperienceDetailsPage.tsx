@@ -8,7 +8,7 @@ import ReviewsSection from "../../reviews/components/ReviewSection";
 import "./ExperienceDetailPage.css";
 import PhotoSection from "../components/PhotoSection";
 
-type ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'media';
+type ReviewSortOption = "recent" | "highest" | "lowest" | "media";
 
 type Category = {
   id: number | string;
@@ -39,6 +39,7 @@ type Experience = {
   latitude?: number | null;
   longitude?: number | null;
   avgRating?: number | null;
+  reviewCount?: number;
   createdBy?: number | string;
   categoryId?: number | null;
   category?: Category | null;
@@ -126,7 +127,7 @@ export default function ExperienceDetailPage() {
   const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [sortBy, setSortBy] = useState<ReviewSortOption>('recent');
+  const [sortBy, setSortBy] = useState<ReviewSortOption>("recent");
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -164,11 +165,14 @@ export default function ExperienceDetailPage() {
         }
         setLoading(false);
       });
-      
+
     apiClient
       .get(`/experiences/${id}?sort=${sortBy}`)
       .then((res) => {
-        setExperience(res.data);
+        const fetchedExperience = res.data as ExperiencePayload | null;
+        setExperience(
+          fetchedExperience ? normalizeExperience(fetchedExperience) : null,
+        );
         setLoading(false);
       })
       .catch((err) => {
@@ -178,7 +182,6 @@ export default function ExperienceDetailPage() {
         }
         setLoading(false);
       });
-      
   }, [id, previewExperience, previewMatchesRoute]);
 
   const currentUserId = useMemo(() => {
@@ -206,6 +209,8 @@ export default function ExperienceDetailPage() {
       a.label.localeCompare(b.label),
     );
   }, [experience?.tags]);
+  const ratingReviewCount = experience?.reviewCount ?? 0;
+  const ratingReviewLabel = ratingReviewCount === 1 ? "review" : "reviews";
 
   async function handleDelete() {
     if (!id || !experience) return;
@@ -284,11 +289,18 @@ export default function ExperienceDetailPage() {
         <div className="detail-body">
           <header className="detail-title-group">
             <h1>{experience.title}</h1>
+
             {experience.avgRating !== null &&
               experience.avgRating !== undefined && (
-                <span className="rating-chip">
-                  {experience.avgRating.toFixed(1)} / 5
-                </span>
+                <div className="rating-chip">
+                  <span>{experience.avgRating.toFixed(1)}</span>
+                  <div className="star-rating">
+                    {"★".repeat(Math.round(experience.avgRating))}
+                  </div>
+                  <a href="#reviews" className="hover-underline">
+                    ({ratingReviewCount} {ratingReviewLabel})
+                  </a>
+                </div>
               )}
           </header>
 
@@ -298,8 +310,7 @@ export default function ExperienceDetailPage() {
             <div className="detail-panel">
               <h2>Location</h2>
               <p>{getLocationString(experience)}</p>
-              {experience.latitude != null && experience
-            initialReviews={experience.reviews}.longitude != null && (
+              {experience.latitude != null && experience.longitude != null && (
                 <p className="detail-muted">
                   {experience.latitude}, {experience.longitude}
                 </p>
@@ -349,9 +360,9 @@ export default function ExperienceDetailPage() {
             <h2>Reviews</h2>
             <div className="sort-controls">
               <label htmlFor="review-sort">Sort by: </label>
-              <select 
-                id="review-sort" 
-                value={sortBy} 
+              <select
+                id="review-sort"
+                value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as ReviewSortOption)}
               >
                 <option value="recent">Most Recent</option>
@@ -362,11 +373,12 @@ export default function ExperienceDetailPage() {
             </div>
           </section>
 
-          <ReviewsSection
-            experienceId={String(experience.id)}
-            isOwner={canManageExperience}
-            initialReviews={experience.reviews}
-          />
+          <section id="reviews">
+            <ReviewsSection
+              experienceId={String(experience.id)}
+              isOwner={canManageExperience}
+            />
+          </section>
         </div>
       </article>
     </main>

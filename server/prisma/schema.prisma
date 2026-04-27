@@ -88,6 +88,7 @@ model Review {
 
   @@index([experienceId])
   @@index([userId])
+  @@unique([userId, experienceId])
 }
 
 model Image {

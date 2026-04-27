@@ -8,6 +8,7 @@ import CreateExperiencePage from "../functionalAreas/experiences/pages/CreateExp
 import ExperienceDetailsPage from "../functionalAreas/experiences/pages/ExperienceDetailsPage";
 import UpdateExperiencePage from "../functionalAreas/experiences/pages/UpdateExperiencePage";
 import ReviewForm from "../functionalAreas/reviews/components/ReviewForm";
+import CreateReviewPage from "../functionalAreas/reviews/pages/CreateReviewPage";
 import CreateTripPage from "../functionalAreas/trips/pages/CreateTripsPage";
 import UpdateTripPage from "../functionalAreas/trips/pages/UpdateTripsPage";
 import InterestsPage from "../functionalAreas/interests/pages/InterestsPage";
@@ -57,7 +58,7 @@ export default function App() {
         />
         <Route
           path={ClientRoutes.REVIEW_CREATE}
-          element={<ReviewForm onSuccess={undefined} />}
+          element={<CreateReviewPage />}
         />
         <Route
           path={ClientRoutes.REVIEW_UPDATE}

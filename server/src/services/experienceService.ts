@@ -100,29 +100,36 @@ const EXPERIENCE_LIST_SELECT = {
 } satisfies Prisma.ExperienceSelect;
 
 const EXPERIENCE_DETAIL_SELECT = (reviewSort?: ReviewSortOption) => {
-  let reviewOrder: Prisma.ReviewOrderByWithRelationInput = { dateCreated: 'desc' };
-  
-  if (reviewSort === 'highest') reviewOrder = { rating: 'desc' };
-  if (reviewSort === 'lowest') reviewOrder = { rating: 'asc' };
+  let reviewOrder: Prisma.ReviewOrderByWithRelationInput = {
+    dateCreated: "desc",
+  };
+
+  if (reviewSort === "highest") reviewOrder = { rating: "desc" };
+  if (reviewSort === "lowest") reviewOrder = { rating: "asc" };
 
   return {
     ...EXPERIENCE_LIST_SELECT,
     description: true,
     descriptionEdit: true,
+    _count: {
+      select: {
+        reviews: true,
+      },
+    },
     reviews: {
-      where: reviewSort === 'media' ? { imageUrl: { not: null } } : {},
+      where: reviewSort === "media" ? { images: { some: {} } } : {},
       orderBy: reviewOrder,
       include: {
-        user: { select: { username: true } }
-      }
-    }
-    images: {
-    select: {
-      id: true,
-      url: true,
+        user: { select: { username: true } },
+      },
     },
-  },
-} satisfies Prisma.ExperienceSelect;
+    images: {
+      select: {
+        id: true,
+        url: true,
+      },
+    },
+  } satisfies Prisma.ExperienceSelect;
 };
 
 // -----------------------------------------------------------------------------
@@ -144,15 +151,25 @@ type ExperienceWithJoins = ExperienceListWithJoins | ExperienceDetailWithJoins;
 // -----------------------------------------------------------------------------
 
 function serializeExperience(experience: ExperienceWithJoins) {
-  const tags = experience.experienceTags.map((jt) => jt.tag);
-  const { experienceTags: _joined, user, ...rest } = experience;
+  const experienceWithCounts = experience as ExperienceWithJoins & {
+    _count?: { reviews: number };
+  };
+  const tags = experienceWithCounts.experienceTags.map((jt) => jt.tag);
+  const {
+    experienceTags: _joined,
+    user,
+    _count,
+    ...rest
+  } = experienceWithCounts;
+  const reviewCount = _count?.reviews;
 
   return {
     ...rest,
     createdByUsername: user?.username ?? null,
     tags,
     tagIds: tags.map((t) => t.id),
-    reviews: (experience as any).reviews ?? [], 
+    reviews: (experienceWithCounts as any).reviews ?? [],
+    ...(reviewCount !== undefined ? { reviewCount } : {}),
   };
 }
 
@@ -283,7 +300,7 @@ export async function createExperience({
     // STEP 3: Return final result
     const finalExperience = await prisma.experience.findUniqueOrThrow({
       where: { id: experienceId! },
-      select: EXPERIENCE_DETAIL_SELECT,
+      select: EXPERIENCE_DETAIL_SELECT(),
     });
 
     return {
@@ -443,7 +460,7 @@ export async function updateExperience(params: UpdateExperienceParams) {
 
   const refreshed = await prisma.experience.findUniqueOrThrow({
     where: { id: experienceId },
-    select: EXPERIENCE_DETAIL_SELECT,
+    select: EXPERIENCE_DETAIL_SELECT(),
   });
 
   return serializeExperience(refreshed);

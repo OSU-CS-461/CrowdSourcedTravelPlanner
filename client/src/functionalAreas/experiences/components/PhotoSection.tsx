@@ -54,10 +54,10 @@ export default function PhotoSection(props: PhotoSectionProps) {
             type="button"
             className="media-overlay-button"
             onClick={() =>
-              navigate("photos", { state: { photos: props.photos } })
+              navigate("photos", { state: { photos: validPhotos } })
             }
           >
-            All Photos {props.photos.length}
+            All Photos {validPhotos.length}
           </button>
         </div>
       )}

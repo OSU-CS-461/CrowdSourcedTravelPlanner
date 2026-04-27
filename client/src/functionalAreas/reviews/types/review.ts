@@ -14,5 +14,5 @@ export type Review = {
   comment: string;
   createdAt: string;
   createdBy?: number | string;
-  media?: { id: string; url: string; type: 'image' | 'video' }[];
+  media?: ReviewMedia[];
 };
