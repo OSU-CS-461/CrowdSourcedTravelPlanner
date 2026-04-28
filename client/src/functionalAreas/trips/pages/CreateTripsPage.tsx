@@ -21,10 +21,10 @@ export default function CreateTripPage() {
       await apiClient.post("/trips", values);
       alert("Trip created successfully!");
       navigate(ClientRoutes.HOME);
-    } catch (err) {
-      console.error(err);
-      alert("There was a problem creating the trip.");
-    }
+    } catch (err: any) {
+        console.error("FULL ERROR:", err);
+        alert(err.response?.data?.error || JSON.stringify(err.response?.data));
+      }
   };
 
   return (
@@ -39,7 +39,7 @@ export default function CreateTripPage() {
         </button>
       </div>
 
-=      <div className="trip-card">
+      <div className="trip-card">
         <div className="trip-title-group">
           <h1>Create Trip</h1>
         </div>

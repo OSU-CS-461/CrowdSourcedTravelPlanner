@@ -20,6 +20,7 @@ async function createTrip(
   next: NextFunction
 ) {
   try {
+    console.log("REQ.USER:", req.user);
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);
 
     if (body.startDate && body.endDate) {
@@ -40,6 +41,7 @@ async function createTrip(
 
     return res.status(201).json(trip);
   } catch (err) {
+    console.error("CREATE TRIP ERROR:", err); 
     next(err);
   }
 }
@@ -49,7 +51,7 @@ async function createTrip(
 
 async function getTrip(req: Request, res: Response, next: NextFunction) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
 
     if (isNaN(tripId) || tripId <= 0) {
       throw { status: 400, message: "Invalid trip ID" };
@@ -114,7 +116,7 @@ async function updateTrip(
   next: NextFunction
 ) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);
 
     if (body.startDate && body.endDate) {
@@ -151,7 +153,7 @@ async function editTrip(
   next: NextFunction
 ) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
     const body: TripPatchBody = TripPatchBodySchema.parse(req.body);
 
     if (body.startDate && body.endDate) {
@@ -188,7 +190,7 @@ async function deleteTrip(
   next: NextFunction
 ) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
@@ -212,7 +214,7 @@ async function addExperienceToTrip(
   next: NextFunction
 ) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
     const { experienceId } = req.body;
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
@@ -242,8 +244,8 @@ async function removeExperienceFromTrip(
   next: NextFunction
 ) {
   try {
-    const tripId = parseInt(req.params.id);
-    const experienceId = parseInt(req.params.experienceId);
+    const tripId = parseInt(req.params.id as string);
+    const experienceId = parseInt(req.params.experienceId as string);
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 

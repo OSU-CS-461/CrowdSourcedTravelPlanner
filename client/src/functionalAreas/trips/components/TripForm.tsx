@@ -3,6 +3,8 @@ import { useState } from "react";
 export interface TripFormValues {
   title: string;
   description: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface TripFormProps {
@@ -18,6 +20,8 @@ export default function TripForm({
 }: TripFormProps) {
   const [title, setTitle] = useState(initialValues.title ?? "");
   const [description, setDescription] = useState(initialValues.description ?? "");
+  const [startDate, setStartDate] = useState(initialValues.startDate ?? "");
+  const [endDate, setEndDate] = useState(initialValues.endDate ?? "");
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -31,6 +35,8 @@ export default function TripForm({
     const payload: TripFormValues = {
       title: title.trim(),
       description: description.trim(),
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
     };
 
     try {
@@ -69,6 +75,24 @@ export default function TripForm({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
+            />
+          </label>
+
+          <label className="exp-form-field">
+            <span>Start Date</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </label>
+
+          <label className="exp-form-field">
+            <span>End Date</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
             />
           </label>
 

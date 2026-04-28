@@ -17,8 +17,8 @@ export async function createTrip(postBody: TripCreateInput) {
       title: postBody.title,
       description: postBody.description,
       createdBy: postBody.createdBy,
-      startDate: postBody.startDate ? new Date(postBody.startDate) : null,
-      endDate: postBody.endDate ? new Date(postBody.endDate) : null,
+      startDate: postBody.startDate ? new Date(postBody.startDate) : undefined,
+      endDate: postBody.endDate ? new Date(postBody.endDate) : undefined,
     },
     select: {
       id: true,
@@ -117,7 +117,16 @@ export async function updateTrip(params: UpdateTripParams) {
 
   return prisma.trip.update({
     where: { id: tripId },
-    data: putData,
+    data: {
+      title: putData.title,
+      description: putData.description,
+      startDate: putData.startDate
+        ? new Date(putData.startDate)
+        : undefined,
+      endDate: putData.endDate
+        ? new Date(putData.endDate)
+        : undefined,
+    },
     select: {
       id: true,
       title: true,
@@ -160,7 +169,16 @@ export async function editTrip(params: EditTripParams) {
 
   return prisma.trip.update({
     where: { id: tripId },
-    data: patchData,
+    data: {
+      title: patchData.title,
+      description: patchData.description,
+      startDate: patchData.startDate
+        ? new Date(patchData.startDate)
+        : undefined,
+      endDate: patchData.endDate
+        ? new Date(patchData.endDate)
+        : undefined,
+    },
     select: {
       id: true,
       title: true,
