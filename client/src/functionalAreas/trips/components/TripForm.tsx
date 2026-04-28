@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./TripForm.css";
 
 export interface TripFormValues {
   title: string;
@@ -59,7 +60,7 @@ export default function TripForm({
 
         <div className="exp-form-grid">
 
-          <label className="exp-form-field">
+          <label className="exp-form-field exp-full">
             <span>Trip Title</span>
             <input
               type="text"
@@ -68,16 +69,6 @@ export default function TripForm({
               required
             />
           </label>
-
-          <label className="exp-form-field">
-            <span>Description</span>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-            />
-          </label>
-
           <label className="exp-form-field">
             <span>Start Date</span>
             <input
@@ -95,6 +86,16 @@ export default function TripForm({
               onChange={(e) => setEndDate(e.target.value)}
             />
           </label>
+
+          <label className="exp-form-field exp-full">
+            <span>Description</span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+            />
+          </label>
+
 
         </div>
 
