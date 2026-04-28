@@ -152,7 +152,7 @@ async function editTrip(
 ) {
   try {
     const tripId = parseInt(req.params.id);
-    const body: TripPatchBody = TripPatchBodySchema.parse(req.body);\
+    const body: TripPatchBody = TripPatchBodySchema.parse(req.body);
 
     if (body.startDate && body.endDate) {
       const start = new Date(body.startDate);
