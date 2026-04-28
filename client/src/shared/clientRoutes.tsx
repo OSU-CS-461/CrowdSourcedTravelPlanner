@@ -5,6 +5,7 @@ export const ClientRoutes = {
   SIGNUP: "/signup",
   EXPLORE: "/explore",
   EXPERIENCE_DETAILS: "/experiences/:id",
+  MEDIA_GALLERY: "/experiences/:id/photos",
   EXPERIENCE_CREATE: "/experiences/create",
   EXPERIENCE_UPDATE: "/experiences/:id/update",
   TRIP_CREATE: "/trips/create",
@@ -12,5 +13,5 @@ export const ClientRoutes = {
   TRIP_DETAILS: "/trips/:id",
   INTERESTS: "/interests",
   REVIEW_CREATE: "/experiences/:id/reviews/create",
-  REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update", 
+  REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update",
 };
