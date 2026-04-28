@@ -4,8 +4,14 @@ import { useAuth } from "../../auth/hooks/useAuth";
 import type { Review } from "../types/review";
 
 type ReviewItemProps = {
-  review: Review;
-  onChange: () => void;
+  review: Review;
+  onChange: () => void;
+};
+
+type HttpError = {
+  response?: {
+    status?: number;
+  };
 };
 
 export default function ReviewItem({ review, onChange }: ReviewItemProps) {
@@ -23,8 +29,9 @@ export default function ReviewItem({ review, onChange }: ReviewItemProps) {
       try {
         await deleteReview(review.experienceId, review.id);
         onChange();
-      } catch (err: any) {
-        if (err.response?.status === 403) {
+      } catch (err: unknown) {
+        const httpError = err as HttpError;
+        if (httpError.response?.status === 403) {
           alert("You do not have permission to delete this review.");
         } else {
           console.error("Delete failed:", err);

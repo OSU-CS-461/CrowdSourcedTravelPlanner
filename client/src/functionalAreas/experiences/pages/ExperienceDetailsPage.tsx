@@ -150,23 +150,6 @@ export default function ExperienceDetailPage() {
     setError(null);
 
     apiClient
-      .get(`/experiences/${id}`)
-      .then((res) => {
-        const fetchedExperience = res.data as ExperiencePayload | null;
-        setExperience(
-          fetchedExperience ? normalizeExperience(fetchedExperience) : null,
-        );
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!previewMatchesRoute) {
-          setError("Failed to load experience");
-        }
-        setLoading(false);
-      });
-
-    apiClient
       .get(`/experiences/${id}?sort=${sortBy}`)
       .then((res) => {
         const fetchedExperience = res.data as ExperiencePayload | null;
@@ -182,7 +165,7 @@ export default function ExperienceDetailPage() {
         }
         setLoading(false);
       });
-  }, [id, previewExperience, previewMatchesRoute]);
+  }, [id, previewExperience, previewMatchesRoute, sortBy]);
 
   const currentUserId = useMemo(() => {
     if (user?.id !== undefined && user?.id !== null) {

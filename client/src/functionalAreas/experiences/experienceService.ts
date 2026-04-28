@@ -29,7 +29,7 @@ export interface ApiExperience {
   latitude: number | null;
   longitude: number | null;
   reviewCount?: number;
-  reviews?: any[];
+  reviews?: unknown[];
   images?: Array<
     | string
     | {
