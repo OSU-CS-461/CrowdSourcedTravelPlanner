@@ -131,6 +131,8 @@ model Trip {
 
   title         String
   description   String?
+  startDate     DateTime?
+  endDate       DateTime?
 
   dateCreated   DateTime @default(now())
   lastUpdated   DateTime @updatedAt

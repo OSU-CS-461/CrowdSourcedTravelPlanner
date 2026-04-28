@@ -22,6 +22,15 @@ async function createTrip(
   try {
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);
 
+    if (body.startDate && body.endDate) {
+      const start = new Date(body.startDate);
+      const end = new Date(body.endDate);
+
+      if (end < start) {
+        throw { status: 400, message: "End date cannot be before start date" };
+      }
+    }
+
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
     const trip = await tripService.createTrip({
@@ -108,6 +117,15 @@ async function updateTrip(
     const tripId = parseInt(req.params.id);
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);
 
+    if (body.startDate && body.endDate) {
+      const start = new Date(body.startDate);
+      const end = new Date(body.endDate);
+
+      if (end < start) {
+        throw { status: 400, message: "End date cannot be before start date" };
+      }
+    }
+
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
     const updated = await tripService.updateTrip({
@@ -134,7 +152,16 @@ async function editTrip(
 ) {
   try {
     const tripId = parseInt(req.params.id);
-    const body: TripPatchBody = TripPatchBodySchema.parse(req.body);
+    const body: TripPatchBody = TripPatchBodySchema.parse(req.body);\
+
+    if (body.startDate && body.endDate) {
+      const start = new Date(body.startDate);
+      const end = new Date(body.endDate);
+
+      if (end < start) {
+        throw { status: 400, message: "End date cannot be before start date" };
+      }
+    }
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
