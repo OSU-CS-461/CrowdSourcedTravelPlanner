@@ -88,6 +88,19 @@ export async function listTrips(params: ListTripsParams) {
   });
 }
 
+export async function listMyTrips(userId: number) {
+  return prisma.trip.findMany({
+    where: {
+      createdBy: userId,
+    },
+    include: {
+      experiences: true,
+    },
+    orderBy: {
+      dateCreated: "desc",
+    },
+  });
+}
 
 // --- UPDATE---
 
