@@ -7,14 +7,18 @@ interface TripCreateInput {
   title: string;
   description?: string;
   createdBy: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export async function createTrip(postBody: TripCreateInput) {
   return prisma.trip.create({
     data: {
-      createdBy: postBody.createdBy,
       title: postBody.title,
       description: postBody.description,
+      createdBy: postBody.createdBy,
+      startDate: postBody.startDate ? new Date(postBody.startDate) : undefined,
+      endDate: postBody.endDate ? new Date(postBody.endDate) : undefined,
     },
     select: {
       id: true,
@@ -23,6 +27,8 @@ export async function createTrip(postBody: TripCreateInput) {
       dateCreated: true,
       lastUpdated: true,
       createdBy: true,
+      startDate: true,
+      endDate: true,
     },
   });
 }
@@ -40,6 +46,8 @@ export async function getTrip(tripId: number) {
       createdBy: true,
       dateCreated: true,
       lastUpdated: true,
+      startDate: true,
+      endDate: true,
       experiences: {
         include: {
           experience: true,
@@ -74,6 +82,8 @@ export async function listTrips(params: ListTripsParams) {
       dateCreated: true,
       lastUpdated: true,
       createdBy: true,
+      startDate: true,
+      endDate: true,
     },
   });
 }
@@ -87,6 +97,8 @@ interface UpdateTripParams {
   putData: {
     title: string;
     description?: string;
+    startDate?: string;
+    endDate?: string;
   };
 }
 
@@ -105,7 +117,16 @@ export async function updateTrip(params: UpdateTripParams) {
 
   return prisma.trip.update({
     where: { id: tripId },
-    data: putData,
+    data: {
+      title: putData.title,
+      description: putData.description,
+      startDate: putData.startDate
+        ? new Date(putData.startDate)
+        : undefined,
+      endDate: putData.endDate
+        ? new Date(putData.endDate)
+        : undefined,
+    },
     select: {
       id: true,
       title: true,
@@ -113,6 +134,8 @@ export async function updateTrip(params: UpdateTripParams) {
       dateCreated: true,
       lastUpdated: true,
       createdBy: true,
+      startDate: true,
+      endDate: true,
     },
   });
 }
@@ -126,6 +149,8 @@ interface EditTripParams {
   patchData: {
     title?: string;
     description?: string;
+    startDate?: string;
+    endDate?: string;
   };
 }
 
@@ -144,7 +169,16 @@ export async function editTrip(params: EditTripParams) {
 
   return prisma.trip.update({
     where: { id: tripId },
-    data: patchData,
+    data: {
+      title: patchData.title,
+      description: patchData.description,
+      startDate: patchData.startDate
+        ? new Date(patchData.startDate)
+        : undefined,
+      endDate: patchData.endDate
+        ? new Date(patchData.endDate)
+        : undefined,
+    },
     select: {
       id: true,
       title: true,
@@ -152,6 +186,8 @@ export async function editTrip(params: EditTripParams) {
       dateCreated: true,
       lastUpdated: true,
       createdBy: true,
+      startDate: true,
+      endDate: true,
     },
   });
 }
