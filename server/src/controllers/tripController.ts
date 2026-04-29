@@ -37,11 +37,10 @@ async function createTrip(req: AuthenticatedRequest, res: Response,next: NextFun
 
     return res.status(201).json(trip);
   } catch (err) {
-    console.error("CREATE TRIP ERROR:", err); 
-    next(err);
+    console.error("CREATE TRIP ERROR:", err);
+    return res.status(400).json(err);
   }
 }
-
 
 // --- GET  ---
 
