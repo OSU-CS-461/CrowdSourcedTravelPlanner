@@ -6,6 +6,9 @@ import { useAuth } from "../../auth/hooks/useAuth";
 import { USER_STORAGE_KEY } from "../../auth/context/auth-context";
 import ReviewsSection from "../../reviews/components/ReviewSection";
 import "./ExperienceDetailPage.css";
+import PhotoSection from "../components/PhotoSection";
+
+type ReviewSortOption = "recent" | "highest" | "lowest" | "media";
 
 type Category = {
   id: number | string;
@@ -36,12 +39,45 @@ type Experience = {
   latitude?: number | null;
   longitude?: number | null;
   avgRating?: number | null;
+  reviewCount?: number;
   createdBy?: number | string;
   categoryId?: number | null;
   category?: Category | null;
   tags?: ExperienceTag[];
   tagIds?: number[];
+  images: string[];
 };
+
+type ExperiencePayload = Omit<Experience, "images"> & {
+  images?: Array<string | { url?: string | null } | null> | null;
+};
+
+function normalizeImages(images: ExperiencePayload["images"]): string[] {
+  if (!Array.isArray(images)) return [];
+
+  return images
+    .map((image) => {
+      if (typeof image === "string" && image.trim().length > 0) return image;
+      if (
+        image &&
+        typeof image === "object" &&
+        typeof image.url === "string" &&
+        image.url.trim().length > 0
+      ) {
+        return image.url;
+      }
+      return null;
+    })
+    .filter((url): url is string => url !== null);
+}
+
+function normalizeExperience(experience: ExperiencePayload): Experience {
+  return {
+    ...experience,
+    lastUpdated: experience.lastUpdated ?? experience.dateCreated,
+    images: normalizeImages(experience.images),
+  };
+}
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -76,7 +112,7 @@ export default function ExperienceDetailPage() {
   const { user } = useAuth();
 
   const previewExperience = (
-    location.state as { experience?: Experience } | null
+    location.state as { experience?: ExperiencePayload } | null
   )?.experience;
   const previewMatchesRoute =
     Boolean(previewExperience) &&
@@ -85,16 +121,13 @@ export default function ExperienceDetailPage() {
 
   const [experience, setExperience] = useState<Experience | null>(() =>
     previewMatchesRoute && previewExperience
-      ? {
-          ...previewExperience,
-          lastUpdated:
-            previewExperience.lastUpdated ?? previewExperience.dateCreated,
-        }
-      : null
+      ? normalizeExperience(previewExperience)
+      : null,
   );
   const [loading, setLoading] = useState(!previewMatchesRoute);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sortBy, setSortBy] = useState<ReviewSortOption>("recent");
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -107,10 +140,7 @@ export default function ExperienceDetailPage() {
     }
 
     if (previewMatchesRoute && previewExperience) {
-      setExperience({
-        ...previewExperience,
-        lastUpdated: previewExperience.lastUpdated ?? previewExperience.dateCreated,
-      });
+      setExperience(normalizeExperience(previewExperience));
       setLoading(false);
     } else {
       setExperience(null);
@@ -120,9 +150,12 @@ export default function ExperienceDetailPage() {
     setError(null);
 
     apiClient
-      .get(`/experiences/${id}`)
+      .get(`/experiences/${id}?sort=${sortBy}`)
       .then((res) => {
-        setExperience(res.data);
+        const fetchedExperience = res.data as ExperiencePayload | null;
+        setExperience(
+          fetchedExperience ? normalizeExperience(fetchedExperience) : null,
+        );
         setLoading(false);
       })
       .catch((err) => {
@@ -132,7 +165,7 @@ export default function ExperienceDetailPage() {
         }
         setLoading(false);
       });
-  }, [id, previewExperience, previewMatchesRoute]);
+  }, [id, previewExperience, previewMatchesRoute, sortBy]);
 
   const currentUserId = useMemo(() => {
     if (user?.id !== undefined && user?.id !== null) {
@@ -156,15 +189,17 @@ export default function ExperienceDetailPage() {
 
   const sortedTags = useMemo(() => {
     return [...(experience?.tags ?? [])].sort((a, b) =>
-      a.label.localeCompare(b.label)
+      a.label.localeCompare(b.label),
     );
   }, [experience?.tags]);
+  const ratingReviewCount = experience?.reviewCount ?? 0;
+  const ratingReviewLabel = ratingReviewCount === 1 ? "review" : "reviews";
 
   async function handleDelete() {
     if (!id || !experience) return;
 
     const confirmed = window.confirm(
-      "Are you sure you want to delete this experience? This action cannot be undone."
+      "Are you sure you want to delete this experience? This action cannot be undone.",
     );
     if (!confirmed) return;
 
@@ -205,10 +240,6 @@ export default function ExperienceDetailPage() {
   return (
     <main className="experience-detail-page">
       <div className="detail-toolbar">
-        <button className="toolbar-back" onClick={() => navigate(-1)}>
-          Back
-        </button>
-
         {canManageExperience && (
           <div className="toolbar-actions">
             <button
@@ -231,18 +262,29 @@ export default function ExperienceDetailPage() {
       </div>
 
       <article className="detail-card">
-        {experience.thumbnail && (
-          <div className="detail-image-wrap">
-            <img src={experience.thumbnail} alt={experience.title} />
-          </div>
-        )}
+        <PhotoSection
+          id={experience.id}
+          title={experience.title}
+          thumbnail={experience?.thumbnail}
+          photos={experience.images}
+        />
 
         <div className="detail-body">
           <header className="detail-title-group">
             <h1>{experience.title}</h1>
-            {experience.avgRating !== null && experience.avgRating !== undefined && (
-              <span className="rating-chip">{experience.avgRating.toFixed(1)} / 5</span>
-            )}
+
+            {experience.avgRating !== null &&
+              experience.avgRating !== undefined && (
+                <div className="rating-chip">
+                  <span>{experience.avgRating.toFixed(1)}</span>
+                  <div className="star-rating">
+                    {"★".repeat(Math.round(experience.avgRating))}
+                  </div>
+                  <a href="#reviews" className="hover-underline">
+                    ({ratingReviewCount} {ratingReviewLabel})
+                  </a>
+                </div>
+              )}
           </header>
 
           <p className="detail-description">{experience.description}</p>
@@ -283,8 +325,11 @@ export default function ExperienceDetailPage() {
               <strong>Created:</strong> {formatDate(experience.dateCreated)}
             </p>
             <p>
-              <span aria-hidden="true" style={{ marginRight: 4 }}>👤</span>
-              <strong>Created By:</strong> {experience.createdByUsername ?? "Unknown"}
+              <span aria-hidden="true" style={{ marginRight: 4 }}>
+                👤
+              </span>
+              <strong>Created By:</strong>{" "}
+              {experience.createdByUsername ?? "Unknown"}
             </p>
             {experience.lastUpdated &&
               experience.lastUpdated !== experience.dateCreated && (
@@ -294,10 +339,29 @@ export default function ExperienceDetailPage() {
               )}
           </footer>
 
-          <ReviewsSection
-            experienceId={String(experience.id)}
-            isOwner={canManageExperience}
-          />
+          <section className="reviews-header-group">
+            <h2>Reviews</h2>
+            <div className="sort-controls">
+              <label htmlFor="review-sort">Sort by: </label>
+              <select
+                id="review-sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as ReviewSortOption)}
+              >
+                <option value="recent">Most Recent</option>
+                <option value="highest">Highest Rated</option>
+                <option value="lowest">Lowest Rated</option>
+                <option value="media">With Photos</option>
+              </select>
+            </div>
+          </section>
+
+          <section id="reviews">
+            <ReviewsSection
+              experienceId={String(experience.id)}
+              isOwner={canManageExperience}
+            />
+          </section>
         </div>
       </article>
     </main>
