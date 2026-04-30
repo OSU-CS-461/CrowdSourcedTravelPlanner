@@ -11,6 +11,12 @@ router.post("/",
 );
 
 // Read
+router.get(
+  "/me",
+  authMiddleware.requireAuth,
+  tripController.listMyTrips
+);
+
 router.get("/",
 authMiddleware.requireAuth,
 tripController.listTrips);

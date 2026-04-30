@@ -27,7 +27,7 @@ const createMock = prismaMock.user.create as unknown as ReturnType<
 
 const parseMock = vi
   .spyOn(userModel.UserSignUp, "parseAsync")
-  .mockImplementation(async (a: any) => a);
+  .mockImplementation(async (a: unknown) => a as IUserSignUp);
 
 const VALID_USER_SIGNUP = (): IUserSignUp => ({
   email: "drew@example.com",
@@ -43,7 +43,7 @@ describe("UserService", () => {
 
   describe("createUser()", () => {
     it("validates arguments", async () => {
-      createMock.mockImplementation(async (args: any) => ({
+      createMock.mockImplementation(async (args: { data: Record<string, unknown> }) => ({
         id: 1,
         ...args.data,
       }));
@@ -53,22 +53,22 @@ describe("UserService", () => {
 
     describe("with valid params", () => {
       it("creates a user", async () => {
-        createMock.mockImplementation(async (args: any) => ({
+        createMock.mockImplementation(async (args: { data: Record<string, unknown> }) => ({
           id: 1,
           ...args.data,
         }));
         const user = await createUser(VALID_USER_SIGNUP());
         expect(prismaMock.user.create).toHaveBeenCalledTimes(1);
-        expect((user as any).id).toBe(1);
+        expect(user.id).toBe(1);
       });
 
       it("hashes the password", async () => {
-        createMock.mockImplementation(async (args: any) => ({
+        createMock.mockImplementation(async (args: { data: Record<string, unknown> }) => ({
           id: 1,
           ...args.data,
         }));
         const user = await createUser(VALID_USER_SIGNUP());
-        expect((user as any).passwordDigest).toBe(ARGON_2_PASSWORD_HASH_STUB);
+        expect(user.passwordDigest).toBe(ARGON_2_PASSWORD_HASH_STUB);
       });
 
       it("surfaces DB constraint errors", async () => {
@@ -83,7 +83,7 @@ describe("UserService", () => {
     describe("with invalid params", () => {
       it("throws an error", async () => {
         parseMock.mockRejectedValue(new Error("validation failed"));
-        await expect(createUser({} as any)).rejects.toBeTruthy();
+        await expect(createUser({} as unknown as IUserSignUp)).rejects.toBeTruthy();
       });
     });
   });
