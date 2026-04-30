@@ -21,10 +21,17 @@ export default function CreateTripPage() {
       await apiClient.post("/trips", values);
       alert("Trip created successfully!");
       navigate(ClientRoutes.HOME);
-    } catch (err: any) {
-        console.error("FULL ERROR:", err);
-        alert(err.response?.data?.error || JSON.stringify(err.response?.data));
-      }
+    } catch (err: unknown) {
+      console.error("FULL ERROR:", err);
+      const responseData = (err as { response?: { data?: unknown } }).response?.data;
+      const errorMessage =
+        typeof responseData === "object" &&
+        responseData !== null &&
+        "error" in responseData
+          ? String((responseData as { error?: unknown }).error)
+          : JSON.stringify(responseData);
+      alert(errorMessage);
+    }
   };
 
   return (
