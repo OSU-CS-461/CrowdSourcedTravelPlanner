@@ -7,12 +7,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import ExperienceForm from "../components/ExperienceForm";
 import { type FormValues, type TagOption } from "../types/types";
 import { getExperienceById, updateExperience } from "../experienceService";
-import buildExpCreationPayload from "../helpers/buildExpCreationPayload";
-import { type FormValues } from "../types/types";
-import {
-  getExperienceById,
-  updateExperience,
-} from "../experienceService";
 import mapApiExperienceToFormValues from "../helpers/mapApiExperienceToFormValues";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
@@ -21,10 +15,13 @@ export default function UpdateExperiencePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null
+    null,
   );
-  const { categories, loading: tagsLoading, error: tagsError } =
-    useCategories();
+  const {
+    categories,
+    loading: tagsLoading,
+    error: tagsError,
+  } = useCategories();
   const {
     features,
     loading: featuresLoading,
@@ -51,7 +48,7 @@ export default function UpdateExperiencePage() {
             slug: t.slug,
             label: t.label,
             categoryId: t.categoryId,
-          }))
+          })),
         );
       } catch {
         if (!cancelled) setLikedTags([]);
@@ -105,7 +102,7 @@ export default function UpdateExperiencePage() {
       // TODO: at some point we'll need better error handling/UI, but this is fine for now
       alert(
         "Error updating experience: " +
-          (err instanceof Error ? err.message : "Unknown error")
+          (err instanceof Error ? err.message : "Unknown error"),
       );
     }
   };
