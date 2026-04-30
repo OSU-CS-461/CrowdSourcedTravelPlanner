@@ -18,6 +18,8 @@ model User {
   reviews        Review[]
   trips          Trip[]
   settings       UserSettings?
+  likedExperiences UserLikedExperience[]
+  likedTags      UserLikedTag[]
 }
 
 model UserSettings {
@@ -53,6 +55,7 @@ model Experience {
   user            User             @relation(fields: [createdBy], references: [id])
   experienceTags  ExperienceTag[]
   reviews         Review[]
+  likedByUsers    UserLikedExperience[]
   trips           TripExperience[]
 
   @@index([createdBy])
@@ -112,6 +115,7 @@ model Tag {
   label          String
   categoryId     Int
   experienceTags ExperienceTag[]
+  likedByUsers     UserLikedTag[]
   category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
@@ -137,4 +141,30 @@ model Interest {
 
   @@index([createdBy])
   @@index([dateCreated])
+}
+
+model UserLikedExperience {
+  userId         Int
+  experienceId   Int
+  dateCreated    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, experienceId])
+  @@index([experienceId])
+  @@index([userId, dateCreated])
+}
+
+model UserLikedTag {
+  userId      Int
+  tagId       Int
+  dateCreated DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tagId])
+  @@index([tagId])
+  @@index([userId, dateCreated])
 }
