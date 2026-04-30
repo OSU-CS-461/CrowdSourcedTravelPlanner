@@ -242,6 +242,15 @@ export async function createExperience({
   try {
     // STEP 1: Create experience (existing logic)
     await prisma.$transaction(async (tx) => {
+      const creator = await tx.user.findUnique({
+        where: { id: userId },
+        select: { id: true },
+      });
+
+      if (!creator) {
+        throw { status: 401, message: "Authenticated user not found. Please sign in again." };
+      }
+
       const tagIds = postBody.tagIds ?? [];
       await assertCategoryAndTags(tx, postBody.categoryId, tagIds);
 
@@ -274,11 +283,6 @@ export async function createExperience({
           skipDuplicates: true,
         });
       }
-
-      return tx.experience.findUniqueOrThrow({
-        where: { id: created.id },
-        select: EXPERIENCE_DETAIL_SELECT(),
-      });
     });
 
     // STEP 2: Upload images
@@ -301,6 +305,10 @@ export async function createExperience({
     }
 
     // STEP 3: Return final result
+    console.info("[experience.create] Fetching created experience", {
+      experienceId,
+      userId,
+    });
     const finalExperience = await prisma.experience.findUniqueOrThrow({
       where: { id: experienceId! },
       select: EXPERIENCE_DETAIL_SELECT(),
