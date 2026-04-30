@@ -21,13 +21,23 @@ async function testConnection() {
       console.log("Run: npx prisma migrate dev");
     }
     
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorCode =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      typeof (error as { code?: unknown }).code === "string"
+        ? (error as { code: string }).code
+        : undefined;
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
     console.error("Database connection failed!");
-    console.error("Error:", error.message);
-    if (error.code === "P1001") {
+    console.error("Error:", errorMessage);
+    if (errorCode === "P1001") {
       console.log("\nCannot reach database server.");
       console.log("Make sure Prisma dev is running: npx prisma dev");
-    } else if (error.code === "P5010") {
+    } else if (errorCode === "P5010") {
       console.log("\nFailed to contact the database service.");
       console.log("Check your DATABASE_URL in .env file");
       console.log("Make sure Prisma dev is running and the URL is correct");

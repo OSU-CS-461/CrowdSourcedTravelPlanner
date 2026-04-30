@@ -14,7 +14,7 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
 // --- CREATE ---
 
-async function createTrip(req: AuthenticatedRequest, res: Response,next: NextFunction) {
+async function createTrip(req: AuthenticatedRequest, res: Response, _next: NextFunction) {
   try {
     console.log("REQ.USER:", req.user);
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);

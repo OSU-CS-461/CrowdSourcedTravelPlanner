@@ -2,17 +2,20 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
 const isZodError = (err: unknown): err is ZodError =>
-  err instanceof ZodError ||
-  (typeof err === "object" && err !== null && (err as any).name === "ZodError");
+  err instanceof ZodError || asRecord(err)?.name === "ZodError";
 
 const isPrismaKnownError = (
   err: unknown
 ): err is PrismaClientKnownRequestError =>
-  typeof err === "object" &&
-  err !== null &&
-  (err as any).name === "PrismaClientKnownRequestError" &&
-  typeof (err as any).code === "string";
+  asRecord(err)?.name === "PrismaClientKnownRequestError" &&
+  typeof asRecord(err)?.code === "string";
 
 export default function errorHandlerMiddleware(
   err: unknown,
@@ -23,16 +26,28 @@ export default function errorHandlerMiddleware(
   if (isZodError(err)) {
     let details: { path: string; message: string }[] = [];
     try {
-      const parsed = JSON.parse((err as any).message);
+      const message = typeof asRecord(err)?.message === "string" ? asRecord(err)?.message : "";
+      const parsed = JSON.parse(message);
       if (Array.isArray(parsed)) {
-        details = parsed.map((e: any) => ({
-          path: Array.isArray(e.path) ? e.path.join(".") : String(e.path ?? ""),
-          message: e.message,
-        }));
+        details = parsed.map((item) => {
+          const parsedItem = asRecord(item);
+          const parsedPath = parsedItem?.path;
+          const messageValue = parsedItem?.message;
+          return {
+            path: Array.isArray(parsedPath)
+              ? parsedPath.map((segment) => String(segment)).join(".")
+              : String(parsedPath ?? ""),
+            message: typeof messageValue === "string" ? messageValue : "Validation failed",
+          };
+        });
       }
     } catch {
+      const fallbackMessage =
+        typeof asRecord(err)?.message === "string"
+          ? asRecord(err)?.message
+          : "Validation failed";
       details = [
-        { path: "", message: (err as any).message || "Validation failed" },
+        { path: "", message: fallbackMessage },
       ];
     }
     return res.status(400).json({ error: "Validation failed", details });
@@ -45,13 +60,16 @@ export default function errorHandlerMiddleware(
       // Using 400 status code for simplicity for now
       case "P2002": {
         // Unique constraint violation
-        const model = (err.meta as any)?.modelName as string | undefined;
-        const target = (err.meta as any)?.target as
-          | string[]
-          | string
-          | undefined;
+        const meta = asRecord(err.meta);
+        const model =
+          typeof meta?.modelName === "string" ? meta.modelName : undefined;
+        const target = meta?.target;
         // normalize fields array for client UX
-        const fields = Array.isArray(target) ? target : target ? [target] : [];
+        const fields = Array.isArray(target)
+          ? target.filter((field): field is string => typeof field === "string")
+          : typeof target === "string"
+            ? [target]
+            : [];
         return res.status(400).json({
           error: "Unique constraint violation",
           details: { model, fields },
@@ -59,7 +77,9 @@ export default function errorHandlerMiddleware(
       }
       case "P2003": {
         // Foreign key constraint failed
-        const field = (err.meta as any)?.field_name as string | undefined;
+        const meta = asRecord(err.meta);
+        const field =
+          typeof meta?.field_name === "string" ? meta.field_name : undefined;
         return res.status(400).json({
           error: "Foreign key constraint violation",
           details: { field },
@@ -96,8 +116,10 @@ export default function errorHandlerMiddleware(
 
   // Custom app errors like: throw { status: 401, message: "Unauthorized" }
   if (typeof err === "object" && err && "status" in err && "message" in err) {
-    const { status, message } = err as any;
-    return res.status(status ?? 500).json({ error: message ?? "Error" });
+    const record = asRecord(err);
+    const status = typeof record?.status === "number" ? record.status : 500;
+    const message = typeof record?.message === "string" ? record.message : "Error";
+    return res.status(status).json({ error: message });
   }
 
   const defaultMessage =

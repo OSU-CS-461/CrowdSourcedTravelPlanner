@@ -65,8 +65,25 @@ vi.mock("../../prismaClient", () => ({
 
 import reviewRouter from "../../routers/reviews";
 
+type RouterPostHandler = (
+  req: AuthenticatedRequest,
+  res: Response,
+) => Promise<void>;
+
+type ReviewRouterLayer = {
+  route?: {
+    path?: string;
+    methods?: {
+      post?: boolean;
+    };
+    stack?: Array<{
+      handle: RouterPostHandler;
+    }>;
+  };
+};
+
 function getCreateReviewHandler() {
-  const postRouteLayer = (reviewRouter as unknown as { stack: any[] }).stack.find(
+  const postRouteLayer = (reviewRouter as unknown as { stack: ReviewRouterLayer[] }).stack.find(
     (layer) => layer?.route?.path === "/" && layer?.route?.methods?.post,
   );
 
@@ -74,11 +91,11 @@ function getCreateReviewHandler() {
     throw new Error("POST / route not found on review router");
   }
 
-  const routeHandlers = postRouteLayer.route.stack.map((entry: any) => entry.handle);
-  return routeHandlers[routeHandlers.length - 1] as (
-    req: AuthenticatedRequest,
-    res: Response,
-  ) => Promise<void>;
+  const routeHandlers = postRouteLayer.route?.stack?.map((entry) => entry.handle) ?? [];
+  if (routeHandlers.length === 0) {
+    throw new Error("POST / route handlers not found on review router");
+  }
+  return routeHandlers[routeHandlers.length - 1];
 }
 
 function buildCreatedReview(
