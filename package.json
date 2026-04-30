@@ -1,5 +1,8 @@
 {
   "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:setup": "cd server && npm run prisma:migrate:deploy && npm run db:create-test-user",
     "dev": "concurrently -n CLIENT,SERVER,PRISMA -c cyan,green,magenta \"npm:dev:client\" \"npm:dev:server\" \"npm:dev:prisma\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run start:dev",

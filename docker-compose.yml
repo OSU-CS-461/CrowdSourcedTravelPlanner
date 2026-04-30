@@ -1,0 +1,17 @@
+# Local PostgreSQL for development. Start with: docker compose up -d
+# Then from /server: npm run prisma:migrate:deploy && npm run db:create-test-user
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cstp_local_dev
+      POSTGRES_DB: cstp
+    ports:
+      # Host 5433 avoids clashing with an existing Postgres on 5432
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cstp"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
