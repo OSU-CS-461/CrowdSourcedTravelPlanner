@@ -6,10 +6,11 @@
     "dev": "concurrently -n CLIENT,SERVER,PRISMA -c cyan,green,magenta \"npm:dev:client\" \"npm:dev:server\" \"npm:dev:prisma\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run start:dev",
-    "dev:prisma": "cd server && npx prisma dev",
+    "dev:prisma": "cd server && npm run prisma:dev",
 
     "build:client": "cd client && npm ci && npm run build",
-    "build:server": "cd server && npm ci && npm run prisma:generate && npm run prisma:migrate:deploy",
+    "build:server": "cd server && npm ci && npm run prisma:generate",
+    "migrate:server": "cd server && npm run prisma:migrate:deploy",
     "sync:client-to-server": "mkdir -p server/public && rm -rf server/public/* && cp -r client/dist/* server/public",
     "build:render": "npm run build:server && npm run build:client && npm run sync:client-to-server",
     "start:render": "cd server && npm run start:production"

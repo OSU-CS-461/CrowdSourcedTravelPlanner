@@ -14,13 +14,19 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
 // --- CREATE ---
 
-async function createTrip(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function createTrip(req: AuthenticatedRequest, res: Response, _next: NextFunction) {
   try {
+    console.log("REQ.USER:", req.user);
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);
+
+    if (body.startDate && body.endDate) {
+      const start = new Date(body.startDate);
+      const end = new Date(body.endDate);
+
+      if (end < start) {
+        throw { status: 400, message: "End date cannot be before start date" };
+      }
+    }
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
@@ -31,16 +37,16 @@ async function createTrip(
 
     return res.status(201).json(trip);
   } catch (err) {
-    next(err);
+    console.error("CREATE TRIP ERROR:", err);
+    return res.status(400).json(err);
   }
 }
-
 
 // --- GET  ---
 
 async function getTrip(req: Request, res: Response, next: NextFunction) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
 
     if (isNaN(tripId) || tripId <= 0) {
       throw { status: 400, message: "Invalid trip ID" };
@@ -56,6 +62,17 @@ async function getTrip(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+export async function listMyTrips(req: AuthenticatedRequest, res: Response, next: NextFunction ) {
+  try {
+    if (!req.user) throw { status: 401, message: "Unauthorized" };
+
+    const trips = await tripService.listMyTrips(req.user.id);
+
+    return res.status(200).json(trips);
+  } catch (err) {
+    next(err);
+  }
+}
 
 // --- LIST ---
 
@@ -99,14 +116,19 @@ async function listTrips(req: Request, res: Response, next: NextFunction) {
 
 // --- PUT ---
 
-async function updateTrip(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function updateTrip(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
     const body: TripPutPostBody = TripPutPostBodySchema.parse(req.body);
+
+    if (body.startDate && body.endDate) {
+      const start = new Date(body.startDate);
+      const end = new Date(body.endDate);
+
+      if (end < start) {
+        throw { status: 400, message: "End date cannot be before start date" };
+      }
+    }
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
@@ -127,14 +149,19 @@ async function updateTrip(
 
 // --- PATCH ---
 
-async function editTrip(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function editTrip(req: AuthenticatedRequest, res: Response, next: NextFunction ) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
     const body: TripPatchBody = TripPatchBodySchema.parse(req.body);
+
+    if (body.startDate && body.endDate) {
+      const start = new Date(body.startDate);
+      const end = new Date(body.endDate);
+
+      if (end < start) {
+        throw { status: 400, message: "End date cannot be before start date" };
+      }
+    }
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
@@ -155,13 +182,9 @@ async function editTrip(
 
 // --- DELETE ---
 
-async function deleteTrip(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function deleteTrip( req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 
@@ -179,13 +202,9 @@ async function deleteTrip(
 
 // --- ADD EXPERIENCE ---
 
-async function addExperienceToTrip(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function addExperienceToTrip(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const tripId = parseInt(req.params.id);
+    const tripId = parseInt(req.params.id as string);
     const { experienceId } = req.body;
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
@@ -209,14 +228,10 @@ async function addExperienceToTrip(
 
 // --- REMOVE EXPERIENCE ---
 
-async function removeExperienceFromTrip(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function removeExperienceFromTrip(req: AuthenticatedRequest, res: Response, next: NextFunction ) {
   try {
-    const tripId = parseInt(req.params.id);
-    const experienceId = parseInt(req.params.experienceId);
+    const tripId = parseInt(req.params.id as string);
+    const experienceId = parseInt(req.params.experienceId as string);
 
     if (!req.user) throw { status: 401, message: "Unauthorized" };
 

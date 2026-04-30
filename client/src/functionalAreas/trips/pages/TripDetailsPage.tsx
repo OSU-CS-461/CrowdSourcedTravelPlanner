@@ -20,7 +20,10 @@ type Trip = {
   title: string;
   description?: string;
   dateCreated: string;
+  lastUpdated: string;
   createdBy: number;
+  startDate?: string | null;
+  endDate?: string | null;
   experiences: TripExperience[];
 };
 
@@ -134,8 +137,26 @@ export default function TripDetailsPage() {
           <p>{trip.description}</p>
         )}
 
+        {trip.startDate && (
+          <p>
+            <strong>Start:</strong>{" "}
+            {new Date(trip.startDate).toLocaleDateString()}
+          </p>
+        )}
+
+        {trip.endDate && (
+          <p>
+            <strong>End:</strong>{" "}
+            {new Date(trip.endDate).toLocaleDateString()}
+          </p>
+        )}
+
         <p className="exp-form-helper">
           Created: {new Date(trip.dateCreated).toLocaleDateString()}
+        </p>
+
+        <p className="exp-form-helper">
+          Last Updated: {new Date(trip.lastUpdated).toLocaleDateString()}
         </p>
 
       </section>
