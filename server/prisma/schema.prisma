@@ -19,7 +19,8 @@ model User {
   trips          Trip[]
   settings       UserSettings?
   likedExperiences UserLikedExperience[]
-  likedTags      UserLikedTag[]
+  likedTags        UserLikedTag[]
+  likedTrips       UserLikedTrip[]
 }
 
 model UserSettings {
@@ -87,6 +88,7 @@ model Trip {
   createdBy   Int
   user        User             @relation(fields: [createdBy], references: [id])
   experiences TripExperience[]
+  likedByUsers UserLikedTrip[]
 
   @@index([createdBy])
 }
@@ -166,5 +168,18 @@ model UserLikedTag {
 
   @@id([userId, tagId])
   @@index([tagId])
+  @@index([userId, dateCreated])
+}
+
+model UserLikedTrip {
+  userId      Int
+  tripId      Int
+  dateCreated DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tripId])
+  @@index([tripId])
   @@index([userId, dateCreated])
 }

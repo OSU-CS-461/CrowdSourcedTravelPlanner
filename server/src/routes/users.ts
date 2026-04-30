@@ -2,6 +2,7 @@ import { default as express } from "express";
 import * as settingsController from "../controllers/settingsController";
 import * as userLikedExperienceController from "../controllers/userLikedExperienceController";
 import * as userLikedTagController from "../controllers/userLikedTagController";
+import * as userLikedTripController from "../controllers/userLikedTripController";
 import { requireAuth } from "../middleware/authMiddleware";
 
 const router = express.Router();
@@ -28,6 +29,27 @@ router.delete(
   "/me/liked-experiences/:experienceId",
   requireAuth,
   userLikedExperienceController.unlikeExperience
+);
+
+router.get(
+  "/me/liked-trips/status/:tripId",
+  requireAuth,
+  userLikedTripController.getMyLikedTripStatus
+);
+router.get(
+  "/me/liked-trips",
+  requireAuth,
+  userLikedTripController.listMyLikedTrips
+);
+router.post(
+  "/me/liked-trips",
+  requireAuth,
+  userLikedTripController.likeTrip
+);
+router.delete(
+  "/me/liked-trips/:tripId",
+  requireAuth,
+  userLikedTripController.unlikeTrip
 );
 
 router.get(
