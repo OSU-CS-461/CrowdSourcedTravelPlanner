@@ -1,0 +1,112 @@
+.trip-detail-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.trip-toolbar {
+  margin-bottom: 1.5rem;
+}
+
+.trip-back {
+  background: transparent;
+  border: 1px solid rgba(53, 89, 187, 0.55);
+  color: #3559bb;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.trip-back:hover {
+  background: #3559bb;
+  color: white;
+}
+
+.trip-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 2rem;
+}
+
+.trip-title-group h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.trip-description {
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.trip-section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.trip-meta {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 0.75rem;
+}
+
+.trip-experience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.trip-experience-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.trip-experience-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.trip-experience-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.trip-experience-card p {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.trip-experience-card button {
+  margin-top: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(53, 89, 187, 0.55);
+  color: #3559bb;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.trip-experience-card button:hover {
+  background: #3559bb;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .trip-detail-page {
+    padding: 1.5rem;
+  }
+
+  .trip-card {
+    padding: 1.5rem;
+  }
+}

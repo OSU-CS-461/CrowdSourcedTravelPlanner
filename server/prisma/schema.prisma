@@ -80,8 +80,8 @@ model Trip {
   id          Int              @id @default(autoincrement())
   title       String
   description String?
-  startDate   DateTime
-  endDate     DateTime
+  startDate   DateTime?
+  endDate     DateTime?
   dateCreated DateTime         @default(now())
   lastUpdated DateTime         @updatedAt
   createdBy   Int

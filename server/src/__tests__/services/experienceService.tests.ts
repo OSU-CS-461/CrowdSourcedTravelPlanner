@@ -52,7 +52,7 @@ describe("experienceService.createExperience rollback", () => {
     };
 
     (prismaMock.$transaction as unknown as ReturnType<typeof vi.fn>)
-      .mockImplementation(async (callback: any) => callback(tx));
+      .mockImplementation(async (callback: (client: typeof tx) => unknown) => callback(tx));
 
     uploadExperienceImagesMock.mockResolvedValue([
       {

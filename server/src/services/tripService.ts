@@ -1,4 +1,5 @@
 import prisma from "../db/prisma";
+import { Prisma } from "../generated/prisma/client";
 
 
 // --- CREATE ---
@@ -63,8 +64,8 @@ export async function getTrip(tripId: number) {
 interface ListTripsParams {
   limit: number;
   offset: number;
-  where?: any;
-  orderBy?: any;
+  where?: Prisma.TripWhereInput;
+  orderBy?: Prisma.TripOrderByWithRelationInput;
 }
 
 export async function listTrips(params: ListTripsParams) {
@@ -88,6 +89,19 @@ export async function listTrips(params: ListTripsParams) {
   });
 }
 
+export async function listMyTrips(userId: number) {
+  return prisma.trip.findMany({
+    where: {
+      createdBy: userId,
+    },
+    include: {
+      experiences: true,
+    },
+    orderBy: {
+      dateCreated: "desc",
+    },
+  });
+}
 
 // --- UPDATE---
 

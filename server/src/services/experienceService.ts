@@ -145,6 +145,9 @@ type ExperienceDetailWithJoins = Prisma.ExperienceGetPayload<{
 }>;
 
 type ExperienceWithJoins = ExperienceListWithJoins | ExperienceDetailWithJoins;
+type ExperienceWithOptionalReviews = ExperienceWithJoins & {
+  reviews?: ExperienceDetailWithJoins["reviews"];
+};
 
 // -----------------------------------------------------------------------------
 // HELPERS
@@ -168,7 +171,7 @@ function serializeExperience(experience: ExperienceWithJoins) {
     createdByUsername: user?.username ?? null,
     tags,
     tagIds: tags.map((t) => t.id),
-    reviews: (experienceWithCounts as any).reviews ?? [],
+    reviews: (experienceWithCounts as ExperienceWithOptionalReviews).reviews ?? [],
     ...(reviewCount !== undefined ? { reviewCount } : {}),
   };
 }

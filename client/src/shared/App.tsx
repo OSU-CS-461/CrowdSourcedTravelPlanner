@@ -18,6 +18,7 @@ import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
 import MyExperiencesPage from "../functionalAreas/experiences/pages/MyExperiencesPage";
 import TripDetailsPage from "../functionalAreas/trips/pages/TripDetailsPage";
 import MediaGalleryPage from "../functionalAreas/experiences/pages/MediaGalleryPage";
+import MyTripsPage from "../functionalAreas/trips/pages/MyTripsPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -39,6 +40,7 @@ export default function App() {
     <Routes>
       <Route element={<RootLayout />}>
         <Route path={ClientRoutes.HOME} element={<HomePage />} />
+        <Route path={ClientRoutes.MY_TRIPS} element={<MyTripsPage />} />
         <Route
           path={ClientRoutes.MY_EXPERIENCES}
           element={<MyExperiencesPage />}
@@ -74,11 +76,12 @@ export default function App() {
           path={ClientRoutes.SIGNUP}
           element={<Navigate to={ClientRoutes.HOME} replace />}
         />
+        <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
+        <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
+
         <Route path={ClientRoutes.INTERESTS} element={<InterestsPage />} />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
-      </Route>
-
-      <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
+        </Route>
     </Routes>
   );
 }

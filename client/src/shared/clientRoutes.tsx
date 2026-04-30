@@ -1,6 +1,7 @@
 export const ClientRoutes = {
   HOME: "/",
   MY_EXPERIENCES: "/my-experiences",
+  MY_TRIPS: "/my-trips",
   LOGIN: "/login",
   SIGNUP: "/signup",
   EXPLORE: "/explore",

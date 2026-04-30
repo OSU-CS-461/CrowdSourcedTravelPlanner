@@ -223,9 +223,10 @@ router.put(
       );
 
       res.json(updatedReview);
-    } catch (error: any) {
-      const status = error.message.includes("Forbidden") ? 403 : 500;
-      res.status(status).json({ error: error.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      const status = message.includes("Forbidden") ? 403 : 500;
+      res.status(status).json({ error: message });
     }
   },
 );
@@ -245,9 +246,10 @@ router.delete(
       await reviewService.deleteReview(Number(reviewId), userId);
 
       res.status(204).send();
-    } catch (error: any) {
-      const status = error.message.includes("Forbidden") ? 403 : 404;
-      res.status(status).json({ error: error.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      const status = message.includes("Forbidden") ? 403 : 404;
+      res.status(status).json({ error: message });
     }
   },
 );
