@@ -44,7 +44,13 @@ export default function TagSelection({
   }, [onCategoryChange, selectedCategoryId]);
 
   useEffect(() => {
-    if (selectedCategoryId === null || featuresLoading) return;
+    if (
+      selectedCategoryId === null ||
+      featuresLoading ||
+      availableFeatures.length === 0
+    ) {
+      return;
+    }
     const allowedFeatureIds = new Set(availableFeatures.map((feature) => feature.id));
     setSelectedFeatureIds((current) =>
       current.filter((featureId) => allowedFeatureIds.has(featureId))

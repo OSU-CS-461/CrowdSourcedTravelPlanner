@@ -70,6 +70,12 @@ export default function HomePage() {
         >
           My Interests
         </button>
+        <button
+          className="btn btn-my-trips"
+          onClick={() => navigate(ClientRoutes.MY_TRIPS)}
+        >
+          My Trips
+        </button>
       </div>
 
       <h2>Your Experiences</h2>

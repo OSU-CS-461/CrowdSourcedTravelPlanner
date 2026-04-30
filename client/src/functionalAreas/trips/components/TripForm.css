@@ -1,0 +1,95 @@
+.exp-form {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.exp-form-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.exp-form-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.exp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.exp-full {
+  grid-column: span 2;
+}
+
+.exp-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.exp-form-field span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.exp-form-field input,
+.exp-form-field textarea {
+  padding: 0.8rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exp-form-field input:focus,
+.exp-form-field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.exp-form-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.exp-form-actions button {
+  background: transparent;
+  border: 1px solid rgba(53, 89, 187, 0.55);
+  color: #3559bb;
+  padding: 0.75rem 1.6rem;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.exp-form-actions button:hover {
+  background: #3559bb;
+  color: white;
+}
+
+.exp-form-error {
+  color: #dc2626;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .exp-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exp-full {
+    grid-column: span 1;
+  }
+}
