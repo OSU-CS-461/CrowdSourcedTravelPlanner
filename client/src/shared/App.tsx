@@ -17,6 +17,7 @@ import RootLayout from "./RootLayout";
 import ExplorePage from "../functionalAreas/experiences/pages/ExplorePage";
 import MyExperiencesPage from "../functionalAreas/experiences/pages/MyExperiencesPage";
 import TripDetailsPage from "../functionalAreas/trips/pages/TripDetailsPage";
+import TagDetailPage from "../functionalAreas/experiences/pages/TagDetailPage";
 import MediaGalleryPage from "../functionalAreas/experiences/pages/MediaGalleryPage";
 import MyTripsPage from "../functionalAreas/trips/pages/MyTripsPage";
 
@@ -80,6 +81,7 @@ export default function App() {
         <Route path={ClientRoutes.TRIP_DETAILS} element={<TripDetailsPage />} />
 
         <Route path={ClientRoutes.INTERESTS} element={<InterestsPage />} />
+        <Route path={ClientRoutes.TAG_DETAILS} element={<TagDetailPage />} />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
         </Route>
     </Routes>
