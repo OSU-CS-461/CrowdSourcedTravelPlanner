@@ -6,7 +6,7 @@ import {
   setAuthToken,
 } from "../../../shared/services/api.service";
 import ExperienceForm from "../components/ExperienceForm";
-import type { FormValues, TagOption } from "../types/types";
+import type { TagOption } from "../types/types";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
 import { createExperience } from "../experienceService";
@@ -14,10 +14,20 @@ import { createExperience } from "../experienceService";
 export default function CreateExperiencePage() {
   const navigate = useNavigate();
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null,
+  );
   const [likedTags, setLikedTags] = useState<TagOption[]>([]);
-  const { categories, loading: tagsLoading, error: tagsError } = useCategories();
-  const { features, loading: featuresLoading, error: featuresError } = useCategoryFeatures(selectedCategoryId);
+  const {
+    categories,
+    loading: tagsLoading,
+    error: tagsError,
+  } = useCategories();
+  const {
+    features,
+    loading: featuresLoading,
+    error: featuresError,
+  } = useCategoryFeatures(selectedCategoryId);
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -34,7 +44,7 @@ export default function CreateExperiencePage() {
             slug: t.slug,
             label: t.label,
             categoryId: t.categoryId,
-          }))
+          })),
         );
       } catch {
         if (!cancelled) setLikedTags([]);
@@ -44,21 +54,6 @@ export default function CreateExperiencePage() {
       cancelled = true;
     };
   }, []);
-  
-  const handleCreateExperience = async (values: FormValues) => {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null,
-  );
-  const {
-    categories,
-    loading: tagsLoading,
-    error: tagsError,
-  } = useCategories();
-  const {
-    features,
-    loading: featuresLoading,
-    error: featuresError,
-  } = useCategoryFeatures(selectedCategoryId);
 
   const handleCreateExperience = async (formData: FormData) => {
     try {
