@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
-import { apiClient, setAuthToken } from "../../../shared/services/api.service";
+import { setAuthToken } from "../../../shared/services/api.service";
+import { createReview } from "../../../shared/services/reviewService";
 import StarRating from "../common/StarRating";
 
 export default function CreateReviewPage() {
@@ -10,7 +11,23 @@ export default function CreateReviewPage() {
   
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const imagePreviews = useMemo(
+    () =>
+      images.map((file) => ({
+        file,
+        url: URL.createObjectURL(file),
+      })),
+    [images],
+  );
+
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [imagePreviews]);
 
   const handleCreateReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,12 +52,14 @@ export default function CreateReviewPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await apiClient.post(`/experiences/${experienceId}/reviews`, {
+      const response = await createReview({
+        experienceId,
         rating,
         comment: comment.trim(),
+        images,
       });
 
-      console.log("Review created:", response.data);
+      console.log("Review created:", response);
       alert("Review posted successfully!");
       
       navigate(ClientRoutes.EXPERIENCE_DETAILS.replace(":id", experienceId));
@@ -109,6 +128,67 @@ export default function CreateReviewPage() {
               fontFamily: "inherit"
             }}
           />
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+            Upload Images (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => {
+              const selected = e.target.files ? Array.from(e.target.files) : [];
+              setImages(selected);
+            }}
+          />
+          {imagePreviews.length > 0 && (
+            <div
+              style={{
+                marginTop: "14px",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                gap: "12px",
+              }}
+            >
+              {imagePreviews.map((preview) => (
+                <div
+                  key={`${preview.file.name}-${preview.file.lastModified}`}
+                  style={{
+                    border: "1px solid #ddd",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#fafafa",
+                  }}
+                >
+                  <img
+                    src={preview.url}
+                    alt={preview.file.name}
+                    style={{
+                      width: "100%",
+                      height: "100px",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                  <div
+                    style={{
+                      padding: "8px",
+                      fontSize: "12px",
+                      color: "#666",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                    title={preview.file.name}
+                  >
+                    {preview.file.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div style={{ display: "flex", gap: "12px" }}>

@@ -21,9 +21,16 @@ export default function CreateTripPage() {
       await apiClient.post("/trips", values);
       alert("Trip created successfully!");
       navigate(ClientRoutes.HOME);
-    } catch (err) {
-      console.error(err);
-      alert("There was a problem creating the trip.");
+    } catch (err: unknown) {
+      console.error("FULL ERROR:", err);
+      const responseData = (err as { response?: { data?: unknown } }).response?.data;
+      const errorMessage =
+        typeof responseData === "object" &&
+        responseData !== null &&
+        "error" in responseData
+          ? String((responseData as { error?: unknown }).error)
+          : JSON.stringify(responseData);
+      alert(errorMessage);
     }
   };
 
@@ -39,7 +46,7 @@ export default function CreateTripPage() {
         </button>
       </div>
 
-=      <div className="trip-card">
+      <div className="trip-card">
         <div className="trip-title-group">
           <h1>Create Trip</h1>
         </div>

@@ -4,6 +4,8 @@ import { z } from "zod";
 export const TripPutPostBodySchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
 });
 
 export type TripPutPostBody = z.infer<typeof TripPutPostBodySchema>;
@@ -13,6 +15,8 @@ export type TripPutPostBody = z.infer<typeof TripPutPostBodySchema>;
 export const TripPatchBodySchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
 });
 
 export type TripPatchBody = z.infer<typeof TripPatchBodySchema>;

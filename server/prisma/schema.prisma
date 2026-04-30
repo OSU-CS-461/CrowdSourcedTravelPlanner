@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -9,99 +9,84 @@ datasource db {
 }
 
 model User {
-  id             Int          @id @default(autoincrement())
-  email          String       @unique
-  username       String       @unique
+  id             Int           @id @default(autoincrement())
+  email          String        @unique
   passwordDigest String
-
+  username       String        @unique
   experiences    Experience[]
+  interests      Interest[]
   reviews        Review[]
   trips          Trip[]
-  interests      Interest[]
   settings       UserSettings?
   likedExperiences UserLikedExperience[]
   likedTags      UserLikedTag[]
 }
 
 model UserSettings {
-  id                 Int      @id @default(autoincrement())
-  userId             Int      @unique
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  preferredFeedSort  String   @default("newest") // "newest" | "highestRated" | "recommended"
-  lastUpdated        DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique
+  preferredFeedSort String   @default("newest")
+  lastUpdated       DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Experience {
-  id              Int       @id @default(autoincrement())
-
+  id              Int              @id @default(autoincrement())
   createdBy       Int
-  user            User      @relation(fields: [createdBy], references: [id])
-
   title           String
   description     String
   descriptionEdit String?
-
-  dateCreated     DateTime  @default(now())
-  lastUpdated     DateTime  @updatedAt
-
-  latitude        Float
-  longitude       Float
-
+  dateCreated     DateTime         @default(now())
+  lastUpdated     DateTime         @updatedAt
   country         String?
   adminRegion     String?
   city            String?
   street          String?
   postalCode      String?
-
+  latitude        Float
+  longitude       Float
   thumbnail       String?
   avgRating       Float?
-
-  keywords        String[]
-
   categoryId      Int?
-  category        Category? @relation(fields: [categoryId], references: [id])
-
+  keywords        String[]
+  category        Category?        @relation(fields: [categoryId], references: [id])
+  user            User             @relation(fields: [createdBy], references: [id])
   experienceTags  ExperienceTag[]
-  trips           TripExperience[]
   reviews         Review[]
   likedByUsers    UserLikedExperience[]
+  trips           TripExperience[]
 
   @@index([createdBy])
   @@index([categoryId])
 }
 
 model Review {
-  id            Int      @id @default(autoincrement())
-  rating        Int
-  reviewText    String
-  dateCreated   DateTime @default(now())
-
-  experienceId  Int
-  experience    Experience @relation(fields: [experienceId], references: [id])
-
-  userId        Int
-  user          User @relation(fields: [userId], references: [id])
+  id           Int        @id @default(autoincrement())
+  rating       Int
+  reviewText   String
+  dateCreated  DateTime   @default(now())
+  experienceId Int
+  userId       Int
+  experience   Experience @relation(fields: [experienceId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
 
   @@index([experienceId])
   @@index([userId])
 }
 
 model Trip {
-  id            Int      @id @default(autoincrement())
-
-  createdBy     Int
-  user          User     @relation(fields: [createdBy], references: [id])
-
-  title         String
-  description   String?
-
-  dateCreated   DateTime @default(now())
-  lastUpdated   DateTime @updatedAt
-
-  experiences   TripExperience[]
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  dateCreated DateTime         @default(now())
+  lastUpdated DateTime         @updatedAt
+  createdBy   Int
+  user        User             @relation(fields: [createdBy], references: [id])
+  experiences TripExperience[]
 
   @@index([createdBy])
 }
@@ -109,41 +94,36 @@ model Trip {
 model TripExperience {
   tripId       Int
   experienceId Int
-
-  trip         Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
   experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  trip         Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@id([tripId, experienceId])
   @@index([experienceId])
 }
 
 model Category {
-  id          Int     @id @default(autoincrement())
-  slug        String  @unique
+  id          Int          @id @default(autoincrement())
+  slug        String       @unique
   label       String
-
-  tags        Tag[]
   experiences Experience[]
+  tags        Tag[]
 }
 
 model Tag {
-  id          Int      @id @default(autoincrement())
-  slug        String   @unique
-  label       String
-
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
+  id             Int             @id @default(autoincrement())
+  slug           String          @unique
+  label          String
+  categoryId     Int
   experienceTags ExperienceTag[]
   likedByUsers     UserLikedTag[]
+  category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
 model ExperienceTag {
   experienceId Int
   tagId        Int
-
-  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
-  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  tag          Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([experienceId, tagId])
   @@index([tagId])
@@ -153,13 +133,11 @@ model ExperienceTag {
 model Interest {
   id          Int      @id @default(autoincrement())
   createdBy   Int
-  user        User     @relation(fields: [createdBy], references: [id])
-
   name        String
   description String?
-
   dateCreated DateTime @default(now())
   lastUpdated DateTime @updatedAt
+  user        User     @relation(fields: [createdBy], references: [id])
 
   @@index([createdBy])
   @@index([dateCreated])

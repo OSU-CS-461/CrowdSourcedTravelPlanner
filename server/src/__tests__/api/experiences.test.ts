@@ -59,7 +59,9 @@ describe("Experiences API", () => {
         .query({ title: "Seaside Village Festival" })
         .expect(200);
 
-      expect(res.body.some((e: any) => e.title === "Seaside Village Festival")).toBe(true);
+      expect(
+        res.body.some((e: { title?: string }) => e.title === "Seaside Village Festival"),
+      ).toBe(true);
     });
   });
 

@@ -20,6 +20,8 @@ const requireAuth = async (
 
     const token = authHeader.split(" ")[1];
     const payload = verify(token); // { id: string }
+    
+    console.log("TOKEN PAYLOAD:", payload);
 
     // Optional: fetch full user from DB
     const user = await prisma.user.findUnique({
