@@ -13,6 +13,7 @@ export const ClientRoutes = {
   TRIP_UPDATE: "/trips/:id/update",
   TRIP_DETAILS: "/trips/:id",
   INTERESTS: "/interests",
+  TAG_DETAILS: "/tags/:id",
   REVIEW_CREATE: "/experiences/:id/reviews/create",
   REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update",
 };

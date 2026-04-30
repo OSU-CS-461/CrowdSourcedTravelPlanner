@@ -4,7 +4,7 @@ import { Prisma } from "../generated/prisma/client";
 import prisma from "../db/prisma";
 import type { ExpPutPostBody, ExpPatchBody } from "../models/experience";
 
-export type ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'media';
+export type ReviewSortOption = "recent" | "highest" | "lowest" | "media";
 
 export interface GetExperienceParams {
   experienceId: number;
@@ -68,7 +68,7 @@ const TAG_SELECT = {
   },
 } satisfies Prisma.TagSelect;
 
-const EXPERIENCE_LIST_SELECT = {
+export const EXPERIENCE_LIST_SELECT = {
   id: true,
   title: true,
   country: true,
@@ -153,7 +153,7 @@ type ExperienceWithOptionalReviews = ExperienceWithJoins & {
 // HELPERS
 // -----------------------------------------------------------------------------
 
-function serializeExperience(experience: ExperienceWithJoins) {
+export function serializeExperience(experience: ExperienceWithJoins) {
   const experienceWithCounts = experience as ExperienceWithJoins & {
     _count?: { reviews: number };
   };
@@ -171,7 +171,8 @@ function serializeExperience(experience: ExperienceWithJoins) {
     createdByUsername: user?.username ?? null,
     tags,
     tagIds: tags.map((t) => t.id),
-    reviews: (experienceWithCounts as ExperienceWithOptionalReviews).reviews ?? [],
+    reviews:
+      (experienceWithCounts as ExperienceWithOptionalReviews).reviews ?? [],
     ...(reviewCount !== undefined ? { reviewCount } : {}),
   };
 }
@@ -366,7 +367,7 @@ export async function createExperience({
 
 export async function getExperience(params: GetExperienceParams) {
   const { experienceId, reviewSort } = params;
-  
+
   const experience = await prisma.experience.findUnique({
     where: { id: experienceId },
     select: EXPERIENCE_DETAIL_SELECT(reviewSort),
