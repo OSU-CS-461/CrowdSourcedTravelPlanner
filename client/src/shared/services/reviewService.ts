@@ -1,29 +1,43 @@
-const API = "/api";
+import { apiClient } from "./api.service";
 
 type ReviewId = string | number;
-type ReviewPayload = {
+
+export type CreateReviewInput = {
   experienceId: ReviewId;
   rating: number;
-  text: string;
+  comment: string;
+  images?: File[];
 };
 
+function buildCreateReviewFormData(input: CreateReviewInput): FormData {
+  const formData = new FormData();
+
+  formData.append("experienceId", String(input.experienceId));
+  formData.append("rating", String(input.rating));
+  formData.append("comment", input.comment);
+
+  for (const image of input.images ?? []) {
+    formData.append("images", image);
+  }
+
+  return formData;
+}
+
 export async function getReviews(experienceId: ReviewId) {
-  const res = await fetch(`${API}/experiences/${experienceId}/reviews`);
-  return res.json();
+  const response = await apiClient.get(`/experiences/${experienceId}/reviews`);
+  return response.data;
 }
 
-// Fixed: Matches app.use('/api/experiences/:id/reviews', reviewRouter)
-export async function createReview(data: ReviewPayload) {
-  return fetch(`${API}/experiences/${data.experienceId}/reviews`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+export async function createReview(input: CreateReviewInput) {
+  const formData = buildCreateReviewFormData(input);
+  const response = await apiClient.post(
+    `/experiences/${input.experienceId}/reviews`,
+    formData,
+    {},
+  );
+  return response.data;
 }
 
-// Fixed: Requires experienceId to navigate the nested backend route
 export async function deleteReview(experienceId: ReviewId, reviewId: ReviewId) {
-  return fetch(`${API}/experiences/${experienceId}/reviews/${reviewId}`, { 
-    method: "DELETE" 
-  });
+  await apiClient.delete(`/experiences/${experienceId}/reviews/${reviewId}`);
 }
