@@ -36,6 +36,9 @@ describe("experienceService.createExperience rollback", () => {
     const originalError = new Error("final fetch failed");
 
     const tx = {
+      user: {
+        findUnique: vi.fn().mockResolvedValue({ id: 9 }),
+      },
       category: {
         findUnique: vi.fn().mockResolvedValue({ id: 5 }),
       },
