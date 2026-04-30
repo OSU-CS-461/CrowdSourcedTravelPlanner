@@ -2,9 +2,6 @@ export interface ExperienceCardProps {
   experience: Experience;
 }
 
-
-
-
 // ---- Experience Form ----
 
 export interface TagOption {
@@ -24,6 +21,7 @@ export interface FormValues {
   title: string;
   description: string;
   image: string;
+  existingImages?: string[];
   categoryId: number | null;
   tagIds: number[];
   country: string;
@@ -37,7 +35,7 @@ export interface FormValues {
 
 export interface FormTemplateProps {
   initialValues?: Partial<FormValues>;
-  onSubmit: (values: FormValues) => void | Promise<void>;
+  onSubmit: (formData: FormData) => void | Promise<void>;
   submitLabel?: string;
   showTagSelector?: boolean;
   availableCategories?: CategoryOption[];
@@ -50,9 +48,7 @@ export interface FormTemplateProps {
   likedTags?: TagOption[];
 }
 
-
-
-// ---- Location Picker ---- 
+// ---- Location Picker ----
 
 export type GeocodeResult = {
   placeId?: number | null;
@@ -110,8 +106,6 @@ export type ViewportCoordinates = {
   minLng: number;
   maxLng: number;
 };
-
-
 
 // ---- Explore Page ----
 

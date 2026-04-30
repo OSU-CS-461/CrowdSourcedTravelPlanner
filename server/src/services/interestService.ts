@@ -1,4 +1,5 @@
 import prisma from "../db/prisma";
+import { Prisma } from "../generated/prisma/client";
 import { InterestPutPostBody, InterestPatchBody } from "../models/interest";
 
 interface InterestCreateInput extends InterestPutPostBody {
@@ -42,8 +43,8 @@ export async function getInterest(interestId: number) {
 interface ListInterestsParams {
   limit: number;
   offset: number;
-  where?: any;
-  orderBy?: any;
+  where?: Prisma.InterestWhereInput;
+  orderBy?: Prisma.InterestOrderByWithRelationInput;
 }
 
 export async function listInterests(params: ListInterestsParams) {
