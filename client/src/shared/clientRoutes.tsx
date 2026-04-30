@@ -1,10 +1,12 @@
 export const ClientRoutes = {
   HOME: "/",
   MY_EXPERIENCES: "/my-experiences",
+  MY_TRIPS: "/my-trips",
   LOGIN: "/login",
   SIGNUP: "/signup",
   EXPLORE: "/explore",
   EXPERIENCE_DETAILS: "/experiences/:id",
+  MEDIA_GALLERY: "/experiences/:id/photos",
   EXPERIENCE_CREATE: "/experiences/create",
   EXPERIENCE_UPDATE: "/experiences/:id/update",
   TRIP_CREATE: "/trips/create",
@@ -13,5 +15,5 @@ export const ClientRoutes = {
   INTERESTS: "/interests",
   TAG_DETAILS: "/tags/:id",
   REVIEW_CREATE: "/experiences/:id/reviews/create",
-  REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update", 
+  REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update",
 };

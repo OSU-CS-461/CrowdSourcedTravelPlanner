@@ -70,15 +70,19 @@ export default function RootLayout() {
                   My Experiences
                 </NavLink>
 
-                <a
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setIsProfileOpen(false);
-                  }}
+                <NavLink
+                  to={ClientRoutes.INTERESTS}
+                  onClick={() => setIsProfileOpen(false)}
                 >
-                  Trips
-                </a>
+                  My Interests
+                </NavLink>
+
+                <NavLink
+                  to={ClientRoutes.MY_TRIPS}
+                  onClick={() => setIsProfileOpen(false)}
+                >
+                  My Trips
+                </NavLink>
 
                 <a
                   href="#"

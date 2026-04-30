@@ -212,6 +212,16 @@
   color: white;
 }
 
+.btn-interests {
+  background-color: #34a853;
+  color: white;
+}
+
+.btn-my-trips {
+  background-color: #00a0d1;
+  color: white;
+}
+
 .section-title {
   margin-top: 40px;
 }

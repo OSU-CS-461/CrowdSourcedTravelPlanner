@@ -1,7 +1,9 @@
 node_modules
 .env
 /src/generated/prisma
-generated
 ./public
 .DS_Store
 coverage
+prisma-client-js/
+generated/
+node_modules/.prisma/

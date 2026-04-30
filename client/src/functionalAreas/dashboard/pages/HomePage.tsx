@@ -208,6 +208,19 @@ export default function HomePage() {
         >
           + Create New Trip
         </button>
+
+        <button
+          className="btn btn-interests"
+          onClick={() => navigate(ClientRoutes.INTERESTS)}
+        >
+          My Interests
+        </button>
+        <button
+          className="btn btn-my-trips"
+          onClick={() => navigate(ClientRoutes.MY_TRIPS)}
+        >
+          My Trips
+        </button>
       </div>
 
       {(experiencesError || tripsError) && (

@@ -1,11 +1,6 @@
 import "./env.js";
 import app from "./app";
 import prisma from "./db/prisma";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 async function startServer() {
   const PORT = Number(process.env.PORT) || 10000;
@@ -22,6 +17,4 @@ async function startServer() {
   });
 }
 
-if (process.argv[1] === __filename) {
-  startServer();
-}
+startServer();
