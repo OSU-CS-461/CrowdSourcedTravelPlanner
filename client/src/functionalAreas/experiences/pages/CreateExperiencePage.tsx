@@ -6,19 +6,28 @@ import {
   setAuthToken,
 } from "../../../shared/services/api.service";
 import ExperienceForm from "../components/ExperienceForm";
-import type { FormValues, TagOption } from "../types/types";
+import type { TagOption } from "../types/types";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
 import { createExperience } from "../experienceService";
-import buildExpCreationPayload  from "../helpers/buildExpCreationPayload";
 
 export default function CreateExperiencePage() {
   const navigate = useNavigate();
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null,
+  );
   const [likedTags, setLikedTags] = useState<TagOption[]>([]);
-  const { categories, loading: tagsLoading, error: tagsError } = useCategories();
-  const { features, loading: featuresLoading, error: featuresError } = useCategoryFeatures(selectedCategoryId);
+  const {
+    categories,
+    loading: tagsLoading,
+    error: tagsError,
+  } = useCategories();
+  const {
+    features,
+    loading: featuresLoading,
+    error: featuresError,
+  } = useCategoryFeatures(selectedCategoryId);
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -35,7 +44,7 @@ export default function CreateExperiencePage() {
             slug: t.slug,
             label: t.label,
             categoryId: t.categoryId,
-          }))
+          })),
         );
       } catch {
         if (!cancelled) setLikedTags([]);
@@ -45,18 +54,34 @@ export default function CreateExperiencePage() {
       cancelled = true;
     };
   }, []);
-  
-  const handleCreateExperience = async (values: FormValues) => {
-    try {
-      const payload = buildExpCreationPayload(values);
-      await createExperience(payload);
 
-      // TODO: at some point we should navigate to the newly created experience's details
-      // page instead of home
+  const handleCreateExperience = async (formData: FormData) => {
+    try {
+      await createExperience(formData);
+
       navigate(ClientRoutes.HOME);
     } catch (err) {
-      // TODO: at some point we'll need better error handling/UI, but this is fine for now
-      alert("Error creating experience: " + (err instanceof Error ? err.message : "Unknown error"));
+      const maybeAxios = err as {
+        response?: { data?: { error?: string; details?: unknown } };
+      };
+      const serverError = maybeAxios.response?.data?.error;
+      const serverDetails = maybeAxios.response?.data?.details;
+      const detailsText = Array.isArray(serverDetails)
+        ? serverDetails
+            .map((d) =>
+              typeof d === "object" && d !== null
+                ? `${String((d as { path?: unknown }).path ?? "")}: ${String((d as { message?: unknown }).message ?? "")}`
+                : String(d),
+            )
+            .join("; ")
+        : undefined;
+
+      alert(
+        "Error creating experience: " +
+          (serverError ??
+            (err instanceof Error ? err.message : "Unknown error")) +
+          (detailsText ? ` (${detailsText})` : ""),
+      );
     }
   };
 

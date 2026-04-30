@@ -11,7 +11,7 @@ Quick setup:
 2. Copy `env.example.txt` to `.env` and configure it
 3. Generate JWT secret: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 4. `npx prisma generate`
-5. `npx prisma dev` (or use local PostgreSQL)
+5. `npm run prisma:dev` (or use local PostgreSQL)
 6. Copy the `DATABASE_URL` from Prisma dev output to your `.env` file
 
 ## MacOS
@@ -22,7 +22,7 @@ Run the following from this directory (server) and be sure you followed the shar
 2. cp .env.example .env
 3. npx prisma generate
    1. This generates the Prisma client (w/ types), which is the ORM we use to interact with our Postgres DB.
-4. npx prisma dev
+4. npm run prisma:dev
    1. This will spin up a Prisma PostgreSQL DB.
    2. Enter `h` and copy the `DATABASE_URL` into your env file. This environment variable is used in on the server to connect to the DB. For example:
 5. `openssl genpkey -algorithm RSA -out jwt-secret.key -pkeyopt rsa_keygen_bits:4096`
@@ -37,7 +37,7 @@ DATABASE_URL="prisma+postgres://localhost:51213/?api_key=eyJkYXRhYmFzZVVybCI6InB
 
 Now that you've completed the first time setup, each time you want to work on the server, you just start the database and then the server:
 
-1. npx prisma dev
+1. npm run prisma:dev
 2. npm run start:dev
 
 ## Install Dependencies Upon Changes
@@ -48,7 +48,14 @@ Whenever there are changes to `package.json`, run `npm install` to make sure you
 
 ## Run DB
 
-`npx prisma dev`
+`npm run prisma:dev`
+
+## Prisma Dev Troubleshooting
+
+If Prisma Dev fails with `PGlite failed to initialize properly`, reset this project's local Prisma dev state:
+
+1. `npx prisma dev rm crowd-sourced-travel-planner`
+2. `npm run prisma:dev`
 
 ## Generate Types
 
@@ -56,7 +63,7 @@ Whenever there are changes to `package.json`, run `npm install` to make sure you
 
 ## Upon Changes
 
-After you make a change to the schema, generate a migration using `npx migrate dev` and then run `npx prisma generate` to generate types.
+After you make a change to the schema, generate a migration using `npx prisma migrate dev` and then run `npx prisma generate` to generate types.
 
 # Tests
 
