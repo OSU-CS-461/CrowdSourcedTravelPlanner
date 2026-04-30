@@ -6,7 +6,7 @@ import {
   setAuthToken,
 } from "../../../shared/services/api.service";
 import ExperienceForm from "../components/ExperienceForm";
-import type { FormValues, TagOption } from "../types/types";
+import type { TagOption } from "../types/types";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
 import { createExperience } from "../experienceService";
