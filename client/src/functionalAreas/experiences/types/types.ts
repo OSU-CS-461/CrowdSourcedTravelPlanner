@@ -44,6 +44,8 @@ export interface FormTemplateProps {
   featuresLoading?: boolean;
   tagsError?: string | null;
   onCategoryChange?: (categoryId: number | null) => void | Promise<void>;
+  /** Tags the user saved (e.g. from My Interests); quick-add when category matches. */
+  likedTags?: TagOption[];
 }
 
 // ---- Location Picker ----

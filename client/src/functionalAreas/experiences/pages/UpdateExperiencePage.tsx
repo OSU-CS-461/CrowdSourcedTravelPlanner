@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import {
+  getMyLikedTags,
+  setAuthToken,
+} from "../../../shared/services/api.service";
 import { useNavigate, useParams } from "react-router-dom";
 import ExperienceForm from "../components/ExperienceForm";
-import { type FormValues } from "../types/types";
-import {
-  getExperienceById,
-  updateExperience,
-} from "../experienceService";
+import { type FormValues, type TagOption } from "../types/types";
+import { getExperienceById, updateExperience } from "../experienceService";
 import mapApiExperienceToFormValues from "../helpers/mapApiExperienceToFormValues";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
@@ -14,10 +15,13 @@ export default function UpdateExperiencePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null
+    null,
   );
-  const { categories, loading: tagsLoading, error: tagsError } =
-    useCategories();
+  const {
+    categories,
+    loading: tagsLoading,
+    error: tagsError,
+  } = useCategories();
   const {
     features,
     loading: featuresLoading,
@@ -27,6 +31,33 @@ export default function UpdateExperiencePage() {
   const [initialValues, setInitialValues] = useState<FormValues | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [likedTags, setLikedTags] = useState<TagOption[]>([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) return;
+    setAuthToken(token);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rows = await getMyLikedTags();
+        if (cancelled) return;
+        setLikedTags(
+          rows.map((t) => ({
+            id: t.id,
+            slug: t.slug,
+            label: t.label,
+            categoryId: t.categoryId,
+          })),
+        );
+      } catch {
+        if (!cancelled) setLikedTags([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!id) {
@@ -71,7 +102,7 @@ export default function UpdateExperiencePage() {
       // TODO: at some point we'll need better error handling/UI, but this is fine for now
       alert(
         "Error updating experience: " +
-          (err instanceof Error ? err.message : "Unknown error")
+          (err instanceof Error ? err.message : "Unknown error"),
       );
     }
   };
@@ -102,6 +133,7 @@ export default function UpdateExperiencePage() {
         featuresLoading={featuresLoading}
         tagsError={tagsError || featuresError}
         onCategoryChange={setSelectedCategoryId}
+        likedTags={likedTags}
       />
     </div>
   );

@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
+import {
+  getMyLikedTags,
+  setAuthToken,
+} from "../../../shared/services/api.service";
 import ExperienceForm from "../components/ExperienceForm";
+import type { TagOption } from "../types/types";
 import useCategories from "../hooks/useCategories";
 import useCategoryFeatures from "../hooks/useCategoryFeatures";
 import { createExperience } from "../experienceService";
@@ -12,6 +17,7 @@ export default function CreateExperiencePage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null,
   );
+  const [likedTags, setLikedTags] = useState<TagOption[]>([]);
   const {
     categories,
     loading: tagsLoading,
@@ -22,6 +28,32 @@ export default function CreateExperiencePage() {
     loading: featuresLoading,
     error: featuresError,
   } = useCategoryFeatures(selectedCategoryId);
+
+  useEffect(() => {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) return;
+    setAuthToken(token);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rows = await getMyLikedTags();
+        if (cancelled) return;
+        setLikedTags(
+          rows.map((t) => ({
+            id: t.id,
+            slug: t.slug,
+            label: t.label,
+            categoryId: t.categoryId,
+          })),
+        );
+      } catch {
+        if (!cancelled) setLikedTags([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleCreateExperience = async (formData: FormData) => {
     try {
@@ -65,6 +97,7 @@ export default function CreateExperiencePage() {
         featuresLoading={featuresLoading}
         tagsError={tagsError || featuresError}
         onCategoryChange={setSelectedCategoryId}
+        likedTags={likedTags}
       />
     </div>
   );

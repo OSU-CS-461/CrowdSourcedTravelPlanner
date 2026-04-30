@@ -11,6 +11,7 @@ interface TagSelectionProps {
   tagsError?: string | null;
   onCategoryChange?: (categoryId: number | null) => void | Promise<void>;
   onTagIdsChange: (tagIds: number[]) => void;
+  likedTags?: TagOption[];
 }
 
 export default function TagSelection({
@@ -23,6 +24,7 @@ export default function TagSelection({
   tagsError = null,
   onCategoryChange,
   onTagIdsChange,
+  likedTags = [],
 }: TagSelectionProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     initialCategoryId
@@ -105,6 +107,14 @@ export default function TagSelection({
 
   const hasCategory = selectedCategoryId !== null;
 
+  const savedTagsForCategory = useMemo(() => {
+    if (selectedCategoryId === null) return [];
+    return likedTags.filter(
+      (t) =>
+        t.categoryId === selectedCategoryId && !selectedFeatureIds.includes(t.id)
+    );
+  }, [likedTags, selectedCategoryId, selectedFeatureIds]);
+
   return (
     <section className="exp-form-section">
       <h3 className="exp-form-section-title">Tags</h3>
@@ -134,6 +144,31 @@ export default function TagSelection({
         </p>
       ) : (
         <div className="exp-form-subsection">
+          {likedTags.length > 0 && (
+            <p className="exp-form-helper">
+              {savedTagsForCategory.length > 0
+                ? "Quick-add from your saved tags (this category):"
+                : "Pick a category to see saved tags you can add in one click."}
+            </p>
+          )}
+          {savedTagsForCategory.length > 0 && (
+            <div className="exp-form-chip-list" style={{ marginBottom: "12px" }}>
+              {savedTagsForCategory.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className="exp-form-chip"
+                  onClick={() => {
+                    if (selectedFeatureIds.includes(t.id)) return;
+                    setSelectedFeatureIds([...selectedFeatureIds, t.id]);
+                  }}
+                >
+                  + {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {featuresLoading && <p className="exp-form-helper">Loading features...</p>}
 
           <label className="exp-form-field">
