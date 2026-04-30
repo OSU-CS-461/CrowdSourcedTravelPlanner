@@ -1,5 +1,14 @@
-import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 import { defineConfig, env } from "prisma/config";
+
+// Load server/.env regardless of cwd (matches server/src/env.ts).
+const prismaConfigDir = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({
+  path: path.join(prismaConfigDir, ".env"),
+  override: process.env.NODE_ENV !== "production",
+});
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

@@ -1,4 +1,5 @@
-import "dotenv/config";
+// Same loading as the API so server/.env wins over machine DATABASE_URL (override in dev).
+import "./src/env.js";
 import prisma from "./src/db/prisma";
 import * as argon2 from "argon2";
 

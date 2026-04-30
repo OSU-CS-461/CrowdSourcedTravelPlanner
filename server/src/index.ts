@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./env.js";
 import app from "./app";
 import prisma from "./db/prisma";
 
@@ -6,8 +6,11 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 10000;
   try {
     await prisma.$connect();
-  } catch {
-    // Non-fatal: server will still start, first request may be slower
+  } catch (err) {
+    console.error(
+      "[startup] Prisma could not connect to the database. Fix DATABASE_URL (see server/.env.example), ensure Prisma dev is running, then restart.",
+      err
+    );
   }
   app.listen(PORT, () => {
     console.log(`App listening on http://localhost:${PORT}`);

@@ -1,4 +1,3 @@
-import "dotenv/config";
 import prisma from "./src/db/prisma";
 
 async function testConnection() {
