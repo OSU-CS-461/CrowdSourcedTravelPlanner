@@ -22,9 +22,83 @@ type UploadedImage = {
   url: string;
 };
 
+type AppError = {
+  status: number;
+  message: string;
+};
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function getUploadConfigStatus() {
+  return {
+    hasEndpoint: isNonEmptyString(process.env.R2_ENDPOINT),
+    hasAccessKeyId: isNonEmptyString(process.env.R2_ACCESS_KEY_ID),
+    hasSecretAccessKey: isNonEmptyString(process.env.R2_SECRET_ACCESS_KEY),
+    hasBucket: isNonEmptyString(process.env.R2_BUCKET),
+    hasPublicBaseUrl: isNonEmptyString(process.env.R2_PUBLIC_BASE_URL),
+  };
+}
+
+function assertUploadConfigConfigured(context: "review" | "experience") {
+  const status = getUploadConfigStatus();
+  const missingKeys: string[] = [];
+
+  if (!status.hasEndpoint) missingKeys.push("R2_ENDPOINT");
+  if (!status.hasAccessKeyId) missingKeys.push("R2_ACCESS_KEY_ID");
+  if (!status.hasSecretAccessKey) missingKeys.push("R2_SECRET_ACCESS_KEY");
+  if (!status.hasBucket) missingKeys.push("R2_BUCKET");
+  if (!status.hasPublicBaseUrl) missingKeys.push("R2_PUBLIC_BASE_URL");
+
+  console.info(`[image.upload.${context}] Upload config status`, status);
+
+  if (missingKeys.length > 0) {
+    console.error(`[image.upload.${context}] Missing upload configuration`, {
+      missingKeys,
+    });
+    throw {
+      status: 500,
+      message: "Image upload service is not configured correctly.",
+    } satisfies AppError;
+  }
+}
+
+function normalizeUploadError(error: unknown, context: "review" | "experience") {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  const normalized = message.toLowerCase();
+  const isCredentialIssue =
+    normalized.includes("resolved credential object is not valid") ||
+    normalized.includes("credential") ||
+    normalized.includes("access key") ||
+    normalized.includes("secret access key") ||
+    normalized.includes("signature");
+
+  console.error(`[image.upload.${context}] Upload failed`, {
+    errorType:
+      error instanceof Error
+        ? error.name
+        : typeof error === "object"
+          ? "object"
+          : typeof error,
+    errorMessage: message,
+  });
+
+  if (isCredentialIssue) {
+    return {
+      status: 500,
+      message: "Image upload service is not configured correctly.",
+    } satisfies AppError;
+  }
+
+  return error;
+}
+
 export async function uploadReviewImages(
   input: UploadReviewImagesInput,
 ): Promise<UploadedImage[]> {
+  assertUploadConfigConfigured("review");
+
   const uploadedKeys: string[] = [];
   const createdImageIds: number[] = [];
 
@@ -96,13 +170,15 @@ export async function uploadReviewImages(
       ),
     );
 
-    throw error;
+    throw normalizeUploadError(error, "review");
   }
 }
 
 export async function uploadExperienceImages(
   input: UploadExperienceImagesInput,
 ): Promise<UploadedImage[]> {
+  assertUploadConfigConfigured("experience");
+
   const uploadedKeys: string[] = [];
   const createdImageIds: number[] = [];
 
@@ -173,6 +249,6 @@ export async function uploadExperienceImages(
       ),
     );
 
-    throw error;
+    throw normalizeUploadError(error, "experience");
   }
 }

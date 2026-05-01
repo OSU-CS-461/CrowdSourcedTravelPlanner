@@ -14,6 +14,7 @@ model User {
   passwordDigest String
   username       String        @unique
   experiences    Experience[]
+  images         Image[]
   interests      Interest[]
   reviews        Review[]
   trips          Trip[]
@@ -55,6 +56,7 @@ model Experience {
   category        Category?        @relation(fields: [categoryId], references: [id])
   user            User             @relation(fields: [createdBy], references: [id])
   experienceTags  ExperienceTag[]
+  images          Image[]
   reviews         Review[]
   likedByUsers    UserLikedExperience[]
   trips           TripExperience[]
@@ -71,10 +73,37 @@ model Review {
   experienceId Int
   userId       Int
   experience   Experience @relation(fields: [experienceId], references: [id])
+  images       Image[]
   user         User       @relation(fields: [userId], references: [id])
 
   @@index([experienceId])
   @@index([userId])
+}
+
+model Image {
+  id               Int        @id @default(autoincrement())
+  createdBy        Int
+  experienceId     Int
+  reviewId         Int?
+  storageKey       String     @unique
+  originalFilename String
+  mimeType         String?
+  fileSizeBytes    Int?
+  url              String
+  altText          String?
+  caption          String?
+  sortOrder        Int        @default(0)
+  dateCreated      DateTime   @default(now())
+  lastUpdated      DateTime   @updatedAt
+  experience       Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  review           Review?    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user             User       @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([createdBy])
+  @@index([experienceId])
+  @@index([reviewId])
+  @@index([experienceId, sortOrder])
+  @@index([reviewId, sortOrder])
 }
 
 model Trip {

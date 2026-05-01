@@ -32,6 +32,9 @@ describe("imageService.uploadReviewImages", () => {
   beforeEach(() => {
     mockReset(prismaMock);
     vi.clearAllMocks();
+    process.env.R2_ENDPOINT = "https://example-r2.dev";
+    process.env.R2_ACCESS_KEY_ID = "test-access-key";
+    process.env.R2_SECRET_ACCESS_KEY = "test-secret-key";
     process.env.R2_BUCKET = "test-bucket";
     process.env.R2_PUBLIC_BASE_URL = "https://cdn.example.com/";
   });
@@ -180,5 +183,35 @@ describe("imageService.uploadReviewImages", () => {
       "experiences/44/reviews/88/img-1.jpg",
       "experiences/44/reviews/88/img-2.jpg",
     ]);
+  });
+
+  it("returns a clean config error when storage credentials are invalid", async () => {
+    buildReviewImageKeyMock.mockReturnValueOnce(
+      "experiences/44/reviews/88/img-1-photo-1.jpg",
+    );
+    r2SendMock.mockRejectedValueOnce(
+      new Error("Resolved credential object is not valid"),
+    );
+
+    const files: Express.Multer.File[] = [
+      {
+        originalname: "photo-1.jpg",
+        mimetype: "image/jpeg",
+        size: 11,
+        buffer: Buffer.from("image-bytes-1"),
+      } as Express.Multer.File,
+    ];
+
+    await expect(
+      uploadReviewImages({
+        createdBy: 7,
+        experienceId: 44,
+        reviewId: 88,
+        files,
+      }),
+    ).rejects.toMatchObject({
+      status: 500,
+      message: "Image upload service is not configured correctly.",
+    });
   });
 });
