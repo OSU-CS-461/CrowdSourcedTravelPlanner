@@ -22,6 +22,16 @@ projects:
                 sync: false # set this to your Neon connection string in Render
               - key: JWT_SECRET
                 sync: false
+              - key: R2_ENDPOINT
+                sync: false
+              - key: R2_ACCESS_KEY_ID
+                sync: false
+              - key: R2_SECRET_ACCESS_KEY
+                sync: false
+              - key: R2_BUCKET
+                sync: false
+              - key: R2_PUBLIC_BASE_URL
+                sync: false
 
             buildCommand: |
               npm ci
