@@ -6,8 +6,9 @@ const router = express.Router();
 
 router.post("/", requireAuth, interestController.createInterest);
 
-router.get("/:id", interestController.getInterest);
+// List route must be registered before `/:id` so `GET /api/interests` is not captured as a detail fetch.
 router.get("/", interestController.listInterests);
+router.get("/:id", interestController.getInterest);
 
 router.put("/:id", requireAuth, interestController.updateInterest);
 router.patch("/:id", requireAuth, interestController.editInterest);

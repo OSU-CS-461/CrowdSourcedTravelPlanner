@@ -8,9 +8,11 @@ import {
   deleteInterest,
   getMyLikedExperiences,
   getMyLikedTags,
+  getMyLikedTrips,
   type Interest,
 } from "../../../shared/services/api.service";
 import { ClientRoutes } from "../../../shared/clientRoutes";
+import "./InterestsPage.css";
 
 function getCurrentUserIdFromToken(): number | null {
   const token = localStorage.getItem("cstp.auth.token");
@@ -30,6 +32,7 @@ function getCurrentUserIdFromToken(): number | null {
 
 type LikedExp = Awaited<ReturnType<typeof getMyLikedExperiences>>[number];
 type LikedTag = Awaited<ReturnType<typeof getMyLikedTags>>[number];
+type LikedTrip = Awaited<ReturnType<typeof getMyLikedTrips>>[number];
 
 export default function InterestsPage() {
   const navigate = useNavigate();
@@ -41,6 +44,7 @@ export default function InterestsPage() {
   const [error, setError] = useState<string | null>(null);
   const [likedExperiences, setLikedExperiences] = useState<LikedExp[]>([]);
   const [likedTags, setLikedTags] = useState<LikedTag[]>([]);
+  const [likedTrips, setLikedTrips] = useState<LikedTrip[]>([]);
   const [likesLoading, setLikesLoading] = useState(true);
 
   const currentUserId = useMemo(() => getCurrentUserIdFromToken(), []);
@@ -57,7 +61,18 @@ export default function InterestsPage() {
       setInterests(data);
     } catch (err) {
       console.error("Failed to load interests:", err);
-      setError("Failed to load interests");
+      let message = "Failed to load interests";
+      if (err && typeof err === "object" && "response" in err) {
+        const data = (err as { response?: { data?: { error?: unknown; message?: unknown } } })
+          .response?.data;
+        if (data?.error != null) message = String(data.error);
+        else if (data?.message != null) message = String(data.message);
+      } else if (err instanceof Error && err.message) {
+        message = err.message.includes("Network Error")
+          ? "Cannot reach server. Is the API running on port 10000?"
+          : message;
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -72,12 +87,14 @@ export default function InterestsPage() {
     setAuthToken(token);
     try {
       setLikesLoading(true);
-      const [exps, tags] = await Promise.all([
+      const [exps, tags, trips] = await Promise.all([
         getMyLikedExperiences(),
         getMyLikedTags(),
+        getMyLikedTrips(),
       ]);
       setLikedExperiences(exps);
       setLikedTags(tags);
+      setLikedTrips(trips);
     } catch (err) {
       console.error("Failed to load saved items:", err);
     } finally {
@@ -185,45 +202,19 @@ export default function InterestsPage() {
     }
   };
 
-  const sectionStyle: React.CSSProperties = {
-    backgroundColor: "#2d2d2d",
-    border: "1px solid #444",
-    borderRadius: "12px",
-    padding: "20px",
-    marginBottom: "24px",
-  };
-
-  const subHeading: React.CSSProperties = {
-    color: "#fff",
-    marginTop: 0,
-    marginBottom: "12px",
-    fontSize: "1.1rem",
-  };
-
   return (
-    <main style={{ maxWidth: "880px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ color: "#fff", marginBottom: "8px" }}>My Interests</h1>
-      <p style={{ color: "rgba(255,255,255,0.8)", marginTop: 0, marginBottom: "24px" }}>
-        Your written interests and things you have saved from the community.
+    <main className="interests-page">
+      <h1 className="interests-title-main">My Interests</h1>
+      <p className="interests-page-intro">
+        Your own interest notes (Local) and things you saved from the community.
       </p>
 
-      {error && (
-        <div
-          style={{
-            backgroundColor: "#fee",
-            color: "#c00",
-            padding: "10px",
-            borderRadius: "4px",
-            marginBottom: "20px",
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="interests-error">{error}</div>}
 
-      <section style={sectionStyle}>
-        <h2 style={{ ...subHeading, marginBottom: "16px" }}>Self-authored</h2>
-        <p style={{ color: "rgba(255,255,255,0.72)", marginTop: 0, fontSize: "0.95rem" }}>
+      <div className="interests-two-col">
+      <section className="interests-col">
+        <h2 className="interests-col-title">Local</h2>
+        <p className="interests-col-desc">
           Create and edit your own interest notes. Only entries you created appear in this list.
         </p>
 
@@ -400,17 +391,17 @@ export default function InterestsPage() {
         )}
       </section>
 
-      <section style={sectionStyle}>
-        <h2 style={subHeading}>Saved from the community</h2>
-        <p style={{ color: "rgba(255,255,255,0.72)", marginTop: 0, fontSize: "0.95rem" }}>
-          Experiences and tags you marked with the heart. Saving a tag helps you reuse it quickly when writing a new experience.
+      <section className="interests-col">
+        <h2 className="interests-col-title">Community</h2>
+        <p className="interests-col-desc">
+          Experiences, trips, and tags you marked with the heart. Saving a tag helps you reuse it quickly when writing a new experience.
         </p>
 
         {likesLoading ? (
           <p style={{ color: "rgba(255,255,255,0.7)" }}>Loading saved items…</p>
         ) : (
           <>
-            <h3 style={{ ...subHeading, fontSize: "1rem" }}>Experiences</h3>
+            <h3 className="interests-subheading">Experiences</h3>
             {likedExperiences.length === 0 ? (
               <p style={{ color: "rgba(255,255,255,0.65)", marginBottom: "24px" }}>
                 None yet. Open an experience and tap the heart to save it here.
@@ -442,13 +433,13 @@ export default function InterestsPage() {
               </ul>
             )}
 
-            <h3 style={{ ...subHeading, fontSize: "1rem" }}>Tags</h3>
+            <h3 className="interests-subheading">Tags</h3>
             {likedTags.length === 0 ? (
-              <p style={{ color: "rgba(255,255,255,0.65)" }}>
+              <p style={{ color: "rgba(255,255,255,0.65)", marginBottom: "24px" }}>
                 None yet. Open a tag page (from an experience) and save the tag.
               </p>
             ) : (
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px 0" }}>
                 {likedTags.map((t) => (
                   <li key={t.id} style={{ marginBottom: "10px" }}>
                     <Link
@@ -466,11 +457,37 @@ export default function InterestsPage() {
                 ))}
               </ul>
             )}
+
+            <h3 className="interests-subheading">Trips</h3>
+            {likedTrips.length === 0 ? (
+              <p style={{ color: "rgba(255,255,255,0.65)" }}>
+                None yet. Tap the heart next to a trip on your home dashboard to save it here.
+              </p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {likedTrips.map((tr) => (
+                  <li key={tr.id} style={{ marginBottom: "10px" }}>
+                    <Link
+                      to={ClientRoutes.TRIP_DETAILS.replace(":id", String(tr.id))}
+                      style={{ color: "#8ab4ff", fontWeight: 600 }}
+                    >
+                      {tr.title}
+                    </Link>
+                    {tr.createdByUsername ? (
+                      <span style={{ color: "#888", marginLeft: "8px", fontSize: "0.85rem" }}>
+                        · {tr.createdByUsername}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
           </>
         )}
       </section>
+      </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div className="interests-back-row">
         <button
           onClick={() => navigate(ClientRoutes.HOME)}
           style={{

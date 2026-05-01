@@ -23,9 +23,13 @@ export default function RootLayout() {
   return (
     <>
       {isAuthenticated && (
-        <nav style={{ display: "flex", gap: 12, padding: 12, borderBottom: "1px solid #e5e7eb" }}>
+        <nav
+          className="top-site-nav"
+          style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: 12, borderBottom: "1px solid #e5e7eb", alignItems: "center" }}
+        >
           <NavLink to={ClientRoutes.HOME}>Home</NavLink>
           <NavLink to={ClientRoutes.EXPLORE}>Explore</NavLink>
+          <NavLink to={ClientRoutes.INTERESTS}>My Interests</NavLink>
 
           <div
             ref={profileMenuRef}
