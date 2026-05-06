@@ -40,6 +40,20 @@ export const authSignup = async (input: {
   return response.data;
 };
 
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+};
+
+export const changeMyPassword = async (input: ChangePasswordInput) => {
+  const response = await apiClient.patch<{ message: string }>(
+    "/users/me/password",
+    input
+  );
+  return response.data;
+};
+
 export type Interest = {
   id: number;
   name: string;

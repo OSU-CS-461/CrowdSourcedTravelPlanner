@@ -84,15 +84,12 @@ export default function RootLayout() {
                   My Trips
                 </NavLink>
 
-                <a
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setIsProfileOpen(false);
-                  }}
+                <NavLink
+                  to={ClientRoutes.SETTINGS}
+                  onClick={() => setIsProfileOpen(false)}
                 >
-                  Profile Settings
-                </a>
+                  User Settings
+                </NavLink>
 
                 <button
                   type="button"

@@ -1,5 +1,10 @@
 import { User } from "../generated/prisma/client";
-import { IUserSignUp, UserSignUp } from "../models/user";
+import {
+  IUserPasswordChange,
+  IUserSignUp,
+  UserPasswordChange,
+  UserSignUp,
+} from "../models/user";
 import * as argon2d from "argon2";
 import prisma from "../db/prisma";
 import z from "zod";
@@ -31,10 +36,43 @@ export const getUserByEmailAndPassword = async (
     where: { email },
   });
   if (!user) throw new Error("No user found");
-  try {
-    await argon2d.verify(user.passwordDigest, password);
-  } catch {
+  const isValidPassword = await argon2d.verify(user.passwordDigest, password);
+  if (!isValidPassword) {
     throw new Error("Failed to login");
   }
   return user;
+};
+
+export const changePasswordForUser = async (
+  userId: number,
+  _passwordChangeArgs: IUserPasswordChange
+) => {
+  const { currentPassword, newPassword } = await UserPasswordChange.parseAsync(
+    _passwordChangeArgs
+  );
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, passwordDigest: true },
+  });
+
+  if (!user) {
+    throw { status: 404, message: "User not found" };
+  }
+
+  const isCurrentPasswordValid = await argon2d.verify(
+    user.passwordDigest,
+    currentPassword
+  );
+  if (!isCurrentPasswordValid) {
+    throw { status: 400, message: "Current password is incorrect." };
+  }
+
+  const passwordDigest = await argon2d.hash(newPassword);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordDigest },
+  });
+
+  return { success: true };
 };
