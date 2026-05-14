@@ -5,7 +5,6 @@ def walk_the_line_sorted(root_dir):
     file_list = []
 
     for root, dirs, files in os.walk(root_dir):
-        # Prune node_modules in-place
         dirs[:] = [d for d in dirs if d != 'node_modules']
 
         for file in files:
@@ -22,8 +21,6 @@ def walk_the_line_sorted(root_dir):
             except OSError:
                 continue
 
-    # Sort by mtime (most recent first)
-    # Use reverse=False for oldest first
     file_list.sort(key=lambda x: x['mtime'], reverse=0)
 
     for f in file_list:
@@ -36,5 +33,5 @@ def walk_the_line_sorted(root_dir):
             print(f"  Modified: {mod_date}")
             print("-" * 30)
 
-# Usage
-walk_the_line_sorted('.')
+if __name__ == '__main__':
+    walk_the_line_sorted('.')
