@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { ClientRoutes } from "./clientRoutes";
 import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
+import { getUserSettings } from "./services/api.service";
+import { isUiTheme, setUiTheme } from "./theme";
 
 export default function RootLayout() {
   const { isAuthenticated, logout } = useAuth();
@@ -20,21 +22,30 @@ export default function RootLayout() {
     return () => document.removeEventListener("mousedown", onDocumentClick);
   }, []);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    void getUserSettings()
+      .then((s) => {
+        if (cancelled) return;
+        const t = isUiTheme(s.themePreference) ? s.themePreference : "light";
+        setUiTheme(t);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
   return (
     <>
       {isAuthenticated && (
-        <nav
-          className="top-site-nav"
-          style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: 12, borderBottom: "1px solid #e5e7eb", alignItems: "center" }}
-        >
+        <nav className="top-site-nav">
           <NavLink to={ClientRoutes.HOME}>Home</NavLink>
           <NavLink to={ClientRoutes.EXPLORE}>Explore</NavLink>
           <NavLink to={ClientRoutes.INTERESTS}>My Interests</NavLink>
 
-          <div
-            ref={profileMenuRef}
-            style={{ marginLeft: "auto", display: "flex", gap: 12, position: "relative" }}
-          >
+          <div ref={profileMenuRef} className="site-nav-profile">
             <button
               type="button"
               onClick={() => setIsProfileOpen((prev) => !prev)}
@@ -46,23 +57,7 @@ export default function RootLayout() {
             </button>
 
             {isProfileOpen && (
-              <div
-                role="menu"
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  minWidth: 180,
-                  background: "#fff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 8,
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                  display: "grid",
-                  gap: 4,
-                  padding: 8,
-                  zIndex: 10,
-                }}
-              >
+              <div className="profile-menu" role="menu">
                 <NavLink
                   to={ClientRoutes.MY_EXPERIENCES}
                   onClick={() => setIsProfileOpen(false)}
@@ -84,15 +79,12 @@ export default function RootLayout() {
                   My Trips
                 </NavLink>
 
-                <a
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setIsProfileOpen(false);
-                  }}
+                <NavLink
+                  to={ClientRoutes.PROFILE_SETTINGS}
+                  onClick={() => setIsProfileOpen(false)}
                 >
-                  Profile Settings
-                </a>
+                  Profile settings
+                </NavLink>
 
                 <button
                   type="button"
@@ -100,7 +92,6 @@ export default function RootLayout() {
                     setIsProfileOpen(false);
                     logout();
                   }}
-                  style={{ textAlign: "left" }}
                 >
                   Logout
                 </button>
@@ -110,8 +101,7 @@ export default function RootLayout() {
         </nav>
       )}
 
-      {/* This is the “body replaced by the router” */}
-      <main style={{ padding: 16 }}>
+      <main className="app-main">
         <Outlet />
       </main>
     </>
