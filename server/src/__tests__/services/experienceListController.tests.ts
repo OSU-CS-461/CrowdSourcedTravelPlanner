@@ -5,12 +5,8 @@ const { listExperiencesMock } = vi.hoisted(() => ({
   listExperiencesMock: vi.fn(),
 }));
 
-vi.mock("../../services/experienceService", async () => {
-  const actual = await vi.importActual<typeof import("../../services/experienceService")>(
-    "../../services/experienceService",
-  );
+vi.mock("../../services/experienceService", () => {
   return {
-    ...actual,
     listExperiences: listExperiencesMock,
   };
 });
