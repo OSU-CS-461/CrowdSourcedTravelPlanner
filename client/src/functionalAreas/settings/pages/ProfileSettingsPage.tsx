@@ -14,6 +14,7 @@ import {
 import "./ProfileSettingsPage.css";
 
 export default function ProfileSettingsPage() {
+  const [email, setEmail] = useState<string | null>(null);
   const [draft, setDraft] = useState<UiTheme>("light");
   const committedRef = useRef<UiTheme>("light");
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -32,11 +33,13 @@ export default function ProfileSettingsPage() {
         committedRef.current = t;
         setDraft(t);
         setUiTheme(t);
+        setEmail(typeof s.email === "string" ? s.email : null);
         setLoadError(null);
       })
       .catch(() => {
         if (!active) return;
         setLoadError("Could not load settings.");
+        setEmail(null);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -63,6 +66,9 @@ export default function ProfileSettingsPage() {
         : "light";
       committedRef.current = t;
       setUiTheme(t);
+      if (typeof updated.email === "string") {
+        setEmail(updated.email);
+      }
       setSavedFlash(true);
       window.setTimeout(() => setSavedFlash(false), 2000);
     } catch {
@@ -80,6 +86,21 @@ export default function ProfileSettingsPage() {
       </div>
 
       {loadError ? <p className="profile-settings__error">{loadError}</p> : null}
+
+      <div className="profile-settings__panel profile-settings__panel--account">
+        <h2>Account</h2>
+        <div className="profile-settings__signin-email">
+          <p className="profile-settings__signin-email-label" id="signin-email-label">
+            Sign-in email
+          </p>
+          <p
+            className="profile-settings__signin-email-value"
+            aria-labelledby="signin-email-label"
+          >
+            {loading ? "—" : (email ?? "—")}
+          </p>
+        </div>
+      </div>
 
       <div className="profile-settings__panel">
         <h2>Appearance</h2>
