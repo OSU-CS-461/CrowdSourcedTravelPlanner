@@ -22,7 +22,11 @@ vi.mock("../../lib/r2", () => ({
 }));
 
 import prisma from "../../db/prisma";
-import { createExperience, getExperience } from "../../services/experienceService";
+import {
+  createExperience,
+  getExperience,
+  listExperiences,
+} from "../../services/experienceService";
 
 const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
@@ -147,5 +151,168 @@ describe("experienceService.getExperience reviewCount", () => {
     expect(result).not.toBeNull();
     expect(result?.avgRating).toBe(4.3);
     expect(result?.reviewCount).toBe(2);
+  });
+
+  it("falls back to legacy detail select when review stat columns are unavailable", async () => {
+    const missingColumnError = Object.assign(
+      new Error(
+        'The column `Experience.mostRecentReviewAt` does not exist in the current database.',
+      ),
+      {
+        code: "P2022",
+        meta: { column: "Experience.mostRecentReviewAt" },
+      },
+    );
+
+    const findUnique = prismaMock.experience.findUnique as unknown as ReturnType<
+      typeof vi.fn
+    >;
+
+    findUnique.mockRejectedValueOnce(missingColumnError).mockResolvedValueOnce({
+      id: 61,
+      title: "Legacy Detail",
+      description: "desc",
+      country: "US",
+      adminRegion: "OR",
+      city: "Portland",
+      street: "SW Main",
+      postalCode: "97204",
+      latitude: 45.5,
+      longitude: -122.6,
+      thumbnail: null,
+      avgRating: null,
+      dateCreated: new Date("2026-01-01T00:00:00.000Z"),
+      lastUpdated: new Date("2026-01-02T00:00:00.000Z"),
+      createdBy: 5,
+      user: { username: "sam" },
+      categoryId: 2,
+      category: { id: 2, slug: "food", label: "Food" },
+      experienceTags: [],
+      descriptionEdit: null,
+      _count: { reviews: 0 },
+      reviews: [],
+      images: [],
+    });
+
+    const result = await getExperience({ experienceId: 61 });
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(61);
+    expect(findUnique).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("experienceService.listExperiences fallback when review stats columns are missing", () => {
+  beforeEach(() => {
+    mockReset(prismaMock);
+    vi.clearAllMocks();
+  });
+
+  it("falls back to legacy query when reviewCount/mostRecentReviewAt columns are unavailable", async () => {
+    const missingColumnError = Object.assign(
+      new Error(
+        'The column `Experience.reviewCount` does not exist in the current database.',
+      ),
+      {
+        code: "P2022",
+        meta: { column: "Experience.reviewCount" },
+      },
+    );
+
+    const findMany = prismaMock.experience.findMany as unknown as ReturnType<
+      typeof vi.fn
+    >;
+
+    findMany.mockRejectedValueOnce(missingColumnError).mockResolvedValueOnce([
+      {
+        id: 10,
+        title: "Historic Walk",
+        country: "US",
+        adminRegion: "OR",
+        city: "Portland",
+        street: "SW Main",
+        postalCode: "97204",
+        latitude: 45.5,
+        longitude: -122.6,
+        thumbnail: null,
+        avgRating: 4.5,
+        dateCreated: new Date("2026-01-01T00:00:00.000Z"),
+        lastUpdated: new Date("2026-01-02T00:00:00.000Z"),
+        createdBy: 5,
+        user: { username: "sam" },
+        categoryId: 2,
+        category: { id: 2, slug: "food", label: "Food" },
+        experienceTags: [],
+      },
+    ]);
+
+    const result = await listExperiences({
+      limit: 10,
+      offset: 0,
+      where: {
+        reviewCount: { gt: 0 },
+        mostRecentReviewAt: { not: null },
+      },
+      orderBy: { mostRecentReviewAt: "desc" },
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe(10);
+    expect(findMany).toHaveBeenCalledTimes(2);
+
+    const fallbackCall = findMany.mock.calls[1]?.[0];
+    expect(fallbackCall.where).toEqual({});
+    expect(fallbackCall.orderBy).toEqual({ dateCreated: "desc" });
+    expect(fallbackCall.select.reviewCount).toBeUndefined();
+    expect(fallbackCall.select.mostRecentReviewAt).toBeUndefined();
+  });
+
+  it("retries once when Prisma connection closes during list query", async () => {
+    const transientError = Object.assign(new Error("Server has closed the connection."), {
+      code: "P1017",
+    });
+
+    const findMany = prismaMock.experience.findMany as unknown as ReturnType<
+      typeof vi.fn
+    >;
+    const disconnect = prismaMock.$disconnect as unknown as ReturnType<typeof vi.fn>;
+
+    findMany.mockRejectedValueOnce(transientError).mockResolvedValueOnce([
+      {
+        id: 25,
+        title: "Recovered List",
+        country: "US",
+        adminRegion: "CA",
+        city: "San Diego",
+        street: "Harbor Dr",
+        postalCode: "92101",
+        latitude: 32.7,
+        longitude: -117.2,
+        thumbnail: null,
+        avgRating: 4.2,
+        reviewCount: 5,
+        mostRecentReviewAt: new Date("2026-05-14T00:00:00.000Z"),
+        dateCreated: new Date("2026-05-01T00:00:00.000Z"),
+        lastUpdated: new Date("2026-05-14T00:00:00.000Z"),
+        createdBy: 3,
+        user: { username: "pat" },
+        categoryId: 2,
+        category: { id: 2, slug: "food", label: "Food" },
+        experienceTags: [],
+      },
+    ]);
+    disconnect.mockResolvedValue(undefined);
+
+    const result = await listExperiences({
+      limit: 10,
+      offset: 0,
+      where: {},
+      orderBy: { dateCreated: "desc" },
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe(25);
+    expect(findMany).toHaveBeenCalledTimes(2);
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });

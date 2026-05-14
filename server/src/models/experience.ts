@@ -84,7 +84,14 @@ export const ExpListQuerySchema = z
     offset: z.coerce.number().int().min(0).optional(),
 
     sortBy: z
-      .enum(["avgRating", "dateCreated", "reviewCount", "title", "distance"])
+      .enum([
+        "avgRating",
+        "dateCreated",
+        "reviewCount",
+        "title",
+        "distance",
+        "mostRecentReviewAt",
+      ])
       .optional(),
 
     sortDirection: z.enum(["asc", "desc"]).optional(),
@@ -113,6 +120,17 @@ export const ExpListQuerySchema = z
     tagMode: z.preprocess(
       (v) => (typeof v === "string" ? v.toLowerCase() : v),
       z.enum(["and", "or"]).optional(),
+    ),
+    reviewedOnly: z.preprocess(
+      (value) => {
+        if (typeof value === "boolean") return value;
+        if (typeof value !== "string") return undefined;
+        const normalized = value.trim().toLowerCase();
+        if (normalized === "true" || normalized === "1") return true;
+        if (normalized === "false" || normalized === "0") return false;
+        return value;
+      },
+      z.boolean().optional(),
     ),
   })
   .superRefine((query, ctx) => {

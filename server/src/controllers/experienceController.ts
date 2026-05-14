@@ -212,6 +212,10 @@ async function listExperiences(
     if (query.categoryId !== undefined) {
       where.categoryId = query.categoryId;
     }
+    if (query.reviewedOnly) {
+      where.reviewCount = { gt: 0 };
+      where.mostRecentReviewAt = { not: null };
+    }
 
     const tagSlugs = splitSlugs(query.tags);
     const tagMode = query.tagMode || "or";
@@ -239,6 +243,10 @@ async function listExperiences(
     const orderBy: Prisma.ExperienceOrderByWithRelationInput =
       query.sortBy === "avgRating"
         ? { avgRating: direction }
+        : query.sortBy === "reviewCount"
+          ? { reviewCount: direction }
+          : query.sortBy === "mostRecentReviewAt"
+            ? { mostRecentReviewAt: direction }
         : query.sortBy === "title"
           ? { title: query.sortDirection || "asc" }
           : { dateCreated: direction };

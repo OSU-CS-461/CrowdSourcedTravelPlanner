@@ -200,4 +200,22 @@ describe("Experience list query validation", () => {
     });
     expect(parsed.success).toBeFalsy();
   });
+
+  it("parses sortBy=mostRecentReviewAt", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      sortBy: "mostRecentReviewAt",
+      sortDirection: "desc",
+    });
+    expect(parsed.success).toBeTruthy();
+  });
+
+  it("parses reviewedOnly flag", () => {
+    const parsed = ExpListQuerySchema.safeParse({
+      reviewedOnly: "true",
+    });
+    expect(parsed.success).toBeTruthy();
+    if (parsed.success) {
+      expect(parsed.data.reviewedOnly).toBe(true);
+    }
+  });
 });
