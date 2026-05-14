@@ -312,7 +312,7 @@ router.put(
             orderBy: { sortOrder: "asc" },
           },
         },
-      );
+      });
 
       res.json(formatReview(refreshedReview));
     } catch (error: unknown) {
