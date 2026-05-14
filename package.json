@@ -8,6 +8,7 @@
     "dev:server": "cd server && npm run start:dev",
     "dev:prisma": "cd server && npm run prisma:dev",
 
+    "build": "npm run build:render",
     "build:client": "cd client && npm ci && npm run build",
     "build:server": "cd server && npm ci && npm run prisma:generate",
     "migrate:server": "cd server && npm run prisma:migrate:deploy",
