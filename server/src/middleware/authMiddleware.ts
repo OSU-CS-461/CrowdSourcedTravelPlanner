@@ -15,7 +15,7 @@ const requireAuth = async (
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Missing Authorization header" });
+      return next({ status: 401, message: "Missing Authorization header" });
     }
 
     const token = authHeader.split(" ")[1];
@@ -30,7 +30,7 @@ const requireAuth = async (
     });
 
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      return next({ status: 401, message: "User not found" });
     }
 
     req.user = { id: user.id };

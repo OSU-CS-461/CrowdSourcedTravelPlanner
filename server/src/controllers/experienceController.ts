@@ -163,7 +163,7 @@ async function getExperience(req: Request, res: Response, next: NextFunction) {
     });
 
     if (!experience) {
-      return res.status(404).json({ message: "Experience not found" });
+      return next({ status: 404, message: "Experience not found" });
     }
 
     return res.status(200).json(experience);

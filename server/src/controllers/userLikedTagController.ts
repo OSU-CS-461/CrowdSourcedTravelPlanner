@@ -24,7 +24,7 @@ export async function getMyLikedTagStatus(
   try {
     const tagId = parseInt(req.params.tagId, 10);
     if (Number.isNaN(tagId) || tagId <= 0) {
-      return res.status(400).json({ error: "Invalid tag ID" });
+      return next({ status: 400, message: "Invalid tag ID" });
     }
     const liked = await userLikedTagService.userHasLikedTag(req.user!.id, tagId);
     return res.status(200).json({ liked });
@@ -42,7 +42,7 @@ export async function likeTag(
     const body = LikeTagBodySchema.parse(req.body);
     const result = await userLikedTagService.addUserLikedTag(req.user!.id, body.tagId);
     if (!result.ok) {
-      return res.status(404).json({ error: "Tag not found" });
+      return next({ status: 404, message: "Tag not found" });
     }
     return res.status(201).json({ liked: true });
   } catch (err) {
@@ -58,7 +58,7 @@ export async function unlikeTag(
   try {
     const tagId = parseInt(req.params.tagId, 10);
     if (Number.isNaN(tagId) || tagId <= 0) {
-      return res.status(400).json({ error: "Invalid tag ID" });
+      return next({ status: 400, message: "Invalid tag ID" });
     }
     await userLikedTagService.removeUserLikedTag(req.user!.id, tagId);
     return res.status(204).send();

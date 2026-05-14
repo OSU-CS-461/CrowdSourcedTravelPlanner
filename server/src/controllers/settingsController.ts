@@ -10,7 +10,7 @@ export async function getSettings(
 ) {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return next({ status: 401, message: "Unauthorized" });
     }
 
     const settings = await settingsService.getSettingsForUser(req.user.id);
@@ -27,7 +27,7 @@ export async function patchSettings(
 ) {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return next({ status: 401, message: "Unauthorized" });
     }
 
     const body = SettingsPatchBodySchema.parse(req.body);

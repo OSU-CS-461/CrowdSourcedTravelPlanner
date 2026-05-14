@@ -38,7 +38,7 @@ async function createTrip(req: AuthenticatedRequest, res: Response, _next: NextF
     return res.status(201).json(trip);
   } catch (err) {
     console.error("CREATE TRIP ERROR:", err);
-    return res.status(400).json(err);
+    return next({ status: 400, message: err });
   }
 }
 

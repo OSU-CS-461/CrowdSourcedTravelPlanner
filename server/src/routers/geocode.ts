@@ -341,7 +341,7 @@ router.get("/search", async (req: Request, res: Response) => {
 
     const response = await fetch(url, { headers: buildNominatimHeaders(req) });
     if (!response.ok) {
-      return res.status(502).json({ error: "Nominatim search failed" });
+      return next({ status: 502, message: "Nominatim search failed" });
     }
 
     const data = (await response.json()) as NominatimPlaceResult[];
@@ -352,7 +352,7 @@ router.get("/search", async (req: Request, res: Response) => {
     setCachedSearchResult(cacheKey, results);
     return res.json(results);
   } catch {
-    return res.status(502).json({ error: "Nominatim search failed" });
+    return next({ status: 502, message: "Nominatim search failed" });
   }
 });
 
@@ -363,7 +363,7 @@ router.get("/reverse", async (req: Request, res: Response) => {
     const lon = Number(req.query.lon);
 
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return res.status(400).json({ error: "Invalid lat/lon" });
+      return next({ status: 400, message: "Invalid lat/lon" });
     }
 
     const acceptLanguage =
@@ -380,7 +380,7 @@ router.get("/reverse", async (req: Request, res: Response) => {
 
     const response = await fetch(url, { headers: buildNominatimHeaders(req) });
     if (!response.ok) {
-      return res.status(502).json({ error: "Nominatim reverse failed" });
+      return next({ status: 502, message: "Nominatim reverse failed" });
     }
 
     const raw = (await response.json()) as NominatimPlaceResult;
@@ -393,12 +393,12 @@ router.get("/reverse", async (req: Request, res: Response) => {
       });
 
     if (!normalized) {
-      return res.status(502).json({ error: "Nominatim reverse failed" });
+      return next({ status: 502, message: "Nominatim reverse failed" });
     }
 
     return res.json(normalized);
   } catch {
-    return res.status(502).json({ error: "Nominatim reverse failed" });
+    return next({ status: 502, message: "Nominatim reverse failed" });
   }
 });
 

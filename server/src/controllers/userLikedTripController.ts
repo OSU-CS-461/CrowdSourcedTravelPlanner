@@ -25,7 +25,7 @@ export async function getMyLikedTripStatus(
   try {
     const tripId = parseInt(req.params.tripId, 10);
     if (Number.isNaN(tripId) || tripId <= 0) {
-      return res.status(400).json({ error: "Invalid trip ID" });
+      return next({ status: 400, message: "Invalid trip ID" });
     }
     const liked = await userLikedTripService.userHasLikedTrip(
       req.user!.id,
@@ -49,7 +49,7 @@ export async function likeTrip(
       body.tripId
     );
     if (!result.ok) {
-      return res.status(404).json({ error: "Trip not found" });
+      return next({ status: 404, message: "Trip not found" });
     }
     return res.status(201).json({ liked: true });
   } catch (err) {
@@ -65,7 +65,7 @@ export async function unlikeTrip(
   try {
     const tripId = parseInt(req.params.tripId, 10);
     if (Number.isNaN(tripId) || tripId <= 0) {
-      return res.status(400).json({ error: "Invalid trip ID" });
+      return next({ status: 400, message: "Invalid trip ID" });
     }
     await userLikedTripService.removeUserLikedTrip(req.user!.id, tripId);
     return res.status(204).send();

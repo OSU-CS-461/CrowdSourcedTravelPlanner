@@ -80,12 +80,12 @@ function formatReview(review: {
 }
 
 // --- GET (Public) ---
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const experienceId = Number((req.params as { id: string }).id);
 
     if (!Number.isInteger(experienceId) || experienceId <= 0) {
-      return res.status(400).json({ error: "Invalid experience ID" });
+      return next({ status: 400, message: "Invalid experience ID" });
     }
 
     const reviews = await prisma.review.findMany({
@@ -108,7 +108,7 @@ router.get("/", async (req, res) => {
 
     res.json(formattedReviews);
   } catch {
-    res.status(500).json({ error: "Failed to fetch reviews" });
+    next({ status: 500, message: "Failed to fetch reviews" });
   }
 });
 
@@ -127,30 +127,28 @@ router.post(
       const userId = req.user?.id;
 
       if (!Number.isInteger(experienceId) || experienceId <= 0) {
-        return res.status(400).json({ error: "Invalid experience ID" });
+        return next({ status: 400, message: "Invalid experience ID" });
       }
 
       if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
+        return next({ status: 401, message: "Unauthorized" });
       }
       createdReviewUserId = userId;
 
       const bodyExperienceId = optionalNumber(req.body.experienceId);
       if (bodyExperienceId !== undefined && Number.isNaN(bodyExperienceId)) {
-        return res.status(400).json({ error: "Invalid experienceId field" });
+        return next({ status: 400, message: "Invalid experienceId field" });
       }
       if (
         bodyExperienceId !== undefined &&
         Number(bodyExperienceId) !== experienceId
       ) {
-        return res
-          .status(400)
-          .json({ error: "Body experienceId does not match route experience ID" });
+        return next({ status: 400, message: "Body experienceId does not match route experience ID" });
       }
 
       const rating = parseReviewRating(req.body.rating);
       if (rating === undefined || Number.isNaN(rating)) {
-        return res.status(400).json({ error: "rating must be an integer from 1 to 5" });
+        return next({ status: 400, message: "rating must be an integer from 1 to 5" });
       }
 
       const files = (req.files as Express.Multer.File[]) ?? [];
@@ -199,7 +197,7 @@ router.post(
 
       const message =
         error instanceof Error ? error.message : "Database error";
-      res.status(500).json({ error: message });
+      next({ status: 500, message: message });
     }
   },
 );
@@ -213,7 +211,7 @@ router.put(
       const { reviewId } = req.params;
       const userId = req.user?.id;
       if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
+        return next({ status: 401, message: "Unauthorized" });
       }
 
       const updatedReview = await reviewService.updateReview(
@@ -226,7 +224,7 @@ router.put(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
       const status = message.includes("Forbidden") ? 403 : 500;
-      res.status(status).json({ error: message });
+      next({ status: status, message: message });
     }
   },
 );
@@ -240,7 +238,7 @@ router.delete(
       const { reviewId } = req.params;
       const userId = req.user?.id;
       if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
+        return next({ status: 401, message: "Unauthorized" });
       }
 
       await reviewService.deleteReview(Number(reviewId), userId);
@@ -249,7 +247,7 @@ router.delete(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
       const status = message.includes("Forbidden") ? 403 : 404;
-      res.status(status).json({ error: message });
+      next({ status: status, message: message });
     }
   },
 );

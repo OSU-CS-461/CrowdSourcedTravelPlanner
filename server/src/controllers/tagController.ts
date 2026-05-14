@@ -17,11 +17,11 @@ async function getTagById(req: Request, res: Response, next: NextFunction) {
   try {
     const tagId = parseInt(req.params.id, 10);
     if (Number.isNaN(tagId) || tagId <= 0) {
-      return res.status(400).json({ error: "Invalid tag ID" });
+      return next({ status: 400, message: "Invalid tag ID" });
     }
     const tag = await tagService.getTagById(tagId);
     if (!tag) {
-      return res.status(404).json({ error: "Tag not found" });
+      return next({ status: 404, message: "Tag not found" });
     }
     return res.status(200).json(tag);
   } catch (err) {

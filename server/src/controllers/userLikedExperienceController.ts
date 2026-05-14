@@ -27,7 +27,7 @@ export async function getMyLikedExperienceStatus(
   try {
     const experienceId = parseInt(req.params.experienceId, 10);
     if (Number.isNaN(experienceId) || experienceId <= 0) {
-      return res.status(400).json({ error: "Invalid experience ID" });
+      return next({ status: 400, message: "Invalid experience ID" });
     }
     const liked = await userLikedExperienceService.userHasLikedExperience(
       req.user!.id,
@@ -51,7 +51,7 @@ export async function likeExperience(
       body.experienceId
     );
     if (!result.ok) {
-      return res.status(404).json({ error: "Experience not found" });
+      return next({ status: 404, message: "Experience not found" });
     }
     return res.status(201).json({ liked: true });
   } catch (err) {
@@ -67,7 +67,7 @@ export async function unlikeExperience(
   try {
     const experienceId = parseInt(req.params.experienceId, 10);
     if (Number.isNaN(experienceId) || experienceId <= 0) {
-      return res.status(400).json({ error: "Invalid experience ID" });
+      return next({ status: 400, message: "Invalid experience ID" });
     }
     await userLikedExperienceService.removeUserLikedExperience(
       req.user!.id,
