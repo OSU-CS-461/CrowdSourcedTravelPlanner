@@ -1,5 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
 import type { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { ZodError } from "zod";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -51,6 +52,27 @@ export default function errorHandlerMiddleware(
       ];
     }
     return res.status(400).json({ error: "Validation failed", details });
+  }
+
+  if (err instanceof multer.MulterError) {
+    switch (err.code) {
+      case "LIMIT_FILE_SIZE":
+        return res.status(400).json({
+          error: "File is too large. Maximum allowed size is 25 MB for uploads.",
+        });
+      case "LIMIT_FILE_COUNT":
+        return res.status(400).json({
+          error: "Too many files. You can upload up to 10 files.",
+        });
+      case "LIMIT_UNEXPECTED_FILE":
+        return res.status(400).json({
+          error: "Unexpected file field in upload request.",
+        });
+      default:
+        return res.status(400).json({
+          error: err.message || "Invalid upload request.",
+        });
+    }
   }
 
   // Prisma known request errors

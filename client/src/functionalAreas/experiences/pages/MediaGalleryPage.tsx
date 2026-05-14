@@ -4,62 +4,117 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiClient } from "../../../shared/services/api.service";
 
-type RawPhoto = string | { url?: string | null } | null;
-type GalleryLocationState = {
-  photos?: RawPhoto[];
+type RawImage =
+  | string
+  | {
+      id?: string | number;
+      url?: string | null;
+      mimeType?: string | null;
+      mediaType?: "IMAGE" | "VIDEO";
+    }
+  | null;
+
+type RawMedia = {
+  id?: string | number;
+  url?: string | null;
+  type?: "image" | "video";
+  mediaType?: "IMAGE" | "VIDEO";
+  mimeType?: string | null;
+} | null;
+
+type MediaItem = {
+  id: string | number;
+  url: string;
+  type: "image" | "video";
 };
 
-function normalizePhotos(photos: RawPhoto[] | null | undefined): string[] {
-  if (!Array.isArray(photos)) return [];
+type GalleryLocationState = {
+  media?: MediaItem[];
+};
 
-  return photos
-    .map((photo) => {
-      if (typeof photo === "string" && photo.trim().length > 0) {
-        return photo;
+function normalizeMedia(
+  media: RawMedia[] | null | undefined,
+  images: RawImage[] | null | undefined,
+): MediaItem[] {
+  if (Array.isArray(media) && media.length > 0) {
+    return media
+      .map((item) => {
+        if (!item || typeof item.url !== "string" || item.url.trim().length === 0) {
+          return null;
+        }
+
+        const type =
+          item.type === "video" || item.mediaType === "VIDEO" ? "video" : "image";
+
+        return {
+          id: item.id ?? item.url,
+          url: item.url.trim(),
+          type,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+  }
+
+  if (!Array.isArray(images)) return [];
+
+  return images
+    .map((item) => {
+      if (typeof item === "string" && item.trim().length > 0) {
+        return {
+          id: item,
+          url: item,
+          type: "image" as const,
+        };
       }
 
-      if (
-        photo &&
-        typeof photo === "object" &&
-        typeof photo.url === "string" &&
-        photo.url.trim().length > 0
-      ) {
-        return photo.url;
+      if (item && typeof item === "object" && typeof item.url === "string") {
+        const type = item.mediaType === "VIDEO" ? "video" : "image";
+        return {
+          id: item.id ?? item.url,
+          url: item.url,
+          type,
+        };
       }
 
       return null;
     })
-    .filter((photo): photo is string => photo !== null);
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
-// TODO: at some point, we should load images as wel scroll instead of loading all at once
+// TODO: at some point, we should load media as we scroll instead of all at once.
 
 export default function MediaGallery() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
 
-  const statePhotos = useMemo(
-    () =>
-      normalizePhotos((location.state as GalleryLocationState | null)?.photos),
-    [location.state],
-  );
+  const stateMedia = useMemo(() => {
+    const media = (location.state as GalleryLocationState | null)?.media;
+    if (!Array.isArray(media)) return [];
 
-  const [photos, setPhotos] = useState<string[]>(statePhotos);
-  const [isLoading, setIsLoading] = useState(statePhotos.length === 0);
+    return media.filter(
+      (item): item is MediaItem =>
+        typeof item?.url === "string" &&
+        item.url.trim().length > 0 &&
+        (item.type === "image" || item.type === "video"),
+    );
+  }, [location.state]);
+
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(stateMedia);
+  const [isLoading, setIsLoading] = useState(stateMedia.length === 0);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
 
   useEffect(() => {
-    if (statePhotos.length > 0) {
-      setPhotos(statePhotos);
+    if (stateMedia.length > 0) {
+      setMediaItems(stateMedia);
       setIsLoading(false);
       setError(null);
       return;
     }
 
     if (!id) {
-      setPhotos([]);
+      setMediaItems([]);
       setIsLoading(false);
       setError("Missing experience ID.");
       return;
@@ -73,24 +128,27 @@ export default function MediaGallery() {
       .get(`/experiences/${id}`)
       .then((res) => {
         if (canceled) return;
-        const fetchedPhotos = normalizePhotos(
-          (res.data as { images?: RawPhoto[] } | null)?.images,
-        );
-        setPhotos(fetchedPhotos);
+        const body = res.data as {
+          media?: RawMedia[];
+          images?: RawImage[];
+        } | null;
+
+        const fetchedMedia = normalizeMedia(body?.media, body?.images);
+        setMediaItems(fetchedMedia);
         setIsLoading(false);
       })
       .catch((err) => {
         if (canceled) return;
-        console.error("Failed to load gallery photos:", err);
-        setPhotos([]);
+        console.error("Failed to load gallery media:", err);
+        setMediaItems([]);
         setIsLoading(false);
-        setError("Failed to load photos.");
+        setError("Failed to load media.");
       });
 
     return () => {
       canceled = true;
     };
-  }, [id, statePhotos]);
+  }, [id, stateMedia]);
 
   return (
     <div className="media-gallery-page">
@@ -102,51 +160,69 @@ export default function MediaGallery() {
         >
           Back
         </button>
-        <h1 className="media-gallery-title">All Photos</h1>
+        <h1 className="media-gallery-title">All Media</h1>
       </div>
 
-      {isLoading && <p className="media-gallery-empty">Loading photos...</p>}
+      {isLoading && <p className="media-gallery-empty">Loading media...</p>}
 
       {!isLoading && error && <p className="media-gallery-empty">{error}</p>}
 
-      {!isLoading && !error && photos.length === 0 && (
+      {!isLoading && !error && mediaItems.length === 0 && (
         <p className="media-gallery-empty">
-          No photos available for this experience yet.
+          No media available for this experience yet.
         </p>
       )}
 
-      {!isLoading && !error && photos.length > 0 && (
+      {!isLoading && !error && mediaItems.length > 0 && (
         <div className="media-gallery-masonry">
-          {photos.map((photo, index) => (
-            <img
-              key={`${photo}-${index}`}
-              src={photo}
-              alt={`Photo ${index + 1}`}
-              className="media-gallery-image"
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelectedPhoto(photo)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setSelectedPhoto(photo);
-                }
-              }}
-            />
-          ))}
+          {mediaItems.map((item, index) =>
+            item.type === "video" ? (
+              <video
+                key={`${item.id}-${index}`}
+                src={item.url}
+                className="media-gallery-image"
+                controls
+                preload="metadata"
+                onClick={() => setSelectedMedia(item)}
+              />
+            ) : (
+              <img
+                key={`${item.id}-${index}`}
+                src={item.url}
+                alt={`Media ${index + 1}`}
+                className="media-gallery-image"
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedMedia(item)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setSelectedMedia(item);
+                  }
+                }}
+              />
+            ),
+          )}
         </div>
       )}
 
-      {selectedPhoto && (
-        <div
-          className="lightbox-overlay"
-          onClick={() => setSelectedPhoto(null)}
-        >
-          <img
-            src={selectedPhoto}
-            alt="Selected full-size"
-            className="lightbox-image"
-            onClick={(e) => e.stopPropagation()}
-          />
+      {selectedMedia && (
+        <div className="lightbox-overlay" onClick={() => setSelectedMedia(null)}>
+          {selectedMedia.type === "video" ? (
+            <video
+              src={selectedMedia.url}
+              className="lightbox-image"
+              controls
+              preload="metadata"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={selectedMedia.url}
+              alt="Selected full-size"
+              className="lightbox-image"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
     </div>

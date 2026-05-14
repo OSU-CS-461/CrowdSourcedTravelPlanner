@@ -61,7 +61,8 @@ export default function ReviewItem({ review, onChange }: ReviewItemProps) {
                     <video 
                       src={item.url} 
                       style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                      controls 
+                      controls
+                      preload="metadata"
                     />
                   ) : (
                     <img 

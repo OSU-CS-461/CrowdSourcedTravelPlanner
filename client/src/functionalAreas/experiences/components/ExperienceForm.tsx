@@ -1,10 +1,20 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LocationSection from "./LocationSection";
 import type { LocationFields } from "./LocationSection";
 import TagSelection from "./TagSelection";
 import "./ExperienceForm.css";
 import { type FormValues, type FormTemplateProps } from "../types/types";
+import {
+  resolveClientMediaType,
+  validateSelectedMedia,
+} from "../../../shared/mediaValidation";
+
+type SelectedMediaPreview = {
+  file: File;
+  url: string;
+  type: "image" | "video";
+};
 
 function buildInitialLocation(values: Partial<FormValues>): LocationFields {
   return {
@@ -16,6 +26,12 @@ function buildInitialLocation(values: Partial<FormValues>): LocationFields {
     latitude: values.latitude ?? "",
     longitude: values.longitude ?? "",
   };
+}
+
+function formatFileSize(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Unknown size";
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export default function ExperienceForm({
@@ -46,19 +62,41 @@ export default function ExperienceForm({
   const [location, setLocation] = useState<LocationFields>(() =>
     buildInitialLocation(initialValues),
   );
-  const existingThumbnail = initialValues.image?.trim() ?? "";
-  const existingImages = useMemo(
-    () =>
-      (initialValues.existingImages ?? []).filter(
-        (url) => {
-          const normalizedUrl = url.trim();
-          return (
-            normalizedUrl.length > 0 && normalizedUrl !== existingThumbnail
-          );
-        },
-      ),
-    [existingThumbnail, initialValues.existingImages],
+  const [removedMediaIds, setRemovedMediaIds] = useState<Array<number | string>>(
+    [],
   );
+  const existingThumbnail = initialValues.image?.trim() ?? "";
+  const existingMedia = useMemo(
+    () =>
+      (initialValues.existingMedia ?? []).filter((item) => {
+        return (
+          typeof item.url === "string" &&
+          item.url.trim().length > 0 &&
+          !removedMediaIds.includes(item.id)
+        );
+      }),
+    [initialValues.existingMedia, removedMediaIds],
+  );
+
+  const selectedPreviews = useMemo<SelectedMediaPreview[]>(() => {
+    return files
+      .map((file) => {
+        const type = resolveClientMediaType(file);
+        if (!type) return null;
+        return {
+          file,
+          url: URL.createObjectURL(file),
+          type,
+        };
+      })
+      .filter((item): item is SelectedMediaPreview => item !== null);
+  }, [files]);
+
+  useEffect(() => {
+    return () => {
+      selectedPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [selectedPreviews]);
 
   const handleLocationChange = useCallback((nextLocation: LocationFields) => {
     setLocation(nextLocation);
@@ -76,6 +114,14 @@ export default function ExperienceForm({
     [onCategoryChange],
   );
 
+  function toggleRemoveExistingMedia(mediaId: number | string) {
+    setRemovedMediaIds((current) =>
+      current.includes(mediaId)
+        ? current.filter((id) => id !== mediaId)
+        : [...current, mediaId],
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -85,6 +131,12 @@ export default function ExperienceForm({
     }
     if (categoryId === null) {
       setError("Please select a category.");
+      return;
+    }
+
+    const validationErrors = validateSelectedMedia(files);
+    if (validationErrors.length > 0) {
+      setError(validationErrors[0]);
       return;
     }
 
@@ -109,13 +161,17 @@ export default function ExperienceForm({
     // tags
     tagIds.forEach((id) => formData.append("tagIds", String(id)));
 
+    removedMediaIds.forEach((id) =>
+      formData.append("removeMediaIds", String(id)),
+    );
+
     // files
     files.forEach((file) => {
       formData.append("images", file);
     });
 
     try {
-      await onSubmit(formData); // 🔥 changed
+      await onSubmit(formData);
       setError("");
     } catch (err) {
       console.error(err);
@@ -155,13 +211,21 @@ export default function ExperienceForm({
       />
 
       <label className="exp-form-field">
-        <span>Upload Images</span>
+        <span>Upload Media</span>
         <input
           type="file"
-          accept="image/*"
+          accept="image/*,video/mp4,video/webm,video/quicktime"
           multiple
           onChange={(e) => {
             const selected = e.target.files ? Array.from(e.target.files) : [];
+            const validationErrors = validateSelectedMedia(selected);
+            if (validationErrors.length > 0) {
+              setError(validationErrors[0]);
+              setFiles([]);
+              return;
+            }
+
+            setError("");
             setFiles(selected);
           }}
         />
@@ -176,33 +240,84 @@ export default function ExperienceForm({
         </div>
       )}
 
-      {existingImages.length > 0 && (
+      {existingMedia.length > 0 && (
         <div className="exp-form-preview">
-          <p>Existing photos</p>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            {existingImages.map((url, idx) => (
-              <img
-                key={`${url}-${idx}`}
-                src={url}
-                alt={`existing photo ${idx + 1}`}
-                width={120}
-              />
+          <p>Existing media</p>
+          <div style={{ display: "grid", gap: "10px" }}>
+            {existingMedia.map((item, idx) => (
+              <label
+                key={`${item.id}-${idx}`}
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  alignItems: "center",
+                }}
+              >
+                {item.type === "video" ? (
+                  <video
+                    src={item.url}
+                    width={120}
+                    height={80}
+                    controls
+                    preload="metadata"
+                  />
+                ) : (
+                  <img
+                    src={item.url}
+                    alt={`existing media ${idx + 1}`}
+                    width={120}
+                    height={80}
+                    style={{ objectFit: "cover" }}
+                  />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div>{item.originalFilename ?? `Media ${idx + 1}`}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>
+                    {item.mimeType ?? item.type}
+                    {typeof item.fileSizeBytes === "number"
+                      ? ` • ${formatFileSize(item.fileSizeBytes)}`
+                      : ""}
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={removedMediaIds.includes(item.id)}
+                  onChange={() => toggleRemoveExistingMedia(item.id)}
+                />
+                <span>Remove</span>
+              </label>
             ))}
           </div>
         </div>
       )}
 
-      {files.length > 0 && (
+      {selectedPreviews.length > 0 && (
         <div className="exp-form-preview">
-          <p>New photos selected</p>
+          <p>New media selected</p>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            {files.map((file, idx) => (
-              <img
-                key={idx}
-                src={URL.createObjectURL(file)}
-                alt="preview"
-                width={120}
-              />
+            {selectedPreviews.map((preview) => (
+              <div key={`${preview.file.name}-${preview.file.lastModified}`}>
+                {preview.type === "video" ? (
+                  <video
+                    src={preview.url}
+                    width={140}
+                    height={90}
+                    controls
+                    preload="metadata"
+                  />
+                ) : (
+                  <img
+                    src={preview.url}
+                    alt={preview.file.name}
+                    width={140}
+                    height={90}
+                    style={{ objectFit: "cover" }}
+                  />
+                )}
+                <div style={{ fontSize: "12px", color: "#666", maxWidth: "140px" }}>
+                  {preview.file.name}
+                </div>
+              </div>
             ))}
           </div>
         </div>

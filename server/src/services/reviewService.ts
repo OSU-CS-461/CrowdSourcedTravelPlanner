@@ -1,5 +1,6 @@
 import prisma from "../db/prisma";
 import type { Prisma } from "../generated/prisma/client";
+import { deleteMediaObjectsByStorageKeys } from "./imageService";
 
 type ReviewInput = {
   comment?: string;
@@ -62,7 +63,7 @@ export async function createReview(
 }
 
 export async function deleteReview(reviewId: number, userId: number) {
-  return prisma.$transaction(async (tx) => {
+  const deletedReview = await prisma.$transaction(async (tx) => {
     const review = await tx.review.findUnique({
       where: { id: reviewId },
       select: { id: true, userId: true, experienceId: true },
@@ -76,14 +77,26 @@ export async function deleteReview(reviewId: number, userId: number) {
       throw new Error("Forbidden: You do not own this review");
     }
 
-    const deletedReview = await tx.review.delete({
+    const mediaObjects = await tx.image.findMany({
+      where: { reviewId },
+      select: { storageKey: true },
+    });
+
+    const deletedReviewRecord = await tx.review.delete({
       where: { id: reviewId },
     });
 
     await recalculateExperienceAvgRating(tx, review.experienceId);
 
-    return deletedReview;
+    return {
+      deletedReview: deletedReviewRecord,
+      mediaStorageKeys: mediaObjects.map((item) => item.storageKey),
+    };
   });
+
+  await deleteMediaObjectsByStorageKeys(deletedReview.mediaStorageKeys);
+
+  return deletedReview.deletedReview;
 }
 
 export async function updateReview(
@@ -115,4 +128,53 @@ export async function updateReview(
 
     return updatedReview;
   });
+}
+
+type RemoveReviewMediaParams = {
+  reviewId: number;
+  userId: number;
+  mediaIds: number[];
+};
+
+export async function removeReviewMedia({
+  reviewId,
+  userId,
+  mediaIds,
+}: RemoveReviewMediaParams) {
+  if (mediaIds.length === 0) return;
+
+  const review = await prisma.review.findUnique({
+    where: { id: reviewId },
+    select: { id: true, userId: true },
+  });
+
+  if (!review) {
+    throw new Error("Review not found");
+  }
+
+  if (review.userId !== userId) {
+    throw new Error("Forbidden: You do not own this review");
+  }
+
+  const mediaRows = await prisma.image.findMany({
+    where: {
+      id: { in: mediaIds },
+      reviewId,
+    },
+    select: {
+      id: true,
+      storageKey: true,
+    },
+  });
+
+  if (mediaRows.length === 0) return;
+
+  await prisma.image.deleteMany({
+    where: {
+      id: { in: mediaRows.map((item) => item.id) },
+      reviewId,
+    },
+  });
+
+  await deleteMediaObjectsByStorageKeys(mediaRows.map((item) => item.storageKey));
 }

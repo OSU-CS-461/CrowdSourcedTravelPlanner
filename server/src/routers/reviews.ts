@@ -40,6 +40,22 @@ function optionalNumber(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : Number.NaN;
 }
 
+function numberArrayField(value: unknown): number[] {
+  const rawValues = Array.isArray(value) ? value : [value];
+  const parsed = rawValues
+    .flatMap((entry) => {
+      if (typeof entry === "string") return entry.split(",");
+      if (typeof entry === "number" && Number.isFinite(entry)) return [String(entry)];
+      return [];
+    })
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => Number(entry))
+    .filter((entry) => Number.isInteger(entry) && entry > 0);
+
+  return parsed;
+}
+
 function parseReviewRating(value: unknown): number | undefined {
   const parsed = optionalNumber(value);
   if (parsed === undefined) return undefined;
@@ -59,7 +75,15 @@ function formatReview(review: {
   reviewText: string;
   dateCreated: Date;
   user?: { username?: string | null } | null;
-  images?: Array<{ id: number; url: string; altText: string | null }> | null;
+  images?: Array<{
+    id: number;
+    url: string;
+    altText: string | null;
+    mediaType?: "IMAGE" | "VIDEO" | null;
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+  }> | null;
 }) {
   return {
     id: review.id.toString(),
@@ -73,7 +97,11 @@ function formatReview(review: {
       review.images?.map((image) => ({
         id: image.id.toString(),
         url: image.url,
-        type: "image" as const,
+        type: image.mediaType === "VIDEO" ? ("video" as const) : ("image" as const),
+        mediaType: image.mediaType ?? "IMAGE",
+        mimeType: image.mimeType ?? null,
+        fileSizeBytes: image.fileSizeBytes ?? null,
+        originalFilename: image.originalFilename ?? null,
         alt: image.altText || "",
       })) || [],
   };
@@ -97,6 +125,10 @@ router.get("/", async (req, res) => {
             id: true,
             url: true,
             altText: true,
+            mediaType: true,
+            mimeType: true,
+            fileSizeBytes: true,
+            originalFilename: true,
           },
           orderBy: { sortOrder: "asc" },
         },
@@ -181,6 +213,10 @@ router.post(
               id: true,
               url: true,
               altText: true,
+              mediaType: true,
+              mimeType: true,
+              fileSizeBytes: true,
+              originalFilename: true,
             },
             orderBy: { sortOrder: "asc" },
           },
@@ -197,9 +233,15 @@ router.post(
         }
       }
 
+      const appError = error as { status?: number; message?: string };
+      const status = Number.isInteger(appError.status) ? Number(appError.status) : 500;
       const message =
-        error instanceof Error ? error.message : "Database error";
-      res.status(500).json({ error: message });
+        typeof appError.message === "string"
+          ? appError.message
+          : error instanceof Error
+            ? error.message
+            : "Database error";
+      res.status(status).json({ error: message });
     }
   },
 );
@@ -208,6 +250,7 @@ router.post(
 router.put(
   "/:reviewId",
   authMiddleware.requireAuth,
+  upload.array("images", 10),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { reviewId } = req.params;
@@ -216,15 +259,73 @@ router.put(
         return res.status(401).json({ error: "Unauthorized" });
       }
 
+      const rating = parseReviewRating(req.body.rating);
+      if (rating === undefined || Number.isNaN(rating)) {
+        return res.status(400).json({ error: "rating must be an integer from 1 to 5" });
+      }
+
+      const comment =
+        optionalString(req.body.comment) ?? optionalString(req.body.text) ?? "";
+      const files = (req.files as Express.Multer.File[]) ?? [];
+      const removeMediaIds = numberArrayField(req.body.removeMediaIds);
+
       const updatedReview = await reviewService.updateReview(
         Number(reviewId),
         userId,
-        req.body,
+        {
+          rating,
+          comment,
+        },
       );
 
-      res.json(updatedReview);
+      if (removeMediaIds.length > 0) {
+        await reviewService.removeReviewMedia({
+          reviewId: Number(reviewId),
+          userId,
+          mediaIds: removeMediaIds,
+        });
+      }
+
+      if (files.length > 0) {
+        await uploadReviewImages({
+          createdBy: userId,
+          experienceId: updatedReview.experienceId,
+          reviewId: updatedReview.id,
+          files,
+        });
+      }
+
+      const refreshedReview = await prisma.review.findUniqueOrThrow({
+        where: { id: updatedReview.id },
+        include: {
+          user: { select: { username: true } },
+          images: {
+            select: {
+              id: true,
+              url: true,
+              altText: true,
+              mediaType: true,
+              mimeType: true,
+              fileSizeBytes: true,
+              originalFilename: true,
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      );
+
+      res.json(formatReview(refreshedReview));
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const appError = error as { status?: number; message?: string };
+      const message =
+        typeof appError.message === "string"
+          ? appError.message
+          : error instanceof Error
+            ? error.message
+            : "Unknown error";
+      if (Number.isInteger(appError.status)) {
+        return res.status(Number(appError.status)).json({ error: message });
+      }
       const status = message.includes("Forbidden") ? 403 : 500;
       res.status(status).json({ error: message });
     }

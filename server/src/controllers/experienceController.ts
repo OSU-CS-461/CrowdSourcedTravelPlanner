@@ -294,12 +294,16 @@ async function updateExperience(
     );
     const body: ExpPutPostBody = ExpPutPostBodySchema.parse(normalizedBody);
     const files = (req.files as Express.Multer.File[]) ?? [];
+    const removeMediaIds = numberArrayField(
+      (req.body as Record<string, unknown>).removeMediaIds,
+    ) ?? [];
 
     const updatedExperience = await experienceService.updateExperience({
       experienceId,
       userId: req.user!.id,
       putData: body,
       files,
+      removeMediaIds,
     });
 
     return res.status(200).json(updatedExperience);

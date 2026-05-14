@@ -30,11 +30,24 @@ export interface ApiExperience {
   longitude: number | null;
   reviewCount?: number;
   reviews?: unknown[];
+  media?: Array<{
+    id?: number | string;
+    url?: string | null;
+    type?: "image" | "video";
+    mediaType?: "IMAGE" | "VIDEO";
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+  }> | null;
   images?: Array<
     | string
     | {
         id?: number | string;
         url?: string | null;
+        mimeType?: string | null;
+        fileSizeBytes?: number | null;
+        originalFilename?: string | null;
+        mediaType?: "IMAGE" | "VIDEO";
       }
     | null
   > | null;

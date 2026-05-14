@@ -8,6 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
 model User {
   id             Int           @id @default(autoincrement())
   email          String        @unique
@@ -89,6 +94,7 @@ model Image {
   originalFilename String
   mimeType         String?
   fileSizeBytes    Int?
+  mediaType        MediaType  @default(IMAGE)
   url              String
   altText          String?
   caption          String?

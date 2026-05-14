@@ -2,6 +2,10 @@ export type ReviewMedia = {
   id: string;
   url: string;
   type: 'image' | 'video';
+  mediaType?: 'IMAGE' | 'VIDEO';
+  mimeType?: string | null;
+  fileSizeBytes?: number | null;
+  originalFilename?: string | null;
   alt?: string;
 };
 

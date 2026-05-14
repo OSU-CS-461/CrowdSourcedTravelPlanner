@@ -51,37 +51,119 @@ type Experience = {
   category?: Category | null;
   tags?: ExperienceTag[];
   tagIds?: number[];
-  images: string[];
+  images: Array<{
+    id: string | number;
+    url: string;
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+    mediaType?: "IMAGE" | "VIDEO";
+  }>;
+  media: Array<{
+    id: string | number;
+    url: string;
+    type: "image" | "video";
+    mediaType?: "IMAGE" | "VIDEO";
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+    alt?: string;
+  }>;
 };
 
 type ExperiencePayload = Omit<Experience, "images"> & {
-  images?: Array<string | { url?: string | null } | null> | null;
+  images?: Array<
+    string | { id?: string | number; url?: string | null; mimeType?: string | null; fileSizeBytes?: number | null; originalFilename?: string | null; mediaType?: "IMAGE" | "VIDEO" } | null
+  > | null;
+  media?: Array<{
+    id?: string | number;
+    url?: string | null;
+    type?: "image" | "video";
+    mediaType?: "IMAGE" | "VIDEO";
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+    alt?: string;
+  } | null> | null;
 };
 
-function normalizeImages(images: ExperiencePayload["images"]): string[] {
+function normalizeImages(images: ExperiencePayload["images"]): Experience["images"] {
   if (!Array.isArray(images)) return [];
 
   return images
     .map((image) => {
-      if (typeof image === "string" && image.trim().length > 0) return image;
+      if (typeof image === "string" && image.trim().length > 0) {
+        return {
+          id: image,
+          url: image,
+          mimeType: null,
+          fileSizeBytes: null,
+          originalFilename: null,
+          mediaType: "IMAGE" as const,
+        };
+      }
       if (
         image &&
         typeof image === "object" &&
         typeof image.url === "string" &&
         image.url.trim().length > 0
       ) {
-        return image.url;
+        return {
+          id: image.id ?? image.url,
+          url: image.url,
+          mimeType: image.mimeType ?? null,
+          fileSizeBytes: image.fileSizeBytes ?? null,
+          originalFilename: image.originalFilename ?? null,
+          mediaType: image.mediaType ?? "IMAGE",
+        };
       }
       return null;
     })
-    .filter((url): url is string => url !== null);
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+}
+
+function normalizeMedia(payload: ExperiencePayload): Experience["media"] {
+  if (Array.isArray(payload.media) && payload.media.length > 0) {
+    return payload.media
+      .map((item) => {
+        if (!item || typeof item.url !== "string" || item.url.trim().length === 0) {
+          return null;
+        }
+        const type = item.type === "video" || item.mediaType === "VIDEO" ? "video" : "image";
+        return {
+          id: item.id ?? item.url,
+          url: item.url.trim(),
+          type,
+          mediaType: item.mediaType ?? (type === "video" ? "VIDEO" : "IMAGE"),
+          mimeType: item.mimeType ?? null,
+          fileSizeBytes: item.fileSizeBytes ?? null,
+          originalFilename: item.originalFilename ?? null,
+          alt: item.alt ?? "",
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+  }
+
+  return normalizeImages(payload.images).map((image) => ({
+    id: image.id,
+    url: image.url,
+    type: "image" as const,
+    mediaType: "IMAGE" as const,
+    mimeType: image.mimeType ?? null,
+    fileSizeBytes: image.fileSizeBytes ?? null,
+    originalFilename: image.originalFilename ?? null,
+    alt: "",
+  }));
 }
 
 function normalizeExperience(experience: ExperiencePayload): Experience {
+  const images = normalizeImages(experience.images);
+  const media = normalizeMedia(experience);
   return {
     ...experience,
     lastUpdated: experience.lastUpdated ?? experience.dateCreated,
-    images: normalizeImages(experience.images),
+    images,
+    media,
   };
 }
 
@@ -349,7 +431,7 @@ export default function ExperienceDetailPage() {
           id={experience.id}
           title={experience.title}
           thumbnail={experience?.thumbnail}
-          photos={experience.images}
+          media={experience.media}
         />
 
         <div className="detail-body">
@@ -441,7 +523,7 @@ export default function ExperienceDetailPage() {
                 <option value="recent">Most Recent</option>
                 <option value="highest">Highest Rated</option>
                 <option value="lowest">Lowest Rated</option>
-                <option value="media">With Photos</option>
+                <option value="media">With Media</option>
               </select>
             </div>
           </section>

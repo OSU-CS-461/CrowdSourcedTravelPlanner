@@ -13,6 +13,7 @@ export interface GetExperienceParams {
 import { uploadExperienceImages } from "./imageService";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { r2 } from "../lib/r2";
+import { deleteMediaObjectsByStorageKeys } from "./imageService";
 
 // -----------------------------------------------------------------------------
 // TYPES
@@ -30,6 +31,7 @@ export interface UpdateExperienceParams {
   userId: number;
   putData: ExpPutPostBody;
   files?: Express.Multer.File[];
+  removeMediaIds?: number[];
 }
 
 export interface EditExperienceParams {
@@ -127,7 +129,13 @@ const EXPERIENCE_DETAIL_SELECT = (reviewSort?: ReviewSortOption) => {
       select: {
         id: true,
         url: true,
+        mimeType: true,
+        fileSizeBytes: true,
+        originalFilename: true,
+        altText: true,
+        mediaType: true,
       },
+      orderBy: { sortOrder: "asc" },
     },
   } satisfies Prisma.ExperienceSelect;
 };
@@ -149,6 +157,16 @@ type ExperienceWithOptionalReviews = ExperienceWithJoins & {
   reviews?: ExperienceDetailWithJoins["reviews"];
 };
 
+type ExperienceMediaItem = {
+  id: number;
+  url: string;
+  mimeType: string | null;
+  fileSizeBytes: number | null;
+  originalFilename: string;
+  altText: string | null;
+  mediaType: "IMAGE" | "VIDEO";
+};
+
 // -----------------------------------------------------------------------------
 // HELPERS
 // -----------------------------------------------------------------------------
@@ -165,9 +183,32 @@ export function serializeExperience(experience: ExperienceWithJoins) {
     ...rest
   } = experienceWithCounts;
   const reviewCount = _count?.reviews;
+  const media = ((rest as { images?: ExperienceMediaItem[] }).images ?? []).map(
+    (item) => ({
+      id: item.id,
+      url: item.url,
+      type: item.mediaType === "VIDEO" ? "video" : "image",
+      mediaType: item.mediaType,
+      mimeType: item.mimeType,
+      fileSizeBytes: item.fileSizeBytes,
+      originalFilename: item.originalFilename,
+      alt: item.altText ?? "",
+    }),
+  );
+  const images = media
+    .filter((item) => item.mediaType === "IMAGE")
+    .map((item) => ({
+      id: item.id,
+      url: item.url,
+      mimeType: item.mimeType,
+      fileSizeBytes: item.fileSizeBytes,
+      originalFilename: item.originalFilename,
+    }));
 
   return {
     ...rest,
+    images,
+    media,
     createdByUsername: user?.username ?? null,
     tags,
     tagIds: tags.map((t) => t.id),
@@ -294,12 +335,13 @@ export async function createExperience({
         files,
       });
 
-      // 🔥 NEW: auto-set thumbnail if not provided
-      if (!postBody.thumbnail && uploadedImages.length > 0) {
+      // Auto-set thumbnail from the first uploaded image (not video) when absent.
+      const firstImage = uploadedImages.find((media) => media.mediaType === "IMAGE");
+      if (!postBody.thumbnail && firstImage) {
         await prisma.experience.update({
           where: { id: experienceId },
           data: {
-            thumbnail: uploadedImages[0].url,
+            thumbnail: firstImage.url,
           },
         });
       }
@@ -315,10 +357,7 @@ export async function createExperience({
       select: EXPERIENCE_DETAIL_SELECT(),
     });
 
-    return {
-      ...serializeExperience(finalExperience),
-      images: uploadedImages,
-    };
+    return serializeExperience(finalExperience);
   } catch (error) {
     // 🔥 rollback
 
@@ -399,7 +438,7 @@ export async function listExperiences(params: ListExperiencesParams) {
 // -----------------------------------------------------------------------------
 
 export async function updateExperience(params: UpdateExperienceParams) {
-  const { experienceId, userId, putData, files = [] } = params;
+  const { experienceId, userId, putData, files = [], removeMediaIds = [] } = params;
 
   const exists = await prisma.experience.findUnique({
     where: { id: experienceId },
@@ -448,6 +487,31 @@ export async function updateExperience(params: UpdateExperienceParams) {
     });
   });
 
+  if (removeMediaIds.length > 0) {
+    const mediaToRemove = await prisma.image.findMany({
+      where: {
+        id: { in: removeMediaIds },
+        experienceId,
+      },
+      select: {
+        id: true,
+        storageKey: true,
+      },
+    });
+
+    const removableIds = mediaToRemove.map((item) => item.id);
+    if (removableIds.length > 0) {
+      await prisma.image.deleteMany({
+        where: {
+          id: { in: removableIds },
+        },
+      });
+      await deleteMediaObjectsByStorageKeys(
+        mediaToRemove.map((item) => item.storageKey),
+      );
+    }
+  }
+
   if (files.length > 0) {
     const uploadedImages = await uploadExperienceImages({
       createdBy: userId,
@@ -458,12 +522,13 @@ export async function updateExperience(params: UpdateExperienceParams) {
     if (
       putData.thumbnail === undefined &&
       !updated.thumbnail &&
-      uploadedImages.length > 0
+      uploadedImages.some((item) => item.mediaType === "IMAGE")
     ) {
+      const firstImage = uploadedImages.find((item) => item.mediaType === "IMAGE");
       await prisma.experience.update({
         where: { id: experienceId },
         data: {
-          thumbnail: uploadedImages[0].url,
+          thumbnail: firstImage?.url,
           lastUpdated: new Date(),
         },
       });
@@ -528,5 +593,12 @@ export async function editExperience(params: EditExperienceParams) {
 
 export async function deleteExperience(params: DeleteExperienceParams) {
   const { experienceId } = params;
+  const mediaToDelete = await prisma.image.findMany({
+    where: { experienceId },
+    select: { storageKey: true },
+  });
   await prisma.experience.delete({ where: { id: experienceId } });
+  await deleteMediaObjectsByStorageKeys(
+    mediaToDelete.map((item) => item.storageKey),
+  );
 }

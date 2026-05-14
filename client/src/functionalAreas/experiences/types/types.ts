@@ -22,6 +22,14 @@ export interface FormValues {
   description: string;
   image: string;
   existingImages?: string[];
+  existingMedia?: Array<{
+    id: number | string;
+    url: string;
+    type: "image" | "video";
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+  }>;
   categoryId: number | null;
   tagIds: number[];
   country: string;

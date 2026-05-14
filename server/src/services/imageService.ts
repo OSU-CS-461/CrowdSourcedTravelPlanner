@@ -2,6 +2,11 @@ import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import prisma from "../db/prisma";
 import { r2 } from "../lib/r2";
 import { buildExperienceImageKey, buildReviewImageKey } from "../lib/imageKeys";
+import {
+  validateAndResolveMediaType,
+  validateUploadFilesCount,
+  type MediaTypeValue,
+} from "../lib/mediaValidation";
 
 type UploadReviewImagesInput = {
   createdBy: number;
@@ -20,6 +25,10 @@ type UploadedImage = {
   id: number;
   storageKey: string;
   url: string;
+  mediaType: MediaTypeValue;
+  mimeType: string;
+  fileSizeBytes: number;
+  originalFilename: string;
 };
 
 type AppError = {
@@ -94,10 +103,26 @@ function normalizeUploadError(error: unknown, context: "review" | "experience") 
   return error;
 }
 
+async function deleteUploadedObjects(keys: string[]) {
+  if (!keys.length) return;
+
+  await Promise.allSettled(
+    keys.map((key) =>
+      r2.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.R2_BUCKET!,
+          Key: key,
+        }),
+      ),
+    ),
+  );
+}
+
 export async function uploadReviewImages(
   input: UploadReviewImagesInput,
 ): Promise<UploadedImage[]> {
   assertUploadConfigConfigured("review");
+  validateUploadFilesCount(input.files);
 
   const uploadedKeys: string[] = [];
   const createdImageIds: number[] = [];
@@ -106,14 +131,13 @@ export async function uploadReviewImages(
     const results: UploadedImage[] = [];
 
     for (const [index, file] of input.files.entries()) {
-      if (!file.mimetype.startsWith("image/")) {
-        throw new Error(`Invalid file type for ${file.originalname}`);
-      }
+      const mediaType = validateAndResolveMediaType(file);
 
       const storageKey = buildReviewImageKey(
         input.experienceId,
         input.reviewId,
         file.originalname,
+        mediaType,
       );
 
       await r2.send(
@@ -138,6 +162,7 @@ export async function uploadReviewImages(
           originalFilename: file.originalname,
           mimeType: file.mimetype,
           fileSizeBytes: file.size,
+          mediaType,
           url,
           sortOrder: index,
         },
@@ -148,6 +173,10 @@ export async function uploadReviewImages(
         id: image.id,
         storageKey: image.storageKey,
         url: image.url,
+        mediaType,
+        mimeType: file.mimetype,
+        fileSizeBytes: file.size,
+        originalFilename: file.originalname,
       });
     }
 
@@ -159,16 +188,7 @@ export async function uploadReviewImages(
       });
     }
 
-    await Promise.allSettled(
-      uploadedKeys.map((key) =>
-        r2.send(
-          new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET!,
-            Key: key,
-          }),
-        ),
-      ),
-    );
+    await deleteUploadedObjects(uploadedKeys);
 
     throw normalizeUploadError(error, "review");
   }
@@ -178,6 +198,7 @@ export async function uploadExperienceImages(
   input: UploadExperienceImagesInput,
 ): Promise<UploadedImage[]> {
   assertUploadConfigConfigured("experience");
+  validateUploadFilesCount(input.files);
 
   const uploadedKeys: string[] = [];
   const createdImageIds: number[] = [];
@@ -186,13 +207,12 @@ export async function uploadExperienceImages(
     const results: UploadedImage[] = [];
 
     for (const [index, file] of input.files.entries()) {
-      if (!file.mimetype.startsWith("image/")) {
-        throw new Error(`Invalid file type for ${file.originalname}`);
-      }
+      const mediaType = validateAndResolveMediaType(file);
 
       const storageKey = buildExperienceImageKey(
         input.experienceId,
         file.originalname,
+        mediaType,
       );
 
       await r2.send(
@@ -216,6 +236,7 @@ export async function uploadExperienceImages(
           originalFilename: file.originalname,
           mimeType: file.mimetype,
           fileSizeBytes: file.size,
+          mediaType,
           url,
           sortOrder: index,
         },
@@ -227,6 +248,10 @@ export async function uploadExperienceImages(
         id: image.id,
         storageKey: image.storageKey,
         url: image.url,
+        mediaType,
+        mimeType: file.mimetype,
+        fileSizeBytes: file.size,
+        originalFilename: file.originalname,
       });
     }
 
@@ -238,17 +263,12 @@ export async function uploadExperienceImages(
       });
     }
 
-    await Promise.allSettled(
-      uploadedKeys.map((key) =>
-        r2.send(
-          new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET!,
-            Key: key,
-          }),
-        ),
-      ),
-    );
+    await deleteUploadedObjects(uploadedKeys);
 
     throw normalizeUploadError(error, "experience");
   }
+}
+
+export async function deleteMediaObjectsByStorageKeys(storageKeys: string[]) {
+  await deleteUploadedObjects(storageKeys);
 }

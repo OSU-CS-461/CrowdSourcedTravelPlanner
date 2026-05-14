@@ -115,7 +115,7 @@ export default function ReviewsSection({
             <option value="recent">Most Recent</option>
             <option value="highest">Highest Rated</option>
             <option value="lowest">Lowest Rated</option>
-            <option value="media">With Photos</option>
+            <option value="media">With Media</option>
           </select>
         </div>
       </div>

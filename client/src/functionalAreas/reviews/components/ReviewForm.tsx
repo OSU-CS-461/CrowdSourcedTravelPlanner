@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { apiClient } from "../../../shared/services/api.service";
 import { useParams, useNavigate } from "react-router-dom";
 import { createReview } from "../../../shared/services/reviewService";
+import {
+  resolveClientMediaType,
+  validateSelectedMedia,
+} from "../../../shared/mediaValidation";
 
 type ReviewFormProps = {
   onSuccess?: () => void;
@@ -11,7 +15,27 @@ type ReviewApiModel = {
   id: number | string;
   rating: number;
   comment?: string;
+  media?: Array<{
+    id: string;
+    url: string;
+    type: "image" | "video";
+    mimeType?: string | null;
+    fileSizeBytes?: number | null;
+    originalFilename?: string | null;
+  }>;
 };
+
+type SelectedPreview = {
+  file: File;
+  url: string;
+  type: "image" | "video";
+};
+
+function formatFileSize(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Unknown size";
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default function ReviewForm({ onSuccess }: ReviewFormProps) {
   const { id, reviewId } = useParams<{ id: string; reviewId?: string }>();
@@ -19,23 +43,42 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
 
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [existingMedia, setExistingMedia] = useState<
+    Array<{
+      id: string;
+      url: string;
+      type: "image" | "video";
+      mimeType?: string | null;
+      fileSizeBytes?: number | null;
+      originalFilename?: string | null;
+    }>
+  >([]);
+  const [removedMediaIds, setRemovedMediaIds] = useState<string[]>([]);
+  const [error, setError] = useState<string>("");
   const isEdit = Boolean(reviewId);
 
   const targetPath = id ? `/experiences/${id}` : "/";
 
-  const imagePreviews = useMemo(() => {
-    return images.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
-  }, [images]);
+  const previews = useMemo(() => {
+    return files
+      .map((file) => {
+        const type = resolveClientMediaType(file);
+        if (!type) return null;
+        return {
+          file,
+          url: URL.createObjectURL(file),
+          type,
+        };
+      })
+      .filter((item): item is SelectedPreview => item !== null);
+  }, [files]);
 
   useEffect(() => {
     return () => {
-      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+      previews.forEach((preview) => URL.revokeObjectURL(preview.url));
     };
-  }, [imagePreviews]);
+  }, [previews]);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -49,6 +92,7 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
           if (existingReview) {
             setRating(existingReview.rating);
             setText(existingReview.comment || "");
+            setExistingMedia(existingReview.media ?? []);
           }
         } catch (err) {
           console.error("Error loading review for edit:", err);
@@ -58,6 +102,14 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
     }
   }, [isEdit, id, reviewId]);
 
+  function toggleRemovedMedia(mediaId: string) {
+    setRemovedMediaIds((current) =>
+      current.includes(mediaId)
+        ? current.filter((id) => id !== mediaId)
+        : [...current, mediaId],
+    );
+  }
+
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!id) {
@@ -65,26 +117,43 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
       return;
     }
 
+    const validationErrors = validateSelectedMedia(files);
+    if (validationErrors.length > 0) {
+      setError(validationErrors[0]);
+      return;
+    }
+
     try {
       if (isEdit) {
-        await apiClient.put(`/experiences/${id}/reviews/${reviewId}`, {
-          rating,
-          comment: text,
+        const formData = new FormData();
+        formData.append("rating", String(rating));
+        formData.append("comment", text);
+
+        removedMediaIds.forEach((mediaId) =>
+          formData.append("removeMediaIds", mediaId),
+        );
+
+        files.forEach((file) => {
+          formData.append("images", file);
         });
+
+        await apiClient.put(`/experiences/${id}/reviews/${reviewId}`, formData, {});
         alert("Review updated!");
       } else {
         await createReview({
           experienceId: id,
           rating,
           comment: text,
-          images,
+          images: files,
         });
         alert("Review submitted!");
       }
 
       setRating(0);
       setText("");
-      setImages([]);
+      setFiles([]);
+      setRemovedMediaIds([]);
+      setError("");
 
       if (onSuccess) {
         onSuccess();
@@ -97,6 +166,10 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
     }
   };
 
+  const visibleExistingMedia = existingMedia.filter(
+    (item) => !removedMediaIds.includes(item.id),
+  );
+
   return (
     <form
       className="review-form"
@@ -104,6 +177,8 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
       style={{ padding: "20px", border: "1px solid #ccc" }}
     >
       <h3>{isEdit ? "Edit Your Review" : "Write a Review"}</h3>
+
+      {error && <p style={{ color: "#b00020" }}>{error}</p>}
 
       <div style={{ margin: "10px 0" }}>
         <label>Rating: </label>
@@ -127,68 +202,130 @@ export default function ReviewForm({ onSuccess }: ReviewFormProps) {
         style={{ width: "100%", margin: "10px 0", minHeight: "80px" }}
       />
 
-      {!isEdit && (
-        <div style={{ margin: "10px 0" }}>
-          <label style={{ display: "block", marginBottom: "6px" }}>
-            Upload Images (Optional)
-          </label>
+      <div style={{ margin: "10px 0" }}>
+        <label style={{ display: "block", marginBottom: "6px" }}>
+          Upload Photos or Videos (Optional)
+        </label>
 
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => {
-              const selected = e.target.files ? Array.from(e.target.files) : [];
-              setImages(selected);
-            }}
-          />
+        <input
+          type="file"
+          accept="image/*,video/mp4,video/webm,video/quicktime"
+          multiple
+          onChange={(e) => {
+            const selected = e.target.files ? Array.from(e.target.files) : [];
+            const validationErrors = validateSelectedMedia(selected);
+            if (validationErrors.length > 0) {
+              setError(validationErrors[0]);
+              setFiles([]);
+              return;
+            }
 
-          {imagePreviews.length > 0 && (
+            setError("");
+            setFiles(selected);
+          }}
+        />
+      </div>
+
+      {visibleExistingMedia.length > 0 && (
+        <div style={{ marginTop: "10px", display: "grid", gap: "8px" }}>
+          <p style={{ margin: 0, fontWeight: "bold" }}>Existing media</p>
+          {visibleExistingMedia.map((item) => (
+            <label
+              key={item.id}
+              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              {item.type === "video" ? (
+                <video
+                  src={item.url}
+                  controls
+                  preload="metadata"
+                  style={{ width: "120px", height: "80px", objectFit: "cover" }}
+                />
+              ) : (
+                <img
+                  src={item.url}
+                  alt={item.originalFilename ?? "review media"}
+                  style={{ width: "120px", height: "80px", objectFit: "cover" }}
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                <div>{item.originalFilename ?? item.type}</div>
+                <div style={{ color: "#666", fontSize: "12px" }}>
+                  {item.mimeType ?? item.type}
+                  {typeof item.fileSizeBytes === "number"
+                    ? ` • ${formatFileSize(item.fileSizeBytes)}`
+                    : ""}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={removedMediaIds.includes(item.id)}
+                onChange={() => toggleRemovedMedia(item.id)}
+              />
+              <span>Remove</span>
+            </label>
+          ))}
+        </div>
+      )}
+
+      {previews.length > 0 && (
+        <div
+          style={{
+            marginTop: "14px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+            gap: "12px",
+          }}
+        >
+          {previews.map((preview) => (
             <div
+              key={`${preview.file.name}-${preview.file.lastModified}`}
               style={{
-                marginTop: "14px",
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-                gap: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "10px",
+                overflow: "hidden",
+                background: "#fafafa",
               }}
             >
-              {imagePreviews.map((preview) => (
-                <div
-                  key={`${preview.file.name}-${preview.file.lastModified}`}
+              {preview.type === "video" ? (
+                <video
+                  src={preview.url}
+                  controls
+                  preload="metadata"
                   style={{
-                    border: "1px solid #ddd",
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                    background: "#fafafa",
+                    width: "100%",
+                    height: "100px",
+                    objectFit: "cover",
+                    display: "block",
                   }}
-                >
-                  <img
-                    src={preview.url}
-                    alt={preview.file.name}
-                    style={{
-                      width: "100%",
-                      height: "100px",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
-                  <div
-                    style={{
-                      padding: "8px",
-                      fontSize: "12px",
-                      color: "#666",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                    title={preview.file.name}
-                  >
-                    {preview.file.name}
-                  </div>
-                </div>
-              ))}
+                />
+              ) : (
+                <img
+                  src={preview.url}
+                  alt={preview.file.name}
+                  style={{
+                    width: "100%",
+                    height: "100px",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+              )}
+              <div
+                style={{
+                  padding: "8px",
+                  fontSize: "12px",
+                  color: "#666",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={preview.file.name}
+              >
+                {preview.file.name}
+              </div>
             </div>
-          )}
+          ))}
         </div>
       )}
 

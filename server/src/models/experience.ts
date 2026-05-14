@@ -41,8 +41,8 @@ const LocationFieldsSchema = z.object({
 /**
  * IMPORTANT:
  * - This schema validates ONLY text fields
- * - Images are handled separately via multer (req.files)
- * - Do NOT add image fields here
+ * - Media files are handled separately via multer (req.files)
+ * - Do NOT add media file fields here
  */
 export const ExpPutPostBodySchema = z.object({
   // Required
