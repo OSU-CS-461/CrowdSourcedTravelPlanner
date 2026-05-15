@@ -35,9 +35,11 @@ export const getUserByEmailAndPassword = async (
   const user = await prisma.user.findFirst({
     where: { email },
   });
+
   if (!user) {
     return null;
   }
+
   const isValidPassword = await argon2d.verify(user.passwordDigest, password);
   if (!isValidPassword) {
     return null;
