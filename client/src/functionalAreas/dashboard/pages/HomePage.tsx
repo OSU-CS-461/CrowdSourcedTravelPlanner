@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 import {
   apiClient,
   setAuthToken,
   getMyLikedExperiences,
+  getMyLikedTags,
   getMyLikedTrips,
   likeExperience,
   unlikeExperience,
   likeTrip,
   unlikeTrip,
 } from "../../../shared/services/api.service";
+import { rankHomeExperiences } from "../helpers/rankHomeExperiences";
+import { getCurrentCoords } from "../../experiences/helpers/ExplorePageHelpers";
 import "./HomePage.css";
 
 function formatApiError(
@@ -43,6 +46,18 @@ type Experience = {
   country?: string;
   city?: string;
   adminRegion?: string;
+  avgRating?: number | null;
+  reviewCount?: number;
+  mostRecentReviewAt?: string | null;
+  tags?: Array<{
+    id: number;
+    slug: string;
+    label: string;
+    categoryId?: number | null;
+  }>;
+  tagIds?: number[];
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 type Trip = {
@@ -54,6 +69,9 @@ type Trip = {
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const HOME_FEED_LIMIT = 20;
+  const HOME_FEED_CANDIDATE_LIMIT = 50;
+  const HOME_FEED_LOCATION_RADIUS_KM = 8;
 
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -66,51 +84,155 @@ export default function HomePage() {
   const [tripsError, setTripsError] = useState<string | null>(null);
   const [experiencesLoaded, setExperiencesLoaded] = useState(false);
   const [tripsLoaded, setTripsLoaded] = useState(false);
+  const [homeLikedTagIds, setHomeLikedTagIds] = useState<number[]>([]);
+  const [reviewedCandidatePool, setReviewedCandidatePool] = useState<Experience[] | null>(
+    null,
+  );
+  const [homeUserLocation, setHomeUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  const loadTrips = useCallback(async () => {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) {
+      setTrips([]);
+      setTripsError(null);
+      setTripsLoaded(true);
+      return;
+    }
+    setAuthToken(token);
+
+    try {
+      const response = await apiClient.get("/trips");
+      setTrips(response.data);
+      setTripsError(null);
+    } catch (err: unknown) {
+      console.error(err);
+      const msg =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err as { response?: { data?: { error?: unknown } } }).response?.data
+          ?.error;
+      setTripsError(formatApiError(msg, err, "Could not load trips."));
+      setTrips([]);
+    } finally {
+      setTripsLoaded(true);
+    }
+  }, []);
+
+  const loadHomeExperiences = useCallback(async (
+    locationForRanking: { latitude: number; longitude: number } | null,
+  ) => {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (token) {
+      setAuthToken(token);
+    }
+
+    let likedTagIds: number[] = [];
+    if (token) {
+      try {
+        const likedTags = await getMyLikedTags();
+        likedTagIds = likedTags.map((tag) => tag.id);
+      } catch (err) {
+        console.error("Failed to load liked tags for home ranking:", err);
+      }
+    }
+    setHomeLikedTagIds(likedTagIds);
+
+    try {
+      const reviewedResponse = await apiClient.get<Experience[]>("/experiences", {
+        params: {
+          sortBy: "mostRecentReviewAt",
+          sortDirection: "desc",
+          reviewedOnly: true,
+          limit: HOME_FEED_CANDIDATE_LIMIT,
+        },
+      });
+
+      const reviewedExperiences = reviewedResponse.data ?? [];
+      const hasReviewStats = reviewedExperiences.some(
+        (exp) =>
+          exp.reviewCount !== undefined ||
+          exp.mostRecentReviewAt !== undefined,
+      );
+
+      if (reviewedExperiences.length > 0 && hasReviewStats) {
+        setReviewedCandidatePool(reviewedExperiences);
+        const ranked = rankHomeExperiences(reviewedExperiences, likedTagIds, {
+          userLocation: locationForRanking,
+          preferredRadiusKm: HOME_FEED_LOCATION_RADIUS_KM,
+        }).slice(
+          0,
+          HOME_FEED_LIMIT,
+        );
+        setExperiences(ranked);
+        setExperiencesError(null);
+        setExperiencesLoaded(true);
+        return;
+      }
+    } catch (err) {
+      console.error("Failed to load recently reviewed experience pool:", err);
+    }
+
+    // Safe fallback to existing home feed behavior.
+    try {
+      setReviewedCandidatePool(null);
+      const fallbackResponse = await apiClient.get<Experience[]>("/experiences");
+      setExperiences(fallbackResponse.data ?? []);
+      setExperiencesError(null);
+    } catch (err: unknown) {
+      console.error(err);
+      const msg =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err as { response?: { data?: { error?: unknown } } }).response?.data
+          ?.error;
+      setExperiencesError(formatApiError(msg, err, "Could not load experiences."));
+      setExperiences([]);
+    } finally {
+      setExperiencesLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("cstp.auth.token");
-    if (token) setAuthToken(token);
+    void loadHomeExperiences(null);
+    void loadTrips();
+  }, [loadHomeExperiences, loadTrips]);
 
-    void apiClient
-      .get("/experiences")
-      .then((res) => {
-        setExperiences(res.data);
-        setExperiencesError(null);
-      })
-      .catch((err: unknown) => {
-        console.error(err);
-        const msg =
-          err &&
-          typeof err === "object" &&
-          "response" in err &&
-          (err as { response?: { data?: { error?: unknown } } }).response?.data
-            ?.error;
-        setExperiencesError(
-          formatApiError(msg, err, "Could not load experiences.")
-        );
-        setExperiences([]);
-      })
-      .finally(() => setExperiencesLoaded(true));
+  useEffect(() => {
+    let cancelled = false;
 
-    void apiClient
-      .get("/trips")
-      .then((res) => {
-        setTrips(res.data);
-        setTripsError(null);
-      })
-      .catch((err: unknown) => {
-        console.error(err);
-        const msg =
-          err &&
-          typeof err === "object" &&
-          "response" in err &&
-          (err as { response?: { data?: { error?: unknown } } }).response?.data
-            ?.error;
-        setTripsError(formatApiError(msg, err, "Could not load trips."));
-        setTrips([]);
-      })
-      .finally(() => setTripsLoaded(true));
+    void (async () => {
+      try {
+        const { lat, lng } = await getCurrentCoords();
+        if (cancelled) return;
+        setHomeUserLocation({ latitude: lat, longitude: lng });
+      } catch (err) {
+        console.warn("Could not get user location for home feed ranking:", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!reviewedCandidatePool || reviewedCandidatePool.length === 0) return;
+
+    const ranked = rankHomeExperiences(reviewedCandidatePool, homeLikedTagIds, {
+      userLocation: homeUserLocation,
+      preferredRadiusKm: HOME_FEED_LOCATION_RADIUS_KM,
+    }).slice(0, HOME_FEED_LIMIT);
+    setExperiences(ranked);
+  }, [
+    homeLikedTagIds,
+    homeUserLocation,
+    reviewedCandidatePool,
+  ]);
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");

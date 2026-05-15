@@ -19,12 +19,16 @@ type StoredReview = {
   userId: number;
   rating: number;
   reviewText: string;
+  dateCreated: Date;
 };
-type NewReviewData = Omit<StoredReview, "id">;
+type NewReviewData = Omit<StoredReview, "id" | "dateCreated">;
 
 function buildTransactionStore() {
   const reviews: StoredReview[] = [];
-  const avgByExperience = new Map<number, number | null>();
+  const statsByExperience = new Map<
+    number,
+    { avgRating: number | null; reviewCount: number; mostRecentReviewAt: Date | null }
+  >();
   let nextReviewId = 1;
 
   const tx = {
@@ -36,6 +40,7 @@ function buildTransactionStore() {
           userId: data.userId,
           rating: data.rating,
           reviewText: data.reviewText,
+          dateCreated: new Date(`2026-05-${String(nextReviewId).padStart(2, "0")}T12:00:00.000Z`),
         };
 
         nextReviewId += 1;
@@ -94,9 +99,21 @@ function buildTransactionStore() {
                 scopedReviews.reduce((sum, review) => sum + review.rating, 0) /
                 count;
 
+        const maxDateCreated =
+          count === 0
+            ? null
+            : new Date(
+                scopedReviews
+                  .map((review) => review.dateCreated.getTime())
+                  .reduce((max, value) => Math.max(max, value), -Infinity),
+              );
+
         return {
           _count: { id: count },
           _avg: { rating: avgRating },
+          _max: {
+            dateCreated: maxDateCreated,
+          },
         };
       }),
     },
@@ -107,10 +124,23 @@ function buildTransactionStore() {
           data,
         }: {
           where: { id: number };
-          data: { avgRating: number | null };
+          data: {
+            avgRating: number | null;
+            reviewCount: number;
+            mostRecentReviewAt: Date | null;
+          };
         }) => {
-          avgByExperience.set(where.id, data.avgRating);
-          return { id: where.id, avgRating: data.avgRating };
+          statsByExperience.set(where.id, {
+            avgRating: data.avgRating,
+            reviewCount: data.reviewCount,
+            mostRecentReviewAt: data.mostRecentReviewAt,
+          });
+          return {
+            id: where.id,
+            avgRating: data.avgRating,
+            reviewCount: data.reviewCount,
+            mostRecentReviewAt: data.mostRecentReviewAt,
+          };
         },
       ),
     },
@@ -118,7 +148,7 @@ function buildTransactionStore() {
 
   return {
     tx,
-    avgByExperience,
+    statsByExperience,
   };
 }
 
@@ -131,7 +161,7 @@ describe("reviewService avgRating synchronization", () => {
   });
 
   it("keeps avgRating correct across review create/update/delete lifecycle", async () => {
-    const { tx, avgByExperience } = buildTransactionStore();
+    const { tx, statsByExperience } = buildTransactionStore();
 
     (prismaMock.$transaction as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       async (callback: (transactionClient: unknown) => Promise<unknown>) =>
@@ -142,36 +172,66 @@ describe("reviewService avgRating synchronization", () => {
       rating: 5,
       comment: "great",
     });
-    expect(avgByExperience.get(77)).toBe(5);
+    expect(statsByExperience.get(77)).toMatchObject({
+      avgRating: 5,
+      reviewCount: 1,
+      mostRecentReviewAt: new Date("2026-05-01T12:00:00.000Z"),
+    });
 
     const secondReview = await createReview(77, 22, {
       rating: 3,
       comment: "ok",
     });
-    expect(avgByExperience.get(77)).toBe(4);
+    expect(statsByExperience.get(77)).toMatchObject({
+      avgRating: 4,
+      reviewCount: 2,
+      mostRecentReviewAt: new Date("2026-05-02T12:00:00.000Z"),
+    });
 
     await updateReview(secondReview.id, 22, {
       rating: 1,
       comment: "worse than expected",
     });
-    expect(avgByExperience.get(77)).toBe(3);
+    expect(statsByExperience.get(77)).toMatchObject({
+      avgRating: 3,
+      reviewCount: 2,
+      mostRecentReviewAt: new Date("2026-05-02T12:00:00.000Z"),
+    });
 
     await deleteReview(firstReview.id, 11);
-    expect(avgByExperience.get(77)).toBe(1);
+    expect(statsByExperience.get(77)).toMatchObject({
+      avgRating: 1,
+      reviewCount: 1,
+      mostRecentReviewAt: new Date("2026-05-02T12:00:00.000Z"),
+    });
 
     await deleteReview(secondReview.id, 22);
-    expect(avgByExperience.get(77)).toBeNull();
+    expect(statsByExperience.get(77)).toMatchObject({
+      avgRating: null,
+      reviewCount: 0,
+      mostRecentReviewAt: null,
+    });
 
     const avgUpdates = (
       tx.experience.update as unknown as ReturnType<typeof vi.fn>
-    ).mock.calls.map((call) => call[0].data.avgRating);
+    ).mock.calls.map((call) => ({
+      avgRating: call[0].data.avgRating,
+      reviewCount: call[0].data.reviewCount,
+      mostRecentReviewAt: call[0].data.mostRecentReviewAt,
+    }));
 
-    expect(avgUpdates).toEqual([5, 4, 3, 1, null]);
+    expect(avgUpdates).toMatchObject([
+      { avgRating: 5, reviewCount: 1 },
+      { avgRating: 4, reviewCount: 2 },
+      { avgRating: 3, reviewCount: 2 },
+      { avgRating: 1, reviewCount: 1 },
+      { avgRating: null, reviewCount: 0, mostRecentReviewAt: null },
+    ]);
     expect(tx.review.aggregate).toHaveBeenCalledTimes(5);
   });
 
   it("scopes avg recalculation to the target experience only", async () => {
-    const { tx, avgByExperience } = buildTransactionStore();
+    const { tx, statsByExperience } = buildTransactionStore();
 
     (prismaMock.$transaction as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       async (callback: (transactionClient: unknown) => Promise<unknown>) =>
@@ -182,7 +242,9 @@ describe("reviewService avgRating synchronization", () => {
     await createReview(99, 2, { rating: 2, comment: "exp 99" });
     await createReview(10, 3, { rating: 3, comment: "exp 10 again" });
 
-    expect(avgByExperience.get(10)).toBe(4);
-    expect(avgByExperience.get(99)).toBe(2);
+    expect(statsByExperience.get(10)?.avgRating).toBe(4);
+    expect(statsByExperience.get(99)?.avgRating).toBe(2);
+    expect(statsByExperience.get(10)?.reviewCount).toBe(2);
+    expect(statsByExperience.get(99)?.reviewCount).toBe(1);
   });
 });

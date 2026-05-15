@@ -136,8 +136,12 @@ export type Experience = {
   postalCode?: string | null;
   category?: ExperienceCategory | null;
   tags?: ExperienceTag[];
+  tagIds?: number[];
   categoryTags?: ExperienceTag[];
   featureTags?: ExperienceTag[];
+  avgRating?: number | null;
+  reviewCount?: number;
+  mostRecentReviewAt?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   distanceKm?: number;

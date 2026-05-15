@@ -25,11 +25,13 @@ model User {
 }
 
 model UserSettings {
-  id                Int      @id @default(autoincrement())
-  userId            Int      @unique
-  preferredFeedSort String   @default("newest")
-  lastUpdated       DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  Int      @id @default(autoincrement())
+  userId              Int      @unique
+  preferredFeedSort   String   @default("newest")
+  /// UI appearance: light (day) or dark (night).
+  themePreference     String   @default("light")
+  lastUpdated         DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -51,6 +53,8 @@ model Experience {
   longitude       Float
   thumbnail       String?
   avgRating       Float?
+  reviewCount     Int              @default(0)
+  mostRecentReviewAt DateTime?
   categoryId      Int?
   keywords        String[]
   category        Category?        @relation(fields: [categoryId], references: [id])
@@ -63,6 +67,8 @@ model Experience {
 
   @@index([createdBy])
   @@index([categoryId])
+  @@index([mostRecentReviewAt])
+  @@index([mostRecentReviewAt, avgRating])
 }
 
 model Review {

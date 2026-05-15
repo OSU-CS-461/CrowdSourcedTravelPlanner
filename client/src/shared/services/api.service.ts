@@ -40,6 +40,45 @@ export const authSignup = async (input: {
   return response.data;
 };
 
+export type UserSettingsDto = {
+  email: string;
+  preferredFeedSort: string;
+  themePreference: "light" | "dark";
+  lastUpdated: string;
+};
+
+export type UserSettingsPatch = {
+  preferredFeedSort?: "newest" | "highestRated" | "recommended";
+  themePreference?: "light" | "dark";
+};
+
+export const getUserSettings = async () => {
+  const response = await apiClient.get<UserSettingsDto>("/users/me/settings");
+  return response.data;
+};
+
+export const patchUserSettings = async (body: UserSettingsPatch) => {
+  const response = await apiClient.patch<UserSettingsDto>(
+    "/users/me/settings",
+    body
+  );
+  return response.data;
+};
+
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+};
+
+export const changeMyPassword = async (input: ChangePasswordInput) => {
+  const response = await apiClient.patch<{ message: string }>(
+    "/users/me/password",
+    input
+  );
+  return response.data;
+};
+
 export type Interest = {
   id: number;
   name: string;

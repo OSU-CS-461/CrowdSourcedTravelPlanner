@@ -20,6 +20,7 @@ import TripDetailsPage from "../functionalAreas/trips/pages/TripDetailsPage";
 import TagDetailPage from "../functionalAreas/experiences/pages/TagDetailPage";
 import MediaGalleryPage from "../functionalAreas/experiences/pages/MediaGalleryPage";
 import MyTripsPage from "../functionalAreas/trips/pages/MyTripsPage";
+import ProfileSettingsPage from "../functionalAreas/settings/pages/ProfileSettingsPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -82,6 +83,10 @@ export default function App() {
 
         <Route path={ClientRoutes.INTERESTS} element={<InterestsPage />} />
         <Route path={ClientRoutes.TAG_DETAILS} element={<TagDetailPage />} />
+        <Route
+          path={ClientRoutes.PROFILE_SETTINGS}
+          element={<ProfileSettingsPage />}
+        />
         <Route path="*" element={<Navigate to={ClientRoutes.HOME} replace />} />
         </Route>
     </Routes>
