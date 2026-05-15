@@ -21,7 +21,7 @@ function resolveRating(data: ReviewInput): number {
   return parsedRating;
 }
 
-async function recalculateExperienceAvgRating(
+async function recalculateExperienceReviewStats(
   tx: Prisma.TransactionClient,
   experienceId: number,
 ) {
@@ -29,14 +29,21 @@ async function recalculateExperienceAvgRating(
     where: { experienceId },
     _avg: { rating: true },
     _count: { id: true },
+    _max: { dateCreated: true },
   });
 
-  const avgRating =
-    ratingAggregate._count.id > 0 ? ratingAggregate._avg.rating : null;
+  const hasReviews = ratingAggregate._count.id > 0;
+  const avgRating = hasReviews ? ratingAggregate._avg.rating : null;
+  const reviewCount = ratingAggregate._count.id;
+  const mostRecentReviewAt = hasReviews ? ratingAggregate._max.dateCreated : null;
 
   await tx.experience.update({
     where: { id: experienceId },
-    data: { avgRating: avgRating ?? null },
+    data: {
+      avgRating: avgRating ?? null,
+      reviewCount,
+      mostRecentReviewAt: mostRecentReviewAt ?? null,
+    },
   });
 }
 
@@ -55,7 +62,7 @@ export async function createReview(
       },
     });
 
-    await recalculateExperienceAvgRating(tx, experienceId);
+    await recalculateExperienceReviewStats(tx, experienceId);
 
     return createdReview;
   });
@@ -80,7 +87,7 @@ export async function deleteReview(reviewId: number, userId: number) {
       where: { id: reviewId },
     });
 
-    await recalculateExperienceAvgRating(tx, review.experienceId);
+    await recalculateExperienceReviewStats(tx, review.experienceId);
 
     return deletedReview;
   });
@@ -111,7 +118,7 @@ export async function updateReview(
       },
     });
 
-    await recalculateExperienceAvgRating(tx, review.experienceId);
+    await recalculateExperienceReviewStats(tx, review.experienceId);
 
     return updatedReview;
   });

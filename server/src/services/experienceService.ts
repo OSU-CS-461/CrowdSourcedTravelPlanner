@@ -80,6 +80,39 @@ export const EXPERIENCE_LIST_SELECT = {
   longitude: true,
   thumbnail: true,
   avgRating: true,
+  reviewCount: true,
+  mostRecentReviewAt: true,
+  dateCreated: true,
+  lastUpdated: true,
+  createdBy: true,
+  user: {
+    select: { username: true },
+  },
+  categoryId: true,
+  category: {
+    select: { id: true, slug: true, label: true },
+  },
+  experienceTags: {
+    select: {
+      tag: {
+        select: TAG_SELECT,
+      },
+    },
+  },
+} satisfies Prisma.ExperienceSelect;
+
+const EXPERIENCE_LIST_SELECT_LEGACY = {
+  id: true,
+  title: true,
+  country: true,
+  adminRegion: true,
+  city: true,
+  street: true,
+  postalCode: true,
+  latitude: true,
+  longitude: true,
+  thumbnail: true,
+  avgRating: true,
   dateCreated: true,
   lastUpdated: true,
   createdBy: true,
@@ -109,6 +142,39 @@ const EXPERIENCE_DETAIL_SELECT = (reviewSort?: ReviewSortOption) => {
 
   return {
     ...EXPERIENCE_LIST_SELECT,
+    description: true,
+    descriptionEdit: true,
+    _count: {
+      select: {
+        reviews: true,
+      },
+    },
+    reviews: {
+      where: reviewSort === "media" ? { images: { some: {} } } : {},
+      orderBy: reviewOrder,
+      include: {
+        user: { select: { username: true } },
+      },
+    },
+    images: {
+      select: {
+        id: true,
+        url: true,
+      },
+    },
+  } satisfies Prisma.ExperienceSelect;
+};
+
+const EXPERIENCE_DETAIL_SELECT_LEGACY = (reviewSort?: ReviewSortOption) => {
+  let reviewOrder: Prisma.ReviewOrderByWithRelationInput = {
+    dateCreated: "desc",
+  };
+
+  if (reviewSort === "highest") reviewOrder = { rating: "desc" };
+  if (reviewSort === "lowest") reviewOrder = { rating: "asc" };
+
+  return {
+    ...EXPERIENCE_LIST_SELECT_LEGACY,
     description: true,
     descriptionEdit: true,
     _count: {
@@ -179,6 +245,97 @@ export function serializeExperience(experience: ExperienceWithJoins) {
 
 function badRequest(message: string) {
   return { status: 400, message };
+}
+
+function asSortOrder(value: unknown): Prisma.SortOrder | undefined {
+  return value === "asc" || value === "desc" ? value : undefined;
+}
+
+function isMissingReviewStatsColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const record = error as Record<string, unknown>;
+  if (record.code !== "P2022") return false;
+  const message = typeof record.message === "string" ? record.message : "";
+  const meta = typeof record.meta === "object" ? JSON.stringify(record.meta) : "";
+  return /reviewcount|mostrecentreviewat/i.test(`${message} ${meta}`);
+}
+
+function isTransientPrismaConnectionError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const record = error as Record<string, unknown>;
+  const code = typeof record.code === "string" ? record.code : "";
+  const message = typeof record.message === "string" ? record.message : "";
+
+  if (code === "P1017" || code === "P1001" || code === "P1002") {
+    return true;
+  }
+
+  return /server has closed the connection|connection.*closed|can't reach database/i.test(
+    message,
+  );
+}
+
+function toLegacyWhere(
+  where?: Prisma.ExperienceWhereInput,
+): Prisma.ExperienceWhereInput | undefined {
+  if (!where) return where;
+  const legacyWhere: Prisma.ExperienceWhereInput = { ...where };
+  delete (legacyWhere as Record<string, unknown>).reviewCount;
+  delete (legacyWhere as Record<string, unknown>).mostRecentReviewAt;
+  return legacyWhere;
+}
+
+function toLegacyOrderBy(
+  orderBy?: Prisma.ExperienceOrderByWithRelationInput,
+): Prisma.ExperienceOrderByWithRelationInput | undefined {
+  if (!orderBy) return orderBy;
+  const record = orderBy as Record<string, unknown>;
+  const reviewCountDirection = asSortOrder(record.reviewCount);
+  if (reviewCountDirection) {
+    return { dateCreated: reviewCountDirection };
+  }
+  const recentReviewDirection = asSortOrder(record.mostRecentReviewAt);
+  if (recentReviewDirection) {
+    return { dateCreated: recentReviewDirection };
+  }
+  return orderBy;
+}
+
+async function findManyExperiencesWithRetry(
+  args: Prisma.ExperienceFindManyArgs,
+) {
+  try {
+    return await prisma.experience.findMany(args);
+  } catch (error) {
+    if (!isTransientPrismaConnectionError(error)) {
+      throw error;
+    }
+
+    // Recover once from dropped prisma/postgres connection.
+    await prisma.$disconnect().catch(() => undefined);
+    return prisma.experience.findMany(args);
+  }
+}
+
+async function findExperienceDetailOrThrow(
+  experienceId: number,
+  reviewSort?: ReviewSortOption,
+  client: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  try {
+    return await client.experience.findUniqueOrThrow({
+      where: { id: experienceId },
+      select: EXPERIENCE_DETAIL_SELECT(reviewSort),
+    });
+  } catch (error) {
+    if (!isMissingReviewStatsColumnError(error)) {
+      throw error;
+    }
+    return client.experience.findUniqueOrThrow({
+      where: { id: experienceId },
+      select: EXPERIENCE_DETAIL_SELECT_LEGACY(reviewSort),
+    });
+  }
 }
 
 async function replaceExperienceTags(
@@ -310,10 +467,7 @@ export async function createExperience({
       experienceId,
       userId,
     });
-    const finalExperience = await prisma.experience.findUniqueOrThrow({
-      where: { id: experienceId! },
-      select: EXPERIENCE_DETAIL_SELECT(),
-    });
+    const finalExperience = await findExperienceDetailOrThrow(experienceId!);
 
     return {
       ...serializeExperience(finalExperience),
@@ -368,10 +522,21 @@ export async function createExperience({
 export async function getExperience(params: GetExperienceParams) {
   const { experienceId, reviewSort } = params;
 
-  const experience = await prisma.experience.findUnique({
-    where: { id: experienceId },
-    select: EXPERIENCE_DETAIL_SELECT(reviewSort),
-  });
+  let experience;
+  try {
+    experience = await prisma.experience.findUnique({
+      where: { id: experienceId },
+      select: EXPERIENCE_DETAIL_SELECT(reviewSort),
+    });
+  } catch (error) {
+    if (!isMissingReviewStatsColumnError(error)) {
+      throw error;
+    }
+    experience = await prisma.experience.findUnique({
+      where: { id: experienceId },
+      select: EXPERIENCE_DETAIL_SELECT_LEGACY(reviewSort),
+    });
+  }
 
   return experience ? serializeExperience(experience) : null;
 }
@@ -383,15 +548,31 @@ export async function getExperience(params: GetExperienceParams) {
 export async function listExperiences(params: ListExperiencesParams) {
   const { limit, offset, where, orderBy } = params;
 
-  const experiences = await prisma.experience.findMany({
-    skip: offset,
-    take: limit,
-    where,
-    select: EXPERIENCE_LIST_SELECT,
-    orderBy: orderBy || { lastUpdated: "desc" },
-  });
+  try {
+    const experiences = await findManyExperiencesWithRetry({
+      skip: offset,
+      take: limit,
+      where,
+      select: EXPERIENCE_LIST_SELECT,
+      orderBy: orderBy || { lastUpdated: "desc" },
+    });
 
-  return experiences.map(serializeExperience);
+    return experiences.map(serializeExperience);
+  } catch (error) {
+    if (!isMissingReviewStatsColumnError(error)) {
+      throw error;
+    }
+
+    const experiences = await findManyExperiencesWithRetry({
+      skip: offset,
+      take: limit,
+      where: toLegacyWhere(where),
+      select: EXPERIENCE_LIST_SELECT_LEGACY,
+      orderBy: toLegacyOrderBy(orderBy) || { lastUpdated: "desc" },
+    });
+
+    return experiences.map(serializeExperience);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -442,10 +623,7 @@ export async function updateExperience(params: UpdateExperienceParams) {
       await replaceExperienceTags(tx, experienceId, tagIds);
     }
 
-    return tx.experience.findUniqueOrThrow({
-      where: { id: experienceId },
-      select: EXPERIENCE_DETAIL_SELECT(),
-    });
+    return findExperienceDetailOrThrow(experienceId, undefined, tx);
   });
 
   if (files.length > 0) {
@@ -470,10 +648,7 @@ export async function updateExperience(params: UpdateExperienceParams) {
     }
   }
 
-  const refreshed = await prisma.experience.findUniqueOrThrow({
-    where: { id: experienceId },
-    select: EXPERIENCE_DETAIL_SELECT(),
-  });
+  const refreshed = await findExperienceDetailOrThrow(experienceId);
 
   return serializeExperience(refreshed);
 }
@@ -513,10 +688,7 @@ export async function editExperience(params: EditExperienceParams) {
       await replaceExperienceTags(tx, experienceId, patchData.tagIds);
     }
 
-    return tx.experience.findUniqueOrThrow({
-      where: { id: experienceId },
-      select: EXPERIENCE_DETAIL_SELECT(),
-    });
+    return findExperienceDetailOrThrow(experienceId, undefined, tx);
   });
 
   return serializeExperience(edited);
