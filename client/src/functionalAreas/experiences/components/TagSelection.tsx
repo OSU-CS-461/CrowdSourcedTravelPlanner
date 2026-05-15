@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { createCategoryTag } from "../../../shared/services/api.service";
+import SearchSelect, {
+  type SearchSelectOption,
+} from "../../../shared/components/SearchSelect";
 import type { CategoryOption, TagOption } from "../types/types";
 
 interface TagSelectionProps {
@@ -12,6 +16,47 @@ interface TagSelectionProps {
   onCategoryChange?: (categoryId: number | null) => void | Promise<void>;
   onTagIdsChange: (tagIds: number[]) => void;
   likedTags?: TagOption[];
+}
+
+const NON_ALPHANUMERIC = /[^a-z0-9]+/g;
+const WHITESPACE = /\s+/g;
+
+function normalizeTagText(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(NON_ALPHANUMERIC, " ")
+    .trim()
+    .replace(WHITESPACE, " ");
+}
+
+function searchScore(tag: TagOption, query: string): number {
+  if (!query) return 0;
+
+  const labelNormalized = normalizeTagText(tag.label);
+  const slugNormalized = normalizeTagText(tag.slug);
+  const haystack = `${labelNormalized} ${slugNormalized}`.trim();
+  const queryTokens = query.split(" ").filter(Boolean);
+  const hayTokens = haystack.split(" ").filter(Boolean);
+
+  if (labelNormalized === query || slugNormalized === query) return 220;
+  if (labelNormalized.startsWith(query) || slugNormalized.startsWith(query)) return 180;
+  if (labelNormalized.includes(query) || slugNormalized.includes(query)) return 140;
+
+  if (queryTokens.length && queryTokens.every((token) => hayTokens.includes(token))) {
+    return 120;
+  }
+
+  if (
+    queryTokens.length &&
+    queryTokens.every((token) =>
+      hayTokens.some((hayToken) => hayToken.startsWith(token))
+    )
+  ) {
+    return 100;
+  }
+
+  if (haystack.includes(query)) return 90;
+  return -1;
 }
 
 export default function TagSelection({
@@ -29,98 +74,164 @@ export default function TagSelection({
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     initialCategoryId
   );
-  const [featureSearch, setFeatureSearch] = useState("");
-  const [featureToAddId, setFeatureToAddId] = useState<number | null>(null);
-  const [selectedFeatureIds, setSelectedFeatureIds] = useState<number[]>(
-    initialTagIds
-  );
+  const [tagSearch, setTagSearch] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>(initialTagIds);
+  const [categoryTags, setCategoryTags] = useState<TagOption[]>(availableFeatures);
+  const [createTagError, setCreateTagError] = useState<string | null>(null);
+  const [creatingTag, setCreatingTag] = useState(false);
 
   useEffect(() => {
-    onTagIdsChange([...selectedFeatureIds]);
-  }, [onTagIdsChange, selectedFeatureIds]);
+    setCategoryTags(availableFeatures);
+  }, [availableFeatures]);
+
+  useEffect(() => {
+    onTagIdsChange([...selectedTagIds]);
+  }, [onTagIdsChange, selectedTagIds]);
 
   useEffect(() => {
     void onCategoryChange?.(selectedCategoryId);
   }, [onCategoryChange, selectedCategoryId]);
 
   useEffect(() => {
-    if (
-      selectedCategoryId === null ||
-      featuresLoading ||
-      availableFeatures.length === 0
-    ) {
+    if (selectedCategoryId === null || featuresLoading || categoryTags.length === 0) {
       return;
     }
-    const allowedFeatureIds = new Set(availableFeatures.map((feature) => feature.id));
-    setSelectedFeatureIds((current) =>
-      current.filter((featureId) => allowedFeatureIds.has(featureId))
-    );
-  }, [availableFeatures, featuresLoading, selectedCategoryId]);
-
-  const selectableFeatures = useMemo(
-    () =>
-      availableFeatures.filter((feature) => {
-        if (selectedFeatureIds.includes(feature.id)) return false;
-        if (!featureSearch.trim()) return true;
-
-        const normalizedSearch = featureSearch.toLowerCase();
-        return (
-          feature.label.toLowerCase().includes(normalizedSearch) ||
-          feature.slug.toLowerCase().includes(normalizedSearch)
-        );
-      }),
-    [availableFeatures, featureSearch, selectedFeatureIds]
-  );
+    const allowedTagIds = new Set(categoryTags.map((tag) => tag.id));
+    setSelectedTagIds((current) => current.filter((tagId) => allowedTagIds.has(tagId)));
+  }, [categoryTags, featuresLoading, selectedCategoryId]);
 
   function handleCategorySelect(value: string) {
+    setCreateTagError(null);
     if (!value) {
       setSelectedCategoryId(null);
-      setSelectedFeatureIds([]);
-      setFeatureSearch("");
-      setFeatureToAddId(null);
+      setSelectedTagIds([]);
+      setTagSearch("");
       return;
     }
 
     const nextCategoryId = Number(value);
     setSelectedCategoryId(nextCategoryId);
-    setSelectedFeatureIds([]);
-    setFeatureSearch("");
-    setFeatureToAddId(null);
+    setSelectedTagIds([]);
+    setTagSearch("");
+    setCategoryTags([]);
   }
 
-  function handleAddFeature() {
-    if (featureToAddId === null) return;
-    if (selectedFeatureIds.includes(featureToAddId)) return;
-    setSelectedFeatureIds([...selectedFeatureIds, featureToAddId]);
-    setFeatureToAddId(null);
+  function handleRemoveTag(tagId: number) {
+    setSelectedTagIds((current) => current.filter((id) => id !== tagId));
   }
 
-  function handleRemoveFeature(featureId: number) {
-    setSelectedFeatureIds(selectedFeatureIds.filter((id) => id !== featureId));
+  function selectTagId(tagId: number) {
+    setSelectedTagIds((current) =>
+      current.includes(tagId) ? current : [...current, tagId]
+    );
+    setTagSearch("");
+    setCreateTagError(null);
   }
 
-  const selectedFeatures = selectedFeatureIds.map((id) => {
-    const feature = availableFeatures.find((item) => item.id === id);
-    if (feature) return feature;
-    return { id, label: `Feature #${id}`, slug: "loading", categoryId: -1 };
+  const selectedTags = selectedTagIds.map((id) => {
+    const tag = categoryTags.find((item) => item.id === id);
+    if (tag) return tag;
+    return { id, label: `Tag #${id}`, slug: "loading", categoryId: -1 };
   });
 
   const hasCategory = selectedCategoryId !== null;
-
-  const savedTagsForCategory = useMemo(() => {
-    if (selectedCategoryId === null) return [];
-    return likedTags.filter(
-      (t) =>
-        t.categoryId === selectedCategoryId && !selectedFeatureIds.includes(t.id)
+  const likedTagIds = useMemo(() => {
+    if (selectedCategoryId === null) return new Set<number>();
+    return new Set(
+      likedTags
+        .filter((tag) => tag.categoryId === selectedCategoryId)
+        .map((tag) => tag.id)
     );
-  }, [likedTags, selectedCategoryId, selectedFeatureIds]);
+  }, [likedTags, selectedCategoryId]);
+
+  const normalizedQuery = normalizeTagText(tagSearch);
+  const rankedOptions = useMemo(() => {
+    const unselectedTags = categoryTags.filter(
+      (tag) => !selectedTagIds.includes(tag.id)
+    );
+
+    const scored = unselectedTags
+      .map((tag) => ({
+        tag,
+        liked: likedTagIds.has(tag.id),
+        score: searchScore(tag, normalizedQuery),
+      }))
+      .filter((row) => (normalizedQuery ? row.score >= 0 : true));
+
+    scored.sort((a, b) => {
+      if (normalizedQuery && a.score !== b.score) return b.score - a.score;
+      if (a.liked !== b.liked) return a.liked ? -1 : 1;
+      return a.tag.label.localeCompare(b.tag.label);
+    });
+
+    return scored;
+  }, [categoryTags, likedTagIds, normalizedQuery, selectedTagIds]);
+
+  const exactNormalizedDuplicateExists = useMemo(() => {
+    if (!normalizedQuery) return false;
+    return categoryTags.some(
+      (tag) =>
+        normalizeTagText(tag.label) === normalizedQuery ||
+        normalizeTagText(tag.slug) === normalizedQuery
+    );
+  }, [categoryTags, normalizedQuery]);
+
+  const searchOptions: SearchSelectOption[] = rankedOptions.map((row) => ({
+    id: String(row.tag.id),
+    label: row.tag.label,
+    supportingText: row.tag.slug,
+    badgeText: row.liked ? "Saved" : undefined,
+  }));
+
+  const shouldShowAddRow =
+    hasCategory &&
+    normalizedQuery.length > 0 &&
+    !exactNormalizedDuplicateExists &&
+    !featuresLoading &&
+    !creatingTag;
+
+  const addRow = shouldShowAddRow
+    ? { label: `Add new tag: "${tagSearch.trim()}"` }
+    : null;
+
+  async function handleCreateTag() {
+    if (selectedCategoryId === null) return;
+    const name = tagSearch.trim();
+    if (!name) return;
+
+    setCreateTagError(null);
+    setCreatingTag(true);
+    try {
+      const tag = await createCategoryTag(selectedCategoryId, name);
+      setCategoryTags((current) => {
+        const exists = current.some((item) => item.id === tag.id);
+        if (exists) return current;
+        return [...current, tag].sort((a, b) => a.label.localeCompare(b.label));
+      });
+      selectTagId(tag.id);
+    } catch (err) {
+      const message =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { error?: unknown } } }).response?.data
+          ?.error === "string"
+          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          : undefined;
+      setCreateTagError(message ?? "Could not create tag.");
+    } finally {
+      setCreatingTag(false);
+    }
+  }
 
   return (
     <section className="exp-form-section">
       <h3 className="exp-form-section-title">Tags</h3>
 
       {tagsLoading && <p className="exp-form-helper">Loading tags...</p>}
-      {tagsError && <p className="exp-form-error">{tagsError}</p>}
+      {(tagsError || createTagError) && (
+        <p className="exp-form-error">{tagsError ?? createTagError}</p>
+      )}
 
       <label className="exp-form-field">
         <span>Category</span>
@@ -132,102 +243,51 @@ export default function TagSelection({
           <option value="">Select a category</option>
           {availableCategories.map((category) => (
             <option key={category.id} value={category.id}>
-              {category.label} ({category.slug})
+              {category.label}
             </option>
           ))}
         </select>
       </label>
 
       {!hasCategory ? (
-        <p className="exp-form-helper">
-          Choose a category to enable feature selection.
-        </p>
+        <p className="exp-form-helper">Choose a category to search and select tags.</p>
       ) : (
         <div className="exp-form-subsection">
-          {likedTags.length > 0 && (
-            <p className="exp-form-helper">
-              {savedTagsForCategory.length > 0
-                ? "Quick-add from your saved tags (this category):"
-                : "Pick a category to see saved tags you can add in one click."}
-            </p>
-          )}
-          {savedTagsForCategory.length > 0 && (
-            <div className="exp-form-chip-list" style={{ marginBottom: "12px" }}>
-              {savedTagsForCategory.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  className="exp-form-chip"
-                  onClick={() => {
-                    if (selectedFeatureIds.includes(t.id)) return;
-                    setSelectedFeatureIds([...selectedFeatureIds, t.id]);
-                  }}
-                >
-                  + {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {featuresLoading && <p className="exp-form-helper">Loading features...</p>}
-
-          <label className="exp-form-field">
-            <span>Search features</span>
-            <input
-              type="text"
-              value={featureSearch}
-              onChange={(e) => setFeatureSearch(e.target.value)}
-              placeholder="Search feature by label or slug"
-              disabled={featuresLoading || !!tagsError}
-            />
-          </label>
-
-          <div className="exp-form-inline-group">
-            <label className="exp-form-field">
-              <span>Features</span>
-              <select
-                value={featureToAddId === null ? "" : String(featureToAddId)}
-                onChange={(e) =>
-                  setFeatureToAddId(e.target.value ? Number(e.target.value) : null)
-                }
-                disabled={
-                  featuresLoading || !!tagsError || selectableFeatures.length === 0
-                }
-              >
-                <option value="">Select a feature</option>
-                {selectableFeatures.map((feature) => (
-                  <option key={feature.id} value={feature.id}>
-                    {feature.label} ({feature.slug})
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <button
-              type="button"
-              onClick={handleAddFeature}
-              disabled={featureToAddId === null || featuresLoading}
-            >
-              Add feature
-            </button>
-          </div>
+          <SearchSelect
+            label="Search tags"
+            placeholder="Search tags by name or slug"
+            value={tagSearch}
+            disabled={featuresLoading || !!tagsError}
+            loading={featuresLoading}
+            options={searchOptions}
+            addRow={addRow}
+            noResultsText="No tags match your search."
+            keepOpenOnSelect
+            onValueChange={setTagSearch}
+            onSelectOption={(optionId) => selectTagId(Number(optionId))}
+            onSelectAddRow={() => {
+              void handleCreateTag();
+            }}
+          />
         </div>
       )}
 
-      {selectedFeatures.length > 0 && (
+      {selectedTags.length > 0 && (
         <div className="exp-form-subsection">
-          <p className="exp-form-helper">Selected features</p>
+          <p className="exp-form-helper">Selected tags</p>
           <div className="exp-form-chip-list">
-            {selectedFeatures.map((feature) => (
-              <div key={feature.id} className="exp-form-chip">
+            {selectedTags.map((tag) => (
+              <div key={tag.id} className="exp-form-chip">
                 <span>
-                  {feature.label} ({feature.slug})
+                  {tag.label}
                 </span>
                 <button
                   type="button"
-                  onClick={() => handleRemoveFeature(feature.id)}
+                  className="exp-form-chip-action"
+                  aria-label={`Remove ${tag.label}`}
+                  onClick={() => handleRemoveTag(tag.id)}
                 >
-                  Remove
+                  −
                 </button>
               </div>
             ))}

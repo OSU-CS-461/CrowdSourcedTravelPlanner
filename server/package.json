@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "lint": "eslint",
-    "start:dev": "cross-env NODE_ENV=development tsx --watch src/index.ts",
-    "start:production": "cross-env NODE_ENV=production tsx src/index.ts",
+    "start:dev": "cross-env NODE_ENV=development node --import tsx src/index.ts",
+    "start:production": "cross-env NODE_ENV=production node --import tsx src/index.ts",
     "prisma:dev": "prisma dev -n crowd-sourced-travel-planner",
     "prisma:generate": "prisma generate --no-engine",
     "prisma:migrate:deploy": "node scripts/run-prisma-migrate-deploy.mjs",

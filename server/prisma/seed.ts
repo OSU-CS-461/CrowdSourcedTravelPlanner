@@ -1,4 +1,5 @@
 import { PrismaClient } from "../src/generated/prisma/client";
+import { normalizeTagText } from "../src/lib/tagText";
 const prisma = new PrismaClient();
 
 /**
@@ -88,11 +89,13 @@ async function main() {
         where: { slug: t.slug },
         update: {
           label: t.label,
+          normalizedLabel: normalizeTagText(t.label),
           categoryId: category.id,
         },
         create: {
           slug: t.slug,
           label: t.label,
+          normalizedLabel: normalizeTagText(t.label),
           categoryId: category.id,
         },
       });

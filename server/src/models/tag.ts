@@ -16,3 +16,13 @@ export const TagListQuerySchema = z.object({
 });
 
 export type TagListQuery = z.infer<typeof TagListQuerySchema>;
+
+export const CreateTagBodySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Tag name is required.")
+    .max(64, "Tag name must be 64 characters or fewer."),
+});
+
+export type CreateTagBody = z.infer<typeof CreateTagBodySchema>;

@@ -10,6 +10,7 @@ export default function useCategoryFeatures(categoryId: number | null) {
   useEffect(() => {
     if (!categoryId) {
       setFeatures([]);
+      setError(null);
       return;
     }
 
@@ -18,12 +19,13 @@ export default function useCategoryFeatures(categoryId: number | null) {
     async function load() {
       try {
         setLoading(true);
+        setError(null);
         const res = await apiClient.get<TagOption[]>(
           `/categories/${categoryId}/tags`
         );
         if (!cancelled) setFeatures(res.data);
       } catch {
-        if (!cancelled) setError("Unable to load features.");
+        if (!cancelled) setError("Unable to load tags.");
       } finally {
         if (!cancelled) setLoading(false);
       }
