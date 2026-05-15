@@ -1,14 +1,22 @@
 import { default as express } from "express";
 import * as settingsController from "../controllers/settingsController";
+import * as userController from "../controllers/userController";
 import * as userLikedExperienceController from "../controllers/userLikedExperienceController";
 import * as userLikedTagController from "../controllers/userLikedTagController";
 import * as userLikedTripController from "../controllers/userLikedTripController";
 import { requireAuth } from "../middleware/authMiddleware";
+import { passwordChangeRateLimit } from "../middleware/passwordChangeRateLimit";
 
 const router = express.Router();
 
 router.get("/me/settings", requireAuth, settingsController.getSettings);
 router.patch("/me/settings", requireAuth, settingsController.patchSettings);
+router.patch(
+  "/me/password",
+  requireAuth,
+  passwordChangeRateLimit,
+  userController.patchMyPassword
+);
 
 router.get(
   "/me/liked-experiences/status/:experienceId",
