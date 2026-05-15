@@ -28,9 +28,35 @@
   gap: 16px;
 }
 
+.profile-settings__panel--account {
+  margin-bottom: 16px;
+}
+
 .profile-settings__panel h2 {
   margin: 0;
   font-size: 1.1rem;
+}
+
+.profile-settings__signin-email {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-settings__signin-email-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.profile-settings__signin-email-value {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--color-text);
+  word-break: break-all;
+  line-height: 1.45;
 }
 
 .profile-settings__options {

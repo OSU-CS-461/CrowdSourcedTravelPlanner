@@ -41,6 +41,7 @@ export const authSignup = async (input: {
 };
 
 export type UserSettingsDto = {
+  email: string;
   preferredFeedSort: string;
   themePreference: "light" | "dark";
   lastUpdated: string;
