@@ -5,6 +5,9 @@ import App from "./App.tsx";
 import { AuthProvider } from "../functionalAreas/auth/context/AuthContext.tsx";
 
 import "leaflet/dist/leaflet.css";
+import { hydrateThemeFromCache } from "./theme";
+
+hydrateThemeFromCache();
 
 if (import.meta.env.DEV) {
   console.log("Dev");

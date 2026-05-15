@@ -49,7 +49,7 @@ npm install
 ### Step 2: Generate Prisma Client
 
 ```powershell
-cd server
+cd ../server
 npx prisma generate
 ```
 

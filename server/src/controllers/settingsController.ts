@@ -33,6 +33,7 @@ export async function patchSettings(
     const body = SettingsPatchBodySchema.parse(req.body);
     const settings = await settingsService.updateSettingsForUser(req.user.id, {
       preferredFeedSort: body.preferredFeedSort,
+      themePreference: body.themePreference,
     });
     return res.status(200).json(settings);
   } catch (err) {
