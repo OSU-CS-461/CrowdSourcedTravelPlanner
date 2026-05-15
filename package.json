@@ -14,7 +14,11 @@
     "migrate:server": "cd server && npm run prisma:migrate:deploy",
     "sync:client-to-server": "mkdir -p server/public && rm -rf server/public/* && cp -r client/dist/* server/public",
     "build:render": "npm run build:server && npm run build:client && npm run sync:client-to-server",
-    "start:render": "cd server && npm run start:production"
+    "start:render": "cd server && npm run start:production",
+    
+    "test": "cd server && vitest run",
+    "test:watch": "cd server && vitest",
+    "test:ui": "cd server && vitest --ui"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
