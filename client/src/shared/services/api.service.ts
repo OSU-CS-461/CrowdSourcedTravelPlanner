@@ -211,3 +211,17 @@ export const likeTag = async (tagId: number) => {
 export const unlikeTag = async (tagId: number) => {
   await apiClient.delete(`/users/me/liked-tags/${tagId}`);
 };
+
+export type TagSummary = {
+  id: number;
+  slug: string;
+  label: string;
+  categoryId: number;
+};
+
+export const createCategoryTag = async (categoryId: number, name: string) => {
+  const response = await apiClient.post<TagSummary>(`/categories/${categoryId}/tags`, {
+    name,
+  });
+  return response.data;
+};

@@ -150,10 +150,13 @@ model Tag {
   id             Int             @id @default(autoincrement())
   slug           String          @unique
   label          String
+  normalizedLabel String
   categoryId     Int
   experienceTags ExperienceTag[]
   likedByUsers     UserLikedTag[]
   category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, normalizedLabel])
 }
 
 model ExperienceTag {

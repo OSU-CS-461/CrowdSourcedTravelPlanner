@@ -316,3 +316,56 @@ describe("experienceService.listExperiences fallback when review stats columns a
     expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("experienceService category/tag validation", () => {
+  beforeEach(() => {
+    mockReset(prismaMock);
+    vi.clearAllMocks();
+  });
+
+  it("rejects tagIds that do not belong to selected categoryId", async () => {
+    const tx = {
+      user: {
+        findUnique: vi.fn().mockResolvedValue({ id: 9 }),
+      },
+      category: {
+        findUnique: vi.fn().mockResolvedValue({ id: 5 }),
+      },
+      tag: {
+        findMany: vi.fn().mockResolvedValue([
+          { id: 33, categoryId: 7 },
+        ]),
+      },
+      experience: {
+        create: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
+      },
+      experienceTag: {
+        createMany: vi.fn(),
+      },
+    };
+
+    (prismaMock.$transaction as unknown as ReturnType<typeof vi.fn>)
+      .mockImplementation(async (callback: (client: typeof tx) => unknown) => callback(tx));
+
+    await expect(
+      createExperience({
+        userId: 9,
+        postBody: {
+          title: "Coastal Walk",
+          description:
+            "A memorable walk along the coast with dramatic cliffs and viewpoints.",
+          categoryId: 5,
+          country: "US",
+          latitude: 44.5,
+          longitude: -123.2,
+          tagIds: [33],
+        },
+        files: [],
+      }),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: "All tagIds must belong to the selected categoryId.",
+    });
+  });
+});
