@@ -16,5 +16,5 @@ export const ClientRoutes = {
   TAG_DETAILS: "/tags/:id",
   REVIEW_CREATE: "/experiences/:id/reviews/create",
   REVIEW_UPDATE: "/experiences/:id/reviews/:reviewId/update",
-  SETTINGS: "/settings",
+  PROFILE_SETTINGS: "/profile/settings",
 };
