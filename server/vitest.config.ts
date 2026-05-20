@@ -3,6 +3,7 @@ import { defineConfig } from "vitest/config";
 const EXCLUDED_INTEGRATION_TEST_PATHS = [
   "src/__tests__/controllers/**/*.tests.ts",
   "src/__tests__/db/**/*.tests.ts",
+  "src/__tests__/api/experiences.test.ts",
 ];
 
 export default defineConfig({
