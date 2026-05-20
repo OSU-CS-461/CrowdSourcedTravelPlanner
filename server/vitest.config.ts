@@ -7,12 +7,13 @@ const EXCLUDED_INTEGRATION_TEST_PATHS = [
 
 export default defineConfig({
   test: {
-    include: ["**/*.{tests,specs}.?(c|m)[jt]s?(x)"],
+    include: ["src/**/*.{test,tests,spec,specs}.?(c|m)[jt]s?(x)"],
     exclude: [...EXCLUDED_INTEGRATION_TEST_PATHS],
     environment: "node",
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       include: ["src/models/**", "src/services/**"],
+      reporter: ["text", "lcov", "json-summary"],
     },
   },
 });

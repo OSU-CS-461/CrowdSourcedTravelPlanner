@@ -9,7 +9,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "types": ["node", "jest"]
+    "types": ["node", "vitest/globals"]
   },
   "include": ["src", "__tests__"],
   "exclude": ["node_modules", "dist"]
