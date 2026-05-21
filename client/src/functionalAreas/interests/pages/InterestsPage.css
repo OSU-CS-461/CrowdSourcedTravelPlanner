@@ -1,12 +1,28 @@
 .interests-page {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px 14px 24px;
+}
+
+.interests-header__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #3d6a9f;
+}
+
+.interests-title-main {
+  margin: 8px 0 0;
+  font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+  line-height: 1.15;
+  color: #14345f;
 }
 
 .interests-page-intro {
-  color: rgba(255, 255, 255, 0.82);
-  margin: 0 0 1.5rem;
+  color: #4d678a;
+  margin: 10px 0 1rem;
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -14,8 +30,200 @@
 .interests-two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+  gap: 1rem;
   align-items: start;
+}
+
+.interests-col {
+  background: #ffffff;
+  border: 1px solid #d5e3f2;
+  border-radius: 14px;
+  padding: 1.1rem 1.15rem;
+  min-height: 200px;
+  box-shadow: 0 10px 22px rgba(19, 59, 105, 0.09);
+}
+
+.interests-col-title {
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #14345f;
+}
+
+.interests-col-desc {
+  color: #587396;
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.interests-primary-btn {
+  border: 1px solid #1669df;
+  background: linear-gradient(180deg, #2b84e9 0%, #1669df 100%);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.58rem 1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.interests-primary-btn:hover {
+  border-color: #79b0ff;
+}
+
+.interests-form {
+  background: #f7fbff;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  border: 1px solid #d4e2f1;
+}
+
+.interests-form h3 {
+  margin: 0 0 14px;
+  color: #173c68;
+}
+
+.interests-form-field {
+  margin-bottom: 12px;
+}
+
+.interests-form-field label {
+  display: block;
+  margin-bottom: 6px;
+  color: #355879;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.interests-form-field input,
+.interests-form-field textarea {
+  width: 100%;
+  border: 1px solid #c9d8ea;
+  background: #fff;
+  color: #173c68;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.interests-form-field textarea {
+  resize: vertical;
+}
+
+.interests-note {
+  margin: 0;
+  color: #4e6a8d;
+}
+
+.interests-note--section {
+  margin-bottom: 16px;
+}
+
+.interests-subheading {
+  color: #173a66;
+  margin: 0 0 0.65rem;
+  font-size: 1.04rem;
+  font-weight: 700;
+}
+
+.interests-entry-card {
+  border: 1px solid #d7e4f3;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 11px;
+  background: #f8fbff;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.interests-entry-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.interests-entry-card__content h4 {
+  margin: 0 0 7px;
+  color: #184171;
+}
+
+.interests-entry-card__content p {
+  color: #3f5f84;
+  margin: 0 0 7px;
+}
+
+.interests-entry-card__content small {
+  color: #6683a8;
+}
+
+.interests-entry-card__actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.interests-secondary-btn,
+.interests-danger-btn,
+.interests-back-btn {
+  border: none;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.43rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.interests-secondary-btn {
+  background: #249661;
+}
+
+.interests-danger-btn {
+  background: #d94841;
+}
+
+.interests-saved-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.interests-saved-list--final {
+  margin: 0;
+}
+
+.interests-saved-item {
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e3edf8;
+  padding-bottom: 8px;
+  color: #67829f;
+  font-size: 0.9rem;
+}
+
+.interests-saved-item:last-child {
+  margin-bottom: 0;
+}
+
+.interests-link {
+  color: #1f5d9f;
+  font-weight: 700;
+}
+
+.interests-error {
+  background-color: #ffe8e8;
+  color: #a71f1f;
+  border: 1px solid #f2b5b5;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.interests-back-row {
+  margin-top: 1rem;
+}
+
+.interests-back-btn {
+  background: #476385;
 }
 
 @media (max-width: 960px) {
@@ -24,58 +232,12 @@
   }
 }
 
-.interests-col {
-  background-color: #2d2d2d;
-  border: 1px solid #444;
-  border-radius: 12px;
-  padding: 1.25rem 1.35rem;
-  min-height: 200px;
-}
+@media (max-width: 680px) {
+  .interests-page {
+    padding: 6px 0 18px;
+  }
 
-.interests-title-main {
-  color: #fff;
-  margin: 0 0 0.5rem;
-  font-size: 1.85rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-/* Column headings: same typeface and size for Local + Community */
-.interests-col-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.65rem;
-  font-weight: 700;
-  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #f3f4f6;
-  letter-spacing: 0.02em;
-}
-
-.interests-col-desc {
-  color: rgba(255, 255, 255, 0.72);
-  margin: 0 0 1rem;
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-.interests-subheading {
-  color: #fff;
-  margin: 1rem 0 0.65rem;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.interests-subheading:first-of-type {
-  margin-top: 0.35rem;
-}
-
-.interests-error {
-  background-color: #fee;
-  color: #c00;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
-
-.interests-back-row {
-  margin-top: 1.5rem;
+  .interests-entry-card {
+    flex-direction: column;
+  }
 }

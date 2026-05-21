@@ -68,40 +68,119 @@ a:hover {
   color: var(--color-link-hover);
 }
 
-nav.top-site-nav a {
-  font-weight: 400;
+nav.top-site-nav {
+  max-width: 1240px;
+  margin: 10px auto 0;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #d7e5f6;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5fc 100%);
+  box-shadow: 0 10px 24px rgba(19, 64, 117, 0.1);
 }
 
-nav.top-site-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 12px;
+nav.top-site-nav .site-brand {
+  display: inline-flex;
   align-items: center;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 46px;
+  padding: 2px 10px 2px 2px;
+  margin-right: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(179, 205, 233, 0.7);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 6px 14px rgba(15, 61, 115, 0.1);
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+nav.top-site-nav .site-brand:hover {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 18px rgba(15, 61, 115, 0.15);
+  transform: translateY(-1px);
+}
+
+nav.top-site-nav .site-brand:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+nav.top-site-nav .site-brand-icon {
+  width: 40px;
+  height: 40px;
+  display: block;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+nav.top-site-nav .site-brand-label {
+  color: #143f72;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+nav.top-site-nav .top-site-nav-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  margin-left: 8px;
+  border: 1px solid #d2e2f5;
+  border-radius: 999px;
+  background: #f1f7ff;
+}
+
+nav.top-site-nav .top-site-nav-link {
+  color: #285489;
+  border-radius: 999px;
+  padding: 0.48rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+nav.top-site-nav .top-site-nav-link:hover {
+  color: #163d6d;
+  background: #ffffff;
+}
+
+nav.top-site-nav .top-site-nav-link.is-active {
+  background: #ffffff;
+  color: #0f3d73;
+  box-shadow: 0 3px 8px rgba(24, 71, 126, 0.15);
 }
 
 nav.top-site-nav .site-nav-profile {
   margin-left: auto;
-  display: flex;
-  gap: 12px;
   position: relative;
+}
+
+nav.top-site-nav .site-nav-menu-toggle {
+  border: 1px solid #c9dbf2;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #164376;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
 }
 
 nav.top-site-nav .profile-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 180px;
+  min-width: 210px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid #d2e0f2;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(17, 58, 106, 0.16);
   display: grid;
   gap: 4px;
   padding: 8px;
-  z-index: 10;
+  z-index: 20;
 }
 
 nav.top-site-nav .profile-menu a,
@@ -109,8 +188,8 @@ nav.top-site-nav .profile-menu button {
   color: var(--color-text);
   background: transparent;
   border: none;
-  padding: 6px 8px;
-  border-radius: 6px;
+  padding: 7px 9px;
+  border-radius: 8px;
   text-align: left;
   font: inherit;
   cursor: pointer;
@@ -121,8 +200,52 @@ nav.top-site-nav .profile-menu button:hover {
   background: var(--color-surface-muted);
 }
 
+nav.top-site-nav .profile-menu__mobile-link {
+  display: none;
+}
+
 main.app-main {
-  padding: 16px;
+  padding: 14px 16px 22px;
+}
+
+@media (max-width: 900px) {
+  nav.top-site-nav {
+    margin-top: 8px;
+    padding: 10px 12px;
+  }
+
+  nav.top-site-nav .site-brand {
+    min-height: 42px;
+    padding: 2px 8px 2px 2px;
+    gap: 8px;
+  }
+
+  nav.top-site-nav .site-brand-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  nav.top-site-nav .site-brand-label {
+    font-size: 0.86rem;
+  }
+
+  nav.top-site-nav .top-site-nav-links {
+    display: none;
+  }
+
+  nav.top-site-nav .profile-menu__mobile-link {
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  nav.top-site-nav .site-brand {
+    padding-right: 2px;
+  }
+
+  nav.top-site-nav .site-brand-label {
+    display: none;
+  }
 }
 
 main.auth-page {

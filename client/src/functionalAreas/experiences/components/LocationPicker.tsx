@@ -359,25 +359,27 @@ export default function LocationPicker({
   }
 
   return (
-    <div style={{ display: "grid", gap: 10 }}>
-      <div>
-        <label>
+    <div className="location-picker" style={{ display: "grid", gap: 10 }}>
+      <div className="location-picker__search">
+        <label className="location-picker__search-label">
           Search location
           <input
+            className="location-picker__search-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search a place or address…"
             style={{ width: "100%" }}
           />
         </label>
-        {loading && <div style={{ fontSize: 12 }}>Searching…</div>}
-        {err && <div style={{ color: "red", fontSize: 12 }}>{err}</div>}
+        {loading && <div className="location-picker__search-status" style={{ fontSize: 12 }}>Searching…</div>}
+        {err && <div className="location-picker__search-error" style={{ color: "red", fontSize: 12 }}>{err}</div>}
       </div>
 
       {results.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, border: "1px solid #ddd" }}>
+        <ul className="location-picker__results" style={{ listStyle: "none", padding: 0, margin: 0, border: "1px solid #ddd" }}>
           {results.map((r) => (
             <li
+              className="location-picker__result-item"
               key={`${r.placeId ?? `${r.lat}-${getLongitude(r)}`}-${r.displayName ?? ""}`}
               onClick={() => pickResult(r)}
               style={{
@@ -388,8 +390,8 @@ export default function LocationPicker({
                 gap: 2,
               }}
             >
-              <span style={{ fontWeight: 600 }}>{getResultPrimaryLine(r)}</span>
-              <span style={{ fontSize: 12, color: "#5f6368" }}>
+              <span className="location-picker__result-primary" style={{ fontWeight: 600 }}>{getResultPrimaryLine(r)}</span>
+              <span className="location-picker__result-secondary" style={{ fontSize: 12, color: "#5f6368" }}>
                 {getResultSecondaryLine(r)}
               </span>
             </li>
@@ -398,6 +400,7 @@ export default function LocationPicker({
       )}
 
       <div
+        className="location-picker__map-wrap"
         style={{
           width: "100%",
           aspectRatio: "1 / 1",
@@ -445,13 +448,14 @@ export default function LocationPicker({
         </MapContainer>
       </div>
 
-      <div style={{ fontSize: 12, color: "inherit", opacity: 0.75 }}>
+      <div className="location-picker__selected" style={{ fontSize: 12, color: "inherit", opacity: 0.75 }}>
         <strong>Selected:</strong>{" "}
         {value?.displayName ??
           (value ? `${value.latitude.toFixed(5)}, ${value.longitude.toFixed(5)}` : "None")}
       </div>
 
       <button
+        className="location-picker__clear-btn"
         type="button"
         onClick={() => {
           setErr(null);

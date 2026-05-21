@@ -4,17 +4,18 @@ import { ClientRoutes } from "./clientRoutes";
 import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
 import { getUserSettings } from "./services/api.service";
 import { isUiTheme, setUiTheme } from "./theme";
+import crowdCompassIcon from "../../logo.png";
 
 export default function RootLayout() {
   const { isAuthenticated, logout } = useAuth();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function onDocumentClick(event: MouseEvent) {
       if (!profileMenuRef.current) return;
       if (!profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
+        setIsMenuOpen(false);
       }
     }
 
@@ -40,56 +41,105 @@ export default function RootLayout() {
   return (
     <>
       {isAuthenticated && (
-        <nav className="top-site-nav">
-          <NavLink to={ClientRoutes.HOME}>Home</NavLink>
-          <NavLink to={ClientRoutes.EXPLORE}>Explore</NavLink>
-          <NavLink to={ClientRoutes.INTERESTS}>My Interests</NavLink>
+        <nav className="top-site-nav" aria-label="Primary navigation">
+          <NavLink to={ClientRoutes.HOME} className="site-brand" aria-label="Crowd Compass home">
+            <img className="site-brand-icon" src={crowdCompassIcon} alt="Crowd Compass home" />
+            <span className="site-brand-label">CrowdCompass</span>
+          </NavLink>
+
+          <div className="top-site-nav-links">
+            <NavLink
+              to={ClientRoutes.HOME}
+              className={({ isActive }) => `top-site-nav-link${isActive ? " is-active" : ""}`}
+            >
+              Home
+            </NavLink>
+            <NavLink
+              to={ClientRoutes.EXPLORE}
+              className={({ isActive }) => `top-site-nav-link${isActive ? " is-active" : ""}`}
+            >
+              Explore
+            </NavLink>
+            <NavLink
+              to={ClientRoutes.INTERESTS}
+              className={({ isActive }) => `top-site-nav-link${isActive ? " is-active" : ""}`}
+            >
+              My Interests
+            </NavLink>
+            <NavLink
+              to={ClientRoutes.MY_TRIPS}
+              className={({ isActive }) => `top-site-nav-link${isActive ? " is-active" : ""}`}
+            >
+              My Trips
+            </NavLink>
+            <NavLink
+              to={ClientRoutes.MY_EXPERIENCES}
+              className={({ isActive }) => `top-site-nav-link${isActive ? " is-active" : ""}`}
+            >
+              My Experiences
+            </NavLink>
+          </div>
 
           <div ref={profileMenuRef} className="site-nav-profile">
             <button
               type="button"
-              onClick={() => setIsProfileOpen((prev) => !prev)}
+              className="site-nav-menu-toggle"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
               aria-haspopup="menu"
-              aria-expanded={isProfileOpen}
-              aria-label="Open menu"
+              aria-expanded={isMenuOpen}
+              aria-label="Open navigation menu"
             >
               ☰
             </button>
 
-            {isProfileOpen && (
+            {isMenuOpen && (
               <div className="profile-menu" role="menu">
                 <NavLink
-                  to={ClientRoutes.MY_EXPERIENCES}
-                  onClick={() => setIsProfileOpen(false)}
+                  to={ClientRoutes.HOME}
+                  className="profile-menu__mobile-link"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  My Experiences
+                  Home
                 </NavLink>
-
+                <NavLink
+                  to={ClientRoutes.EXPLORE}
+                  className="profile-menu__mobile-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Explore
+                </NavLink>
                 <NavLink
                   to={ClientRoutes.INTERESTS}
-                  onClick={() => setIsProfileOpen(false)}
+                  className="profile-menu__mobile-link"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   My Interests
                 </NavLink>
-
                 <NavLink
                   to={ClientRoutes.MY_TRIPS}
-                  onClick={() => setIsProfileOpen(false)}
+                  className="profile-menu__mobile-link"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   My Trips
                 </NavLink>
-
+                <NavLink
+                  to={ClientRoutes.MY_EXPERIENCES}
+                  className="profile-menu__mobile-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Experiences
+                </NavLink>
                 <NavLink
                   to={ClientRoutes.PROFILE_SETTINGS}
-                  onClick={() => setIsProfileOpen(false)}
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  Profile settings
+                  Settings
                 </NavLink>
 
                 <button
                   type="button"
                   onClick={() => {
-                    setIsProfileOpen(false);
+                    setIsMenuOpen(false);
                     logout();
                   }}
                 >
