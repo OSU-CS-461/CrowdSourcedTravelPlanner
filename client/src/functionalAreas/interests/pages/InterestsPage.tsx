@@ -204,301 +204,192 @@ export default function InterestsPage() {
 
   return (
     <main className="interests-page">
-      <h1 className="interests-title-main">My Interests</h1>
-      <p className="interests-page-intro">
-        Your own interest notes (Local) and things you saved from the community.
-      </p>
+      <header className="interests-header">
+        <p className="interests-header__eyebrow">Saved Preferences</p>
+        <h1 className="interests-title-main">My Interests</h1>
+        <p className="interests-page-intro">
+          Your own interest notes (Local) and things you saved from the community.
+        </p>
+      </header>
 
       {error && <div className="interests-error">{error}</div>}
 
       <div className="interests-two-col">
-      <section className="interests-col">
-        <h2 className="interests-col-title">Local</h2>
-        <p className="interests-col-desc">
-          Create and edit your own interest notes. Only entries you created appear in this list.
-        </p>
+        <section className="interests-col">
+          <h2 className="interests-col-title">Local</h2>
+          <p className="interests-col-desc">
+            Create and edit your own interest notes. Only entries you created appear in this list.
+          </p>
 
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setEditingId(null);
-            setFormData({ name: "", description: "" });
-          }}
-          style={{
-            padding: "10px 20px",
-            marginBottom: "20px",
-            cursor: "pointer",
-            backgroundColor: "#1a73e8",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            fontWeight: "bold",
-          }}
-        >
-          {showForm ? "Cancel" : "+ Add New Interest"}
-        </button>
-
-        {showForm && (
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              backgroundColor: "#1e1e1e",
-              padding: "24px",
-              borderRadius: "8px",
-              marginBottom: "24px",
-              border: "1px solid #444",
+          <button
+            className="interests-primary-btn"
+            onClick={() => {
+              setShowForm(!showForm);
+              setEditingId(null);
+              setFormData({ name: "", description: "" });
             }}
           >
-            <h3 style={{ color: "#fff", marginTop: 0, marginBottom: "20px" }}>
-              {editingId ? "Edit Interest" : "Create New Interest"}
-            </h3>
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "8px", color: "#e0e0e0", fontWeight: 500 }}>
-                Name *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                minLength={2}
-                maxLength={100}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  border: "1px solid #555",
-                  borderRadius: "4px",
-                  backgroundColor: "#1a1a1a",
-                  color: "#fff",
-                }}
-              />
-            </div>
-            <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", marginBottom: "8px", color: "#e0e0e0", fontWeight: 500 }}>
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                maxLength={500}
-                rows={3}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  border: "1px solid #555",
-                  borderRadius: "4px",
-                  backgroundColor: "#1a1a1a",
-                  color: "#fff",
-                }}
-              />
-            </div>
-            <button
-              type="submit"
-              style={{
-                padding: "10px 20px",
-                cursor: "pointer",
-                backgroundColor: "#1a73e8",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                fontWeight: "bold",
-              }}
-            >
-              {editingId ? "Update" : "Create"}
-            </button>
-          </form>
-        )}
+            {showForm ? "Cancel" : "+ Add New Interest"}
+          </button>
 
-        {loading ? (
-          <p style={{ color: "rgba(255,255,255,0.7)" }}>Loading…</p>
-        ) : myAuthoredInterests.length === 0 ? (
-          <p style={{ color: "rgba(255,255,255,0.7)" }}>
-            No interests authored by you yet. Add one above.
-          </p>
-        ) : (
-          <div>
-            <h3 style={{ color: "#fff", marginBottom: "16px", fontSize: "1rem" }}>
-              Your entries ({myAuthoredInterests.length})
-            </h3>
-            {myAuthoredInterests.map((interest) => (
-              <div
-                key={interest.id}
-                style={{
-                  border: "1px solid #444",
-                  borderRadius: "8px",
-                  padding: "20px",
-                  marginBottom: "15px",
-                  backgroundColor: "#1a1a1a",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: "0 0 10px 0", color: "#6ea8fe" }}>
-                      {interest.name}
-                    </h4>
-                    {interest.description && (
-                      <p style={{ color: "#b0b0b0", margin: "0 0 10px 0" }}>
-                        {interest.description}
-                      </p>
-                    )}
-                    <p style={{ fontSize: "12px", color: "#888", margin: "0" }}>
+          {showForm && (
+            <form className="interests-form" onSubmit={handleSubmit}>
+              <h3>{editingId ? "Edit Interest" : "Create New Interest"}</h3>
+              <div className="interests-form-field">
+                <label>Name *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                  minLength={2}
+                  maxLength={100}
+                />
+              </div>
+              <div className="interests-form-field">
+                <label>Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  maxLength={500}
+                  rows={3}
+                />
+              </div>
+              <button type="submit" className="interests-primary-btn">
+                {editingId ? "Update" : "Create"}
+              </button>
+            </form>
+          )}
+
+          {loading ? (
+            <p className="interests-note">Loading…</p>
+          ) : myAuthoredInterests.length === 0 ? (
+            <p className="interests-note">
+              No interests authored by you yet. Add one above.
+            </p>
+          ) : (
+            <div>
+              <h3 className="interests-subheading">
+                Your entries ({myAuthoredInterests.length})
+              </h3>
+              {myAuthoredInterests.map((interest) => (
+                <article key={interest.id} className="interests-entry-card">
+                  <div className="interests-entry-card__content">
+                    <h4>{interest.name}</h4>
+                    {interest.description ? <p>{interest.description}</p> : null}
+                    <small>
                       Created: {new Date(interest.dateCreated).toLocaleDateString()}
-                    </p>
+                    </small>
                   </div>
-                  <div>
+                  <div className="interests-entry-card__actions">
                     <button
+                      className="interests-secondary-btn"
                       onClick={() => handleEdit(interest)}
-                      style={{
-                        padding: "5px 15px",
-                        marginRight: "10px",
-                        cursor: "pointer",
-                        backgroundColor: "#34a853",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
                     >
                       Edit
                     </button>
                     <button
+                      className="interests-danger-btn"
                       onClick={() => handleDelete(interest.id)}
-                      style={{
-                        padding: "5px 15px",
-                        cursor: "pointer",
-                        backgroundColor: "#ea4335",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
                     >
                       Delete
                     </button>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <section className="interests-col">
-        <h2 className="interests-col-title">Community</h2>
-        <p className="interests-col-desc">
-          Experiences, trips, and tags you marked with the heart. Saving a tag helps you reuse it quickly when writing a new experience.
-        </p>
+        <section className="interests-col">
+          <h2 className="interests-col-title">Community</h2>
+          <p className="interests-col-desc">
+            Experiences, trips, and tags you marked with the heart. Saving a tag helps you reuse it quickly when writing a new experience.
+          </p>
 
-        {likesLoading ? (
-          <p style={{ color: "rgba(255,255,255,0.7)" }}>Loading saved items…</p>
-        ) : (
-          <>
-            <h3 className="interests-subheading">Experiences</h3>
-            {likedExperiences.length === 0 ? (
-              <p style={{ color: "rgba(255,255,255,0.65)", marginBottom: "24px" }}>
-                None yet. Open an experience and tap the heart to save it here.
-              </p>
-            ) : (
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px 0" }}>
-                {likedExperiences.map((exp) => (
-                  <li
-                    key={exp.id}
-                    style={{
-                      marginBottom: "10px",
-                      borderBottom: "1px solid #444",
-                      paddingBottom: "10px",
-                    }}
-                  >
-                    <Link
-                      to={ClientRoutes.EXPERIENCE_DETAILS.replace(":id", String(exp.id))}
-                      style={{ color: "#8ab4ff", fontWeight: 600 }}
-                    >
-                      {exp.title}
-                    </Link>
-                    {exp.createdByUsername ? (
-                      <span style={{ color: "#888", marginLeft: "8px", fontSize: "0.85rem" }}>
-                        · {exp.createdByUsername}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
+          {likesLoading ? (
+            <p className="interests-note">Loading saved items…</p>
+          ) : (
+            <>
+              <h3 className="interests-subheading">Experiences</h3>
+              {likedExperiences.length === 0 ? (
+                <p className="interests-note interests-note--section">
+                  None yet. Open an experience and tap the heart to save it here.
+                </p>
+              ) : (
+                <ul className="interests-saved-list">
+                  {likedExperiences.map((exp) => (
+                    <li key={exp.id} className="interests-saved-item">
+                      <Link
+                        className="interests-link"
+                        to={ClientRoutes.EXPERIENCE_DETAILS.replace(":id", String(exp.id))}
+                      >
+                        {exp.title}
+                      </Link>
+                      {exp.createdByUsername ? (
+                        <span>· {exp.createdByUsername}</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
 
-            <h3 className="interests-subheading">Tags</h3>
-            {likedTags.length === 0 ? (
-              <p style={{ color: "rgba(255,255,255,0.65)", marginBottom: "24px" }}>
-                None yet. Open a tag page (from an experience) and save the tag.
-              </p>
-            ) : (
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px 0" }}>
-                {likedTags.map((t) => (
-                  <li key={t.id} style={{ marginBottom: "10px" }}>
-                    <Link
-                      to={ClientRoutes.TAG_DETAILS.replace(":id", String(t.id))}
-                      style={{ color: "#8ab4ff", fontWeight: 600 }}
-                    >
-                      {t.label}
-                    </Link>
-                    {t.category?.label ? (
-                      <span style={{ color: "#888", marginLeft: "8px", fontSize: "0.85rem" }}>
-                        · {t.category.label}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
+              <h3 className="interests-subheading">Tags</h3>
+              {likedTags.length === 0 ? (
+                <p className="interests-note interests-note--section">
+                  None yet. Open a tag page (from an experience) and save the tag.
+                </p>
+              ) : (
+                <ul className="interests-saved-list">
+                  {likedTags.map((t) => (
+                    <li key={t.id} className="interests-saved-item">
+                      <Link
+                        className="interests-link"
+                        to={ClientRoutes.TAG_DETAILS.replace(":id", String(t.id))}
+                      >
+                        {t.label}
+                      </Link>
+                      {t.category?.label ? (
+                        <span>· {t.category.label}</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
 
-            <h3 className="interests-subheading">Trips</h3>
-            {likedTrips.length === 0 ? (
-              <p style={{ color: "rgba(255,255,255,0.65)" }}>
-                None yet. Tap the heart next to a trip on your home dashboard to save it here.
-              </p>
-            ) : (
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {likedTrips.map((tr) => (
-                  <li key={tr.id} style={{ marginBottom: "10px" }}>
-                    <Link
-                      to={ClientRoutes.TRIP_DETAILS.replace(":id", String(tr.id))}
-                      style={{ color: "#8ab4ff", fontWeight: 600 }}
-                    >
-                      {tr.title}
-                    </Link>
-                    {tr.createdByUsername ? (
-                      <span style={{ color: "#888", marginLeft: "8px", fontSize: "0.85rem" }}>
-                        · {tr.createdByUsername}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </section>
+              <h3 className="interests-subheading">Trips</h3>
+              {likedTrips.length === 0 ? (
+                <p className="interests-note interests-note--section">
+                  None yet. Tap the heart next to a trip on your home dashboard to save it here.
+                </p>
+              ) : (
+                <ul className="interests-saved-list interests-saved-list--final">
+                  {likedTrips.map((tr) => (
+                    <li key={tr.id} className="interests-saved-item">
+                      <Link
+                        className="interests-link"
+                        to={ClientRoutes.TRIP_DETAILS.replace(":id", String(tr.id))}
+                      >
+                        {tr.title}
+                      </Link>
+                      {tr.createdByUsername ? (
+                        <span>· {tr.createdByUsername}</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+        </section>
       </div>
 
       <div className="interests-back-row">
-        <button
-          onClick={() => navigate(ClientRoutes.HOME)}
-          style={{
-            padding: "10px 20px",
-            cursor: "pointer",
-            backgroundColor: "#666",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
+        <button className="interests-back-btn" onClick={() => navigate(ClientRoutes.HOME)}>
           ← Back to Home
         </button>
       </div>

@@ -149,7 +149,14 @@ export default function ExplorePage() {
 
   return (
     <main className="explore-main">
-      <h1>Explore Page</h1>
+      <header className="explore-header">
+        <p className="explore-header__eyebrow">Community Discovery</p>
+        <h1>Explore Experiences</h1>
+        <p className="explore-header__subtitle">
+          Browse nearby and community-created experiences, then open details to
+          save and plan your next trip.
+        </p>
+      </header>
 
       <div className="explore-layout">
         <section className="explore-results">
@@ -218,6 +225,7 @@ export default function ExplorePage() {
 
               <button
                 type="button"
+                className="explore-clear-button"
                 onClick={clearFilters}
                 disabled={
                   selectedCategoryId === null &&
@@ -300,14 +308,15 @@ export default function ExplorePage() {
           </div>
 
           {!currentMapArea ? (
-            <p>Move or zoom the map to set a search window.</p>
+            <p className="explore-status-card">Move or zoom the map to set a search window.</p>
           ) : loading ? (
-            <p>Loading experiences...</p>
+            <p className="explore-status-card">Loading experiences...</p>
           ) : error ? (
-            <p>{error}</p>
+            <p className="explore-status-card">{error}</p>
           ) : (
             <ExperienceList
               experiences={experiences}
+              variant="card"
               selectedId={highlightedExperienceId}
               onExperienceClick={(id) =>
                 navigate(ClientRoutes.EXPERIENCE_DETAILS.replace(":id", String(id)))
@@ -318,6 +327,10 @@ export default function ExplorePage() {
         </section>
 
         <aside className="explore-map">
+          <header className="explore-map__header">
+            <h2>Search & Map</h2>
+            <p>Pick a location, then browse experiences in that area.</p>
+          </header>
           <LocationPicker
             value={searchLocation}
             onChange={setSearchLocation}

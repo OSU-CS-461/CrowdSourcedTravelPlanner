@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
+import "./MyTripsPage.css";
 
 type Trip = {
   id: number;
@@ -25,29 +26,32 @@ export default function MyTripsPage() {
   }, []);
 
   return (
-    <main className="page-container">
-      <h1>My Trips</h1>
-      <p>Trips you created.</p>
+    <main className="my-trips-page">
+      <header className="my-trips-header">
+        <p className="my-trips-header__eyebrow">Trip Planning</p>
+        <h1>My Trips</h1>
+        <p>Trips you created and can continue building.</p>
+      </header>
 
-      <div className="button-group">
+      <div className="my-trips-actions">
         <button
-          className="btn btn-trip"
+          className="my-trips-create-btn"
           onClick={() => navigate(ClientRoutes.TRIP_CREATE)}
         >
           + Create New Trip
         </button>
       </div>
 
-      <h2 className="section-title">Your Trips</h2>
+      <h2 className="my-trips-section-title">Your Trips</h2>
 
       {trips.length === 0 ? (
-        <p>You haven't created any trips yet.</p>
+        <p className="my-trips-empty">You haven't created any trips yet.</p>
       ) : (
-        <div>
+        <div className="my-trips-grid">
           {trips.map((trip) => (
-            <div key={trip.id} className="card">
+            <article key={trip.id} className="my-trip-card">
               <h2
-                className="card-title"
+                className="my-trip-card__title"
                 onClick={() =>
                   navigate(
                     ClientRoutes.TRIP_DETAILS.replace(
@@ -60,14 +64,14 @@ export default function MyTripsPage() {
                 {trip.title}
               </h2>
 
-              <div className="card-meta">
+              <div className="my-trip-card__meta">
                 {new Date(trip.dateCreated).toLocaleDateString()}
               </div>
 
-              <p className="card-description">
+              <p className="my-trip-card__description">
                 {trip.description || "Plan your next adventure."}
               </p>
-            </div>
+            </article>
           ))}
         </div>
       )}

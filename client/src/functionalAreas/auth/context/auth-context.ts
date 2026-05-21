@@ -11,6 +11,7 @@ export type AuthContextValue = {
 
 export const TOKEN_STORAGE_KEY = "cstp.auth.token";
 export const USER_STORAGE_KEY = "cstp.auth.user";
+export const USER_ID_STORAGE_KEY = "cstp.auth.userId";
 
 export const defaultAuthContext: AuthContextValue = {
   token: null,

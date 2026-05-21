@@ -15,7 +15,7 @@ vi.mock("./services/api.service", () => ({
 }));
 
 describe("RootLayout", () => {
-  it("includes a Profile settings link in the hamburger menu", async () => {
+  it("includes Profile and Settings links in the hamburger menu", async () => {
     vi.mocked(useAuth).mockReturnValue({
       token: "token",
       user: { id: 1, email: "user@example.com" },
@@ -46,9 +46,11 @@ describe("RootLayout", () => {
       </MemoryRouter>
     );
 
-    await user.click(screen.getByRole("button", { name: /open menu/i }));
+    await user.click(screen.getByRole("button", { name: /open navigation menu/i }));
 
-    const settingsLink = screen.getByRole("link", { name: /profile settings/i });
+    const profileLink = screen.getByRole("link", { name: /^profile$/i });
+    expect(profileLink).toHaveAttribute("href", "/profile/settings");
+    const settingsLink = screen.getByRole("link", { name: /^settings$/i });
     expect(settingsLink).toHaveAttribute("href", "/profile/settings");
 
     await user.click(settingsLink);
