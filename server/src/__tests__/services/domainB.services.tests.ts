@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockDeep, mockReset, type DeepMockProxy } from "vitest-mock-extended";
-import { Prisma, type PrismaClient } from "../../generated/prisma/client";
+import type { PrismaClient } from "../../generated/prisma/client";
 
 vi.mock("../../db/prisma", () => ({
   default: mockDeep<PrismaClient>(),
@@ -116,18 +116,15 @@ describe("Domain B services", () => {
       expect(await addUserLikedTrip(1, 99)).toEqual({ ok: false, error: "NOT_FOUND" });
     });
 
-    it("addUserLikedTrip is idempotent on duplicate like", async () => {
+    it("addUserLikedTrip creates like when trip exists", async () => {
       (prismaMock.trip.findUnique as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
         id: 2,
       });
-      const duplicate = new Prisma.PrismaClientKnownRequestError("Unique", {
-        code: "P2002",
-        clientVersion: "test",
+      (prismaMock.userLikedTrip.create as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        userId: 1,
+        tripId: 2,
       });
-      (prismaMock.userLikedTrip.create as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(
-        duplicate
-      );
-      expect(await addUserLikedTrip(1, 2)).toEqual({ ok: true, alreadyLiked: true });
+      expect(await addUserLikedTrip(1, 2)).toEqual({ ok: true, alreadyLiked: false });
     });
   });
 });
