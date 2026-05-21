@@ -17,5 +17,17 @@ export default defineConfig({
     setupFiles: "./src/test/setup.ts",
     globals: true,
     include: ["**/*.{test,spec,tests}.?(c|m)[jt]s?(x)"],
+    coverage: {
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.*",
+        "src/**/*.tests.*",
+        "src/**/*.spec.*",
+        "src/**/*.specs.*",
+        "src/**/__tests__/**",
+        "src/test/**",
+      ],
+      reporter: ["text", "lcov", "json-summary"],
+    },
   },
 })

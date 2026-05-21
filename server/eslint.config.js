@@ -9,7 +9,10 @@ export default defineConfig([
     extends: [tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.jest,
+      globals: {
+        ...globals.node,
+        ...globals.es2020,
+      },
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [
@@ -20,6 +23,22 @@ export default defineConfig([
         },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+  {
+    files: ["src/**/*.{test,tests,spec,specs}.ts", "src/**/__tests__/**/*.ts"],
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeAll: "readonly",
+        beforeEach: "readonly",
+        afterAll: "readonly",
+        afterEach: "readonly",
+        vi: "readonly",
+      },
     },
   },
 ]);
