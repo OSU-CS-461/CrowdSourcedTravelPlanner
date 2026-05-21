@@ -1,0 +1,214 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  TZ: "UTC"
+
+jobs:
+  client-build:
+    name: Client Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ./client
+    env:
+      ARTIFACT_ROOT: ${{ github.workspace }}/artifacts/client
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "23.10.0"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare artifact directories
+        run: |
+          mkdir -p "$ARTIFACT_ROOT/inventory"
+          mkdir -p "$ARTIFACT_ROOT/logs"
+          mkdir -p "$ARTIFACT_ROOT/reports"
+
+      - name: Generate test inventory non-blocking
+        id: inventory
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run test:inventory 2>&1 | tee "$ARTIFACT_ROOT/inventory/client-build-test-inventory.txt"
+
+      - name: Run build
+        id: build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee "$ARTIFACT_ROOT/logs/client-build.log"
+
+      - name: Upload client build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-build-diagnostics
+          path: ${{ env.ARTIFACT_ROOT }}
+          if-no-files-found: warn
+
+  client-lint:
+    name: Client Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ./client
+    env:
+      ARTIFACT_ROOT: ${{ github.workspace }}/artifacts/client
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "23.10.0"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare artifact directories
+        run: |
+          mkdir -p "$ARTIFACT_ROOT/inventory"
+          mkdir -p "$ARTIFACT_ROOT/logs"
+          mkdir -p "$ARTIFACT_ROOT/reports"
+
+      - name: Generate test inventory non-blocking
+        id: inventory
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run test:inventory 2>&1 | tee "$ARTIFACT_ROOT/inventory/client-lint-test-inventory.txt"
+
+      - name: Run lint
+        id: lint
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee "$ARTIFACT_ROOT/logs/client-lint.log"
+
+      - name: Upload client lint diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-lint-diagnostics
+          path: ${{ env.ARTIFACT_ROOT }}
+          if-no-files-found: warn
+
+  server-lint:
+    name: Server Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ./server
+    env:
+      ARTIFACT_ROOT: ${{ github.workspace }}/artifacts/server-lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "23.10.0"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        id: lint
+        run: |
+          mkdir -p "$ARTIFACT_ROOT/logs"
+          set -o pipefail
+          npm run lint 2>&1 | tee "$ARTIFACT_ROOT/logs/server-lint.log"
+
+      - name: Upload server lint diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-lint-diagnostics
+          path: ${{ env.ARTIFACT_ROOT }}
+          if-no-files-found: warn
+
+  server-integration-tests:
+    name: Server Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ./server
+    env:
+      ARTIFACT_ROOT: ${{ github.workspace }}/artifacts/server-integration
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/app_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "23.10.0"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare artifact directories
+        run: |
+          mkdir -p "$ARTIFACT_ROOT/inventory"
+          mkdir -p "$ARTIFACT_ROOT/logs"
+          mkdir -p "$ARTIFACT_ROOT/reports"
+
+      - name: Generate integration test inventory non-blocking
+        id: inventory
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run test:integration:inventory 2>&1 | tee "$ARTIFACT_ROOT/inventory/server-integration-test-inventory.txt"
+
+      - name: Generate prisma client
+        run: |
+          set -o pipefail
+          npx prisma generate 2>&1 | tee "$ARTIFACT_ROOT/logs/server-integration-prisma-generate.log"
+
+      - name: Run integration tests
+        run: |
+          set -o pipefail
+          npm run test:integration 2>&1 | tee "$ARTIFACT_ROOT/logs/server-integration-tests.log"
+
+      - name: Upload server integration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-integration-diagnostics
+          path: ${{ env.ARTIFACT_ROOT }}
+          if-no-files-found: warn
