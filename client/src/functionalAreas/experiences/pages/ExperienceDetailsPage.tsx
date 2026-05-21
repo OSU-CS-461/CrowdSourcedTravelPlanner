@@ -115,7 +115,7 @@ export default function ExperienceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const previewExperience = (
     location.state as { experience?: ExperiencePayload } | null
@@ -137,6 +137,19 @@ export default function ExperienceDetailPage() {
   const [liked, setLiked] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
   const [likeStatusLoaded, setLikeStatusLoaded] = useState(false);
+  const [tripPickerOpen, setTripPickerOpen] = useState(false);
+  const [tripPickerLoading, setTripPickerLoading] = useState(false);
+  const [tripPickerError, setTripPickerError] = useState<string | null>(null);
+  const [addingToTripId, setAddingToTripId] = useState<number | null>(null);
+  const [userTrips, setUserTrips] = useState<
+    Array<{
+      id: number;
+      title: string;
+      description?: string | null;
+      dateCreated: string;
+      createdBy: number;
+    }>
+  >([]);
 
   useEffect(() => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -234,6 +247,86 @@ export default function ExperienceDetailPage() {
   }, [experience?.tags]);
   const ratingReviewCount = experience?.reviewCount ?? 0;
   const ratingReviewLabel = ratingReviewCount === 1 ? "review" : "reviews";
+  const numericExperienceId = Number(experience?.id);
+
+  async function loadOwnedTrips() {
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) {
+      setTripPickerError("Please sign in to add this experience to a trip.");
+      return;
+    }
+
+    setAuthToken(token);
+    setTripPickerLoading(true);
+    setTripPickerError(null);
+    try {
+      const res = await apiClient.get<
+        Array<{
+          id: number;
+          title: string;
+          description?: string | null;
+          dateCreated: string;
+          createdBy: number;
+        }>
+      >("/trips/me");
+      const fetchedTrips = Array.isArray(res.data) ? res.data : [];
+      const ownedTrips =
+        currentUserId === null
+          ? fetchedTrips
+          : fetchedTrips.filter(
+              (trip) => String(trip.createdBy) === String(currentUserId),
+            );
+      setUserTrips(ownedTrips);
+    } catch (err) {
+      console.error(err);
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      setTripPickerError(
+        errorObj.response?.data?.error || "Failed to load your trips.",
+      );
+    } finally {
+      setTripPickerLoading(false);
+    }
+  }
+
+  async function handleOpenTripPicker() {
+    if (!isAuthenticated) {
+      alert("Please sign in to add this experience to a trip.");
+      navigate(ClientRoutes.LOGIN);
+      return;
+    }
+    setTripPickerOpen(true);
+    await loadOwnedTrips();
+  }
+
+  async function handleAddToTrip(tripId: number) {
+    if (!Number.isFinite(numericExperienceId) || numericExperienceId <= 0) {
+      alert("Could not determine the current experience id.");
+      return;
+    }
+
+    const token = localStorage.getItem("cstp.auth.token");
+    if (!token) {
+      alert("Please sign in to add this experience to a trip.");
+      navigate(ClientRoutes.LOGIN);
+      return;
+    }
+
+    setAuthToken(token);
+    setAddingToTripId(tripId);
+    try {
+      await apiClient.post(`/trips/${tripId}/experiences`, {
+        experienceId: numericExperienceId,
+      });
+      setTripPickerOpen(false);
+      alert("Experience added to trip.");
+    } catch (err) {
+      console.error(err);
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      alert(errorObj.response?.data?.error || "Failed to add experience to trip.");
+    } finally {
+      setAddingToTripId(null);
+    }
+  }
 
   async function handleToggleLike() {
     if (!id || likeLoading) return;
@@ -309,6 +402,13 @@ export default function ExperienceDetailPage() {
     <main className="experience-detail-page">
       <div className="detail-toolbar">
         <div className="toolbar-actions">
+          <button
+            type="button"
+            className="toolbar-add-trip"
+            onClick={() => void handleOpenTripPicker()}
+          >
+            Add to Trip
+          </button>
           <button
             type="button"
             className={`toolbar-like${liked ? " is-liked" : ""}`}
@@ -454,6 +554,88 @@ export default function ExperienceDetailPage() {
           </section>
         </div>
       </article>
+
+      {tripPickerOpen && (
+        <div
+          className="trip-picker-backdrop"
+          onClick={() => setTripPickerOpen(false)}
+          role="presentation"
+        >
+          <section
+            className="trip-picker-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trip-picker-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header className="trip-picker-header">
+              <h2 id="trip-picker-title">Add To Trip</h2>
+              <button
+                type="button"
+                className="trip-picker-close"
+                onClick={() => setTripPickerOpen(false)}
+                aria-label="Close add to trip dialog"
+              >
+                ×
+              </button>
+            </header>
+
+            {tripPickerLoading ? (
+              <p className="trip-picker-status">Loading your trips...</p>
+            ) : tripPickerError ? (
+              <div className="trip-picker-status trip-picker-status--error">
+                <p>{tripPickerError}</p>
+                <button
+                  type="button"
+                  className="trip-picker-retry"
+                  onClick={() => void loadOwnedTrips()}
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : userTrips.length === 0 ? (
+              <div className="trip-picker-status">
+                <p>You don&apos;t have any trips yet.</p>
+                <button
+                  type="button"
+                  className="trip-picker-create"
+                  onClick={() => navigate(ClientRoutes.TRIP_CREATE)}
+                >
+                  Create Trip
+                </button>
+              </div>
+            ) : (
+              <ul className="trip-picker-list">
+                {userTrips.map((trip) => (
+                  <li key={trip.id} className="trip-picker-item">
+                    <button
+                      type="button"
+                      className="trip-picker-item-btn"
+                      onClick={() => void handleAddToTrip(trip.id)}
+                      disabled={addingToTripId === trip.id}
+                    >
+                      <span className="trip-picker-item-title">{trip.title}</span>
+                      <span className="trip-picker-item-meta">
+                        {new Date(trip.dateCreated).toLocaleDateString()}
+                      </span>
+                      {trip.description ? (
+                        <span className="trip-picker-item-desc">
+                          {trip.description.length > 90
+                            ? `${trip.description.slice(0, 90)}...`
+                            : trip.description}
+                        </span>
+                      ) : null}
+                      <span className="trip-picker-item-action">
+                        {addingToTripId === trip.id ? "Adding..." : "Add to this trip"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      )}
     </main>
   );
 }

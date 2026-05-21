@@ -9,6 +9,7 @@ import { setAuthToken } from "../../../shared/services/api.service";
 import {
   AuthContext,
   TOKEN_STORAGE_KEY,
+  USER_ID_STORAGE_KEY,
   USER_STORAGE_KEY,
   type AuthContextValue,
 } from "./auth-context";
@@ -28,15 +29,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (typeof window === "undefined") {
       return null;
     }
+    const tokenFromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
     const rawUser = window.localStorage.getItem(USER_STORAGE_KEY);
-    if (!rawUser) {
-      return null;
+    let parsedUser: AuthContextValue["user"] | null = null;
+
+    if (rawUser) {
+      try {
+        parsedUser = JSON.parse(rawUser) as AuthContextValue["user"];
+      } catch {
+        parsedUser = null;
+      }
     }
-    try {
-      return JSON.parse(rawUser) as AuthContextValue["user"];
-    } catch {
-      return null;
+
+    if (parsedUser?.id !== undefined && parsedUser?.id !== null) {
+      return parsedUser;
     }
+
+    const legacyUserId = window.localStorage.getItem(USER_ID_STORAGE_KEY);
+    if (legacyUserId) {
+      return {
+        id: legacyUserId,
+        email: parsedUser?.email ?? "",
+        username: parsedUser?.username,
+      };
+    }
+
+    if (tokenFromStorage) {
+      try {
+        const payload = JSON.parse(atob(tokenFromStorage.split(".")[1])) as {
+          id?: string | number;
+        };
+        if (payload.id !== undefined && payload.id !== null) {
+          return {
+            id: payload.id,
+            email: parsedUser?.email ?? "",
+            username: parsedUser?.username,
+          };
+        }
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
   });
 
   useEffect(() => {
@@ -44,6 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [token]);
 
   const initialize = useCallback<AuthContextValue["initialize"]>((payload) => {
+    setAuthToken(payload.token);
     setToken(payload.token);
     setUser(payload.user);
     if (typeof window !== "undefined") {
@@ -52,6 +88,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         USER_STORAGE_KEY,
         JSON.stringify(payload.user)
       );
+      if (payload.user?.id !== undefined && payload.user?.id !== null) {
+        window.localStorage.setItem(USER_ID_STORAGE_KEY, String(payload.user.id));
+      } else {
+        window.localStorage.removeItem(USER_ID_STORAGE_KEY);
+      }
     }
   }, []);
 
@@ -61,6 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       window.localStorage.removeItem(USER_STORAGE_KEY);
+      window.localStorage.removeItem(USER_ID_STORAGE_KEY);
     }
     setAuthToken(null);
   }, []);
@@ -71,7 +113,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       user,
       initialize,
       logout,
-      isAuthenticated: Boolean(token),
+      isAuthenticated: Boolean(token && user?.id !== undefined && user?.id !== null),
     }),
     [token, user, initialize, logout]
   );

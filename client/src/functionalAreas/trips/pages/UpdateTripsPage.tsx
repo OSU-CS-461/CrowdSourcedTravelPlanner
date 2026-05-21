@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 import TripFormTemplate, {type TripFormValues,} from "../components/TripForm";
 import { apiClient, setAuthToken } from "../../../shared/services/api.service";
+import "./UpdateTripsPage.css";
 
 type ApiTrip = {
   id: number | string;
@@ -80,18 +81,47 @@ export default function UpdateTripPage() {
     }
   };
 
-  if (loading) return <p>Loading trip...</p>;
-  if (loadError) return <p>{loadError}</p>;
-  if (!initialValues) return <p>Could not load trip data.</p>;
+  if (loading) {
+    return (
+      <main className="update-trip-page">
+        <p className="update-trip-status">Loading trip...</p>
+      </main>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <main className="update-trip-page">
+        <p className="update-trip-status update-trip-status--error">{loadError}</p>
+      </main>
+    );
+  }
+
+  if (!initialValues) {
+    return (
+      <main className="update-trip-page">
+        <p className="update-trip-status update-trip-status--error">Could not load trip data.</p>
+      </main>
+    );
+  }
 
   return (
-    <div>
-      <h1>Edit Trip</h1>
-      <TripFormTemplate
-        initialValues={initialValues}
-        onSubmit={handleUpdateTrip}
-        submitLabel="Update Trip"
-      />
-    </div>
+    <main className="update-trip-page">
+      <header className="update-trip-header">
+        <p className="update-trip-header__eyebrow">Trip Planning</p>
+        <h1>Edit Trip</h1>
+        <p className="update-trip-header__subtitle">
+          Update your trip details and keep your itinerary current.
+        </p>
+      </header>
+
+      <section className="update-trip-form-shell">
+        <TripFormTemplate
+          initialValues={initialValues}
+          onSubmit={handleUpdateTrip}
+          submitLabel="Update Trip"
+        />
+      </section>
+    </main>
   );
 }

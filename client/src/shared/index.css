@@ -255,6 +255,10 @@ main.auth-page {
   min-height: 100vh;
   width: 100%;
   padding: 32px 20px;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(52, 123, 237, 0.14), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(34, 174, 150, 0.1), transparent 38%),
+    linear-gradient(180deg, #f7fbff 0%, #edf4fb 100%);
 }
 
 .auth-page section {
@@ -263,10 +267,26 @@ main.auth-page {
   gap: 16px;
   width: 100%;
   max-width: 420px;
-  padding: 24px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-surface);
+  padding: 22px 22px 24px;
+  border: 1px solid #d4e2f2;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 16px 34px rgba(17, 61, 110, 0.14);
+}
+
+.auth-page section::before {
+  content: "CrowdCompass";
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 34px;
+  padding-left: 42px;
+  margin-bottom: 2px;
+  background: url("/logo.png") left center / 34px 34px no-repeat;
+  color: #143f72;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-size: 1rem;
 }
 
 .auth-page form {
@@ -275,24 +295,42 @@ main.auth-page {
   gap: 14px;
 }
 
+.auth-page h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.1rem);
+  line-height: 1.1;
+  color: #14345f;
+}
+
+.auth-page section > p {
+  color: #4d678a;
+}
+
 .auth-page .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+.auth-page .field label {
+  color: #365a7f;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
 .auth-page input {
   padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border: 1px solid #c8d9ed;
+  border-radius: 10px;
   font: inherit;
-  background: var(--color-bg-page);
-  color: inherit;
+  background: #ffffff;
+  color: #153861;
 }
 
 .auth-page input:focus {
-  outline: 2px solid var(--color-link);
-  outline-offset: 2px;
+  outline: none;
+  border-color: #2d79e6;
+  box-shadow: 0 0 0 3px rgba(45, 121, 230, 0.16);
 }
 
 .auth-page .form-error,
@@ -303,6 +341,24 @@ main.auth-page {
 
 .auth-page p {
   margin: 0;
+}
+
+.auth-page button[type="submit"] {
+  border: 1px solid #1f7df8;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2f8cff 0%, #1b74e6 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(20, 104, 228, 0.24);
+}
+
+.auth-page button[type="submit"]:hover {
+  border-color: #6daeff;
+}
+
+.auth-page a {
+  color: #1f5d9f;
+  font-weight: 700;
 }
 
 h1 {
@@ -363,4 +419,270 @@ button:focus-visible {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+:root[data-theme="dark"] {
+  --app-surface: #111c2f;
+  --app-surface-soft: #16253d;
+  --app-border: #2b3d5a;
+  --app-text: #e6eef8;
+  --app-muted: #9fb2cc;
+  --app-shadow: 0 14px 30px rgba(2, 9, 18, 0.45);
+}
+
+:root[data-theme="dark"] html,
+:root[data-theme="dark"] body {
+  background: radial-gradient(circle at 10% 0%, #13233a 0%, #0b1220 45%, #0b1220 100%);
+}
+
+:root[data-theme="dark"] nav.top-site-nav {
+  border-color: #2a3b56;
+  background: linear-gradient(180deg, #12233a 0%, #0f1d31 100%);
+  box-shadow: 0 12px 28px rgba(1, 8, 18, 0.5);
+}
+
+:root[data-theme="dark"] nav.top-site-nav .site-brand {
+  border-color: #314867;
+  background: rgba(18, 34, 56, 0.92);
+  box-shadow: 0 8px 18px rgba(1, 8, 18, 0.45);
+}
+
+:root[data-theme="dark"] nav.top-site-nav .site-brand:hover {
+  background: rgba(24, 42, 68, 0.98);
+}
+
+:root[data-theme="dark"] nav.top-site-nav .site-brand-label {
+  color: #d3e4fb;
+}
+
+:root[data-theme="dark"] nav.top-site-nav .top-site-nav-links {
+  border-color: #2d4566;
+  background: #132741;
+}
+
+:root[data-theme="dark"] nav.top-site-nav .top-site-nav-link {
+  color: #c4d8f4;
+}
+
+:root[data-theme="dark"] nav.top-site-nav .top-site-nav-link:hover {
+  color: #eef6ff;
+  background: #1f3656;
+}
+
+:root[data-theme="dark"] nav.top-site-nav .top-site-nav-link.is-active {
+  background: #213a5d;
+  color: #f0f6ff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] nav.top-site-nav .site-nav-menu-toggle {
+  border-color: #2f4768;
+  background: #132843;
+  color: #d4e5fb;
+}
+
+:root[data-theme="dark"] nav.top-site-nav .profile-menu {
+  border-color: #2d4566;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] main.auth-page {
+  background:
+    radial-gradient(circle at 16% 8%, rgba(58, 121, 219, 0.24), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(31, 131, 112, 0.18), transparent 38%),
+    linear-gradient(180deg, #101a2d 0%, #0b1220 100%);
+}
+
+:root[data-theme="dark"] .auth-page section {
+  border-color: #2f4463;
+  background: linear-gradient(180deg, #122033 0%, #0f1b2d 100%);
+  box-shadow: 0 20px 36px rgba(2, 10, 20, 0.55);
+}
+
+:root[data-theme="dark"] .auth-page section::before {
+  color: #deebff;
+}
+
+:root[data-theme="dark"] .auth-page h1 {
+  color: #ecf4ff;
+}
+
+:root[data-theme="dark"] .auth-page section > p {
+  color: #afc4df;
+}
+
+:root[data-theme="dark"] .auth-page .field label {
+  color: #cbdaee;
+}
+
+:root[data-theme="dark"] .auth-page input {
+  border-color: #345073;
+  background: #13243d;
+  color: #e6eef8;
+}
+
+:root[data-theme="dark"] .auth-page input:focus {
+  border-color: #63a6ff;
+  box-shadow: 0 0 0 3px rgba(99, 166, 255, 0.2);
+}
+
+:root[data-theme="dark"] .auth-page button[type="submit"] {
+  border-color: #5ea6ff;
+  background: linear-gradient(180deg, #3e91f4 0%, #2d77dd 100%);
+  box-shadow: 0 10px 22px rgba(20, 104, 228, 0.36);
+}
+
+:root[data-theme="dark"] .auth-page a {
+  color: #9fc6ff;
+}
+
+:root[data-theme="dark"] .home-dashboard,
+:root[data-theme="dark"] .explore-main,
+:root[data-theme="dark"] .interests-page,
+:root[data-theme="dark"] .my-trips-page,
+:root[data-theme="dark"] .my-experiences-page,
+:root[data-theme="dark"] .update-trip-page,
+:root[data-theme="dark"] .trip-detail-page {
+  color: var(--app-text);
+}
+
+:root[data-theme="dark"] .home-dashboard {
+  --home-surface: var(--app-surface);
+  --home-surface-soft: #15243a;
+  --home-border: var(--app-border);
+  --home-text: var(--app-text);
+  --home-muted: var(--app-muted);
+}
+
+:root[data-theme="dark"] .home-hero {
+  background: linear-gradient(160deg, #13243d 0%, #122238 55%, #0f1c2f 100%);
+  border-color: #304561;
+}
+
+:root[data-theme="dark"] .home-hero h1,
+:root[data-theme="dark"] .home-section__header h2,
+:root[data-theme="dark"] .for-you-card__title,
+:root[data-theme="dark"] .trip-card__title,
+:root[data-theme="dark"] .hero-featured-overlay__title {
+  color: #edf4ff;
+}
+
+:root[data-theme="dark"] .home-hero p,
+:root[data-theme="dark"] .hero-featured-overlay__meta,
+:root[data-theme="dark"] .for-you-card__meta,
+:root[data-theme="dark"] .trip-card__meta,
+:root[data-theme="dark"] .for-you-card__description,
+:root[data-theme="dark"] .trip-card__description,
+:root[data-theme="dark"] .home-status {
+  color: #c3d2e8;
+}
+
+:root[data-theme="dark"] .hero-featured-overlay {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(15, 28, 45, 0.74);
+  color: #e8f1fd;
+}
+
+:root[data-theme="dark"] .home-link-btn,
+:root[data-theme="dark"] .dashboard-like-btn {
+  background: #16263d;
+  color: #dbe8fb;
+  border-color: #324a69;
+}
+
+:root[data-theme="dark"] .explore-map,
+:root[data-theme="dark"] .explore-filters,
+:root[data-theme="dark"] .explore-tag-popup,
+:root[data-theme="dark"] .explore-status-card,
+:root[data-theme="dark"] .explore-main .experience-row.is-card,
+:root[data-theme="dark"] .interests-col,
+:root[data-theme="dark"] .interests-form,
+:root[data-theme="dark"] .interests-entry-card,
+:root[data-theme="dark"] .my-trip-card,
+:root[data-theme="dark"] .my-experiences-page .experience-row.is-card,
+:root[data-theme="dark"] .update-trip-form-shell,
+:root[data-theme="dark"] .update-trip-page .exp-form-section,
+:root[data-theme="dark"] .trip-card,
+:root[data-theme="dark"] .trip-experience-card {
+  background: var(--app-surface);
+  border-color: var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+:root[data-theme="dark"] .explore-map__header h2,
+:root[data-theme="dark"] .explore-header h1,
+:root[data-theme="dark"] .my-trips-header h1,
+:root[data-theme="dark"] .interests-title-main,
+:root[data-theme="dark"] .my-experiences-header h1,
+:root[data-theme="dark"] .update-trip-header h1,
+:root[data-theme="dark"] .trip-title-group h1,
+:root[data-theme="dark"] .trip-section-title {
+  color: #edf4ff;
+}
+
+:root[data-theme="dark"] .explore-header__subtitle,
+:root[data-theme="dark"] .explore-map__header p,
+:root[data-theme="dark"] .my-trips-header p,
+:root[data-theme="dark"] .interests-page-intro,
+:root[data-theme="dark"] .interests-col-desc,
+:root[data-theme="dark"] .my-experiences-header__subtitle,
+:root[data-theme="dark"] .update-trip-header__subtitle,
+:root[data-theme="dark"] .trip-description,
+:root[data-theme="dark"] .trip-meta,
+:root[data-theme="dark"] .trip-empty,
+:root[data-theme="dark"] .update-trip-status,
+:root[data-theme="dark"] .interests-note,
+:root[data-theme="dark"] .interests-saved-item,
+:root[data-theme="dark"] .my-trip-card__meta,
+:root[data-theme="dark"] .my-trip-card__description,
+:root[data-theme="dark"] .my-experiences-loading,
+:root[data-theme="dark"] .my-experiences-page > p,
+:root[data-theme="dark"] .explore-main .experience-row.is-card .experience-meta,
+:root[data-theme="dark"] .explore-main .experience-row.is-card .experience-description,
+:root[data-theme="dark"] .my-experiences-page .experience-row.is-card .experience-meta,
+:root[data-theme="dark"] .my-experiences-page .experience-row.is-card .experience-description,
+:root[data-theme="dark"] .trip-experience-card__location,
+:root[data-theme="dark"] .trip-experience-card__desc {
+  color: var(--app-muted);
+}
+
+:root[data-theme="dark"] .explore-filter-control,
+:root[data-theme="dark"] .explore-map .location-picker__search-label,
+:root[data-theme="dark"] .update-trip-page .exp-form-field span,
+:root[data-theme="dark"] .interests-form-field label {
+  color: #c8d8ee;
+}
+
+:root[data-theme="dark"] .explore-filter-control select,
+:root[data-theme="dark"] .explore-clear-button,
+:root[data-theme="dark"] .explore-filter-mode,
+:root[data-theme="dark"] .explore-map .location-picker__search-input,
+:root[data-theme="dark"] .explore-map .location-picker__results,
+:root[data-theme="dark"] .explore-map .location-picker__clear-btn,
+:root[data-theme="dark"] .interests-form-field input,
+:root[data-theme="dark"] .interests-form-field textarea,
+:root[data-theme="dark"] .update-trip-page .exp-form-field input,
+:root[data-theme="dark"] .update-trip-page .exp-form-field textarea,
+:root[data-theme="dark"] .trip-select-wrap select {
+  background: #13243b;
+  border-color: #2f4666;
+  color: #e6eef8;
+}
+
+:root[data-theme="dark"] .explore-map .location-picker__result-item:hover,
+:root[data-theme="dark"] .explore-main .experience-row.is-card:hover,
+:root[data-theme="dark"] .my-experiences-page .experience-row.is-card:hover,
+:root[data-theme="dark"] .trip-experience-card:hover {
+  background: #172942;
+}
+
+:root[data-theme="dark"] .interests-link,
+:root[data-theme="dark"] .my-trip-card__title:hover,
+:root[data-theme="dark"] .trip-experience-card__view-btn,
+:root[data-theme="dark"] .trip-back,
+:root[data-theme="dark"] .trip-action-btn,
+:root[data-theme="dark"] .trip-add-btn {
+  color: #cfe2ff;
+  border-color: #41608a;
+  background: #162b47;
 }

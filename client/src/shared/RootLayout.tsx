@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { isAxiosError } from "axios";
 import { NavLink, Outlet } from "react-router-dom";
 import { ClientRoutes } from "./clientRoutes";
 import { useAuth } from "../functionalAreas/auth/hooks/useAuth";
@@ -32,7 +33,12 @@ export default function RootLayout() {
         const t = isUiTheme(s.themePreference) ? s.themePreference : "light";
         setUiTheme(t);
       })
-      .catch(() => {});
+      .catch((error) => {
+        if (cancelled) return;
+        if (isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+          logout();
+        }
+      });
     return () => {
       cancelled = true;
     };
