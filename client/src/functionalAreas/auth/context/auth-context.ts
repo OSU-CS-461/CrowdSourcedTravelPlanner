@@ -21,3 +21,5 @@ export const defaultAuthContext: AuthContextValue = {
 };
 
 export const AuthContext = createContext<AuthContextValue>(defaultAuthContext);
+
+// triggering checks

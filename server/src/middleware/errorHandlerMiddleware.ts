@@ -21,7 +21,7 @@ export default function errorHandlerMiddleware(
   err: unknown,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _nextFunction: NextFunction
 ) {
   if (isZodError(err)) {
     let details: { path: string; message: string }[] = [];
