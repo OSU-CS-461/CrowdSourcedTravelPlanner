@@ -14,7 +14,15 @@ export default defineConfig({
     setupFiles: ["./vitest.integration.setup.ts"],
     include: [...INCLUDED_INTEGRATION_TEST_PATHS],
     coverage: {
-      include: [...INCLUDED_INTEGRATION_TEST_PATHS],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.*",
+        "src/**/*.tests.*",
+        "src/**/*.spec.*",
+        "src/**/*.specs.*",
+        "src/**/__tests__/**",
+      ],
+      reporter: ["text", "lcov", "json-summary"],
     },
   },
 });

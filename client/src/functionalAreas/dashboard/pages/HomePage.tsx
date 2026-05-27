@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientRoutes } from "../../../shared/clientRoutes";
 import {
@@ -43,6 +43,12 @@ type Experience = {
   dateCreated: string;
   createdByUsername?: string | null;
   thumbnail?: string;
+  imageUrl?: string;
+  image?: string;
+  photoUrl?: string;
+  coverImage?: string;
+  photos?: Array<string | { url?: string | null }>;
+  images?: Array<string | { url?: string | null }>;
   country?: string;
   city?: string;
   adminRegion?: string;
@@ -56,6 +62,11 @@ type Experience = {
     categoryId?: number | null;
   }>;
   tagIds?: number[];
+  category?: {
+    id: number;
+    slug: string;
+    label: string;
+  } | null;
   latitude?: number | null;
   longitude?: number | null;
 };
@@ -66,6 +77,325 @@ type Trip = {
   description?: string;
   dateCreated: string;
 };
+
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+type FeaturedCandidate = {
+  experience: Experience;
+  feedIndex: number;
+  rating: number | null;
+  reviewCount: number;
+  distanceKm: number | null;
+};
+
+const NO_IMAGE_PLACEHOLDER =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='%23eef2f7'/><stop offset='100%' stop-color='%23d8dee8'/></linearGradient></defs><rect width='1200' height='800' fill='url(%23g)'/><rect x='450' y='285' width='300' height='190' rx='20' fill='%23c7d0dc'/><circle cx='530' cy='350' r='26' fill='%23b2bcc9'/><path d='M470 445l90-84 74 60 50-40 66 64z' fill='%23a7b2c0'/><text x='600' y='540' text-anchor='middle' font-family='Arial,sans-serif' font-size='44' fill='%23738091'>No Image</text></svg>";
+
+const COUNTRY_TO_REGION: Record<string, string> = {
+  US: "north-america",
+  CA: "north-america",
+  MX: "north-america",
+  BR: "south-america",
+  AR: "south-america",
+  CL: "south-america",
+  CO: "south-america",
+  PE: "south-america",
+  GB: "europe",
+  IE: "europe",
+  FR: "europe",
+  DE: "europe",
+  ES: "europe",
+  IT: "europe",
+  PT: "europe",
+  NL: "europe",
+  BE: "europe",
+  CH: "europe",
+  AT: "europe",
+  NO: "europe",
+  SE: "europe",
+  DK: "europe",
+  FI: "europe",
+  PL: "europe",
+  CZ: "europe",
+  JP: "asia",
+  KR: "asia",
+  CN: "asia",
+  TW: "asia",
+  HK: "asia",
+  SG: "asia",
+  TH: "asia",
+  VN: "asia",
+  ID: "asia",
+  MY: "asia",
+  PH: "asia",
+  IN: "asia",
+  AE: "asia",
+  SA: "asia",
+  AU: "oceania",
+  NZ: "oceania",
+  ZA: "africa",
+  EG: "africa",
+  MA: "africa",
+};
+
+function normalizeCountryCode(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(normalized) ? normalized : null;
+}
+
+function getRegionFromCountryCode(countryCode: string | null): string | null {
+  if (!countryCode) return null;
+  return COUNTRY_TO_REGION[countryCode] ?? null;
+}
+
+function getUserCountryHint(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const rawUser = window.localStorage.getItem("cstp.auth.user");
+    if (rawUser) {
+      const parsed = JSON.parse(rawUser) as Record<string, unknown>;
+      const directCountry =
+        normalizeCountryCode(parsed.country) ??
+        normalizeCountryCode(parsed.countryCode);
+      if (directCountry) return directCountry;
+
+      if (parsed.location && typeof parsed.location === "object") {
+        const location = parsed.location as Record<string, unknown>;
+        const nestedCountry =
+          normalizeCountryCode(location.country) ??
+          normalizeCountryCode(location.countryCode);
+        if (nestedCountry) return nestedCountry;
+      }
+    }
+  } catch {
+    // Ignore malformed local auth user payload.
+  }
+
+  const languageHints = [
+    ...(typeof navigator !== "undefined" ? navigator.languages ?? [] : []),
+    typeof navigator !== "undefined" ? navigator.language : "",
+  ].filter((value): value is string => typeof value === "string" && value.length > 0);
+
+  for (const hint of languageHints) {
+    const match = hint.match(/[-_]([A-Za-z]{2})$/);
+    if (!match) continue;
+    const country = normalizeCountryCode(match[1]);
+    if (country) return country;
+  }
+
+  return null;
+}
+
+function toDisplayDate(value?: string | null): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString();
+}
+
+function toLocationLabel(experience: Experience): string {
+  const parts = [experience.city, experience.adminRegion, experience.country]
+    .map((part) => (typeof part === "string" ? part.trim() : ""))
+    .filter(Boolean);
+
+  return parts.length > 0 ? parts.join(", ") : "Global";
+}
+
+function toDescriptionPreview(
+  description: string | undefined,
+  maxLength = 145,
+): string {
+  const trimmed = (description ?? "").trim();
+  if (!trimmed) return "Discover more about this community-curated adventure.";
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, maxLength).trimEnd()}...`;
+}
+
+function toNumericRating(experience: Experience): number | null {
+  const value = experience.avgRating;
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  return value;
+}
+
+function toRatingBadge(experience: Experience): string | null {
+  const rating = toNumericRating(experience);
+  if (rating === null) return null;
+  const reviewCount = Math.max(0, experience.reviewCount ?? 0);
+  return reviewCount > 0
+    ? `★ ${rating.toFixed(1)} (${reviewCount})`
+    : `★ ${rating.toFixed(1)}`;
+}
+
+function toCategoryLabel(experience: Experience): string | null {
+  const category = experience.category?.label?.trim();
+  if (category) return category;
+  const firstTag = experience.tags?.[0]?.label?.trim();
+  return firstTag || null;
+}
+
+function resolveFromImageArray(
+  value: Experience["photos"] | Experience["images"],
+): string | null {
+  if (!Array.isArray(value)) return null;
+
+  for (const item of value) {
+    if (typeof item === "string" && item.trim()) {
+      return item;
+    }
+    if (item && typeof item === "object" && "url" in item) {
+      const url = item.url;
+      if (typeof url === "string" && url.trim()) {
+        return url;
+      }
+    }
+  }
+
+  return null;
+}
+
+function getExperienceImage(experience: Experience): string {
+  const candidates = [
+    experience.thumbnail,
+    experience.imageUrl,
+    experience.image,
+    experience.photoUrl,
+    experience.coverImage,
+    resolveFromImageArray(experience.photos),
+    resolveFromImageArray(experience.images),
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate;
+    }
+  }
+
+  return NO_IMAGE_PLACEHOLDER;
+}
+
+function toRadians(value: number): number {
+  return (value * Math.PI) / 180;
+}
+
+function haversineDistanceKm(
+  from: Coordinates,
+  to: Coordinates,
+): number {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(to.latitude - from.latitude);
+  const dLon = toRadians(to.longitude - from.longitude);
+  const latA = toRadians(from.latitude);
+  const latB = toRadians(to.latitude);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(latA) * Math.cos(latB) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return earthRadiusKm * c;
+}
+
+function getDistanceToUserKm(
+  experience: Experience,
+  userLocation: Coordinates | null,
+): number | null {
+  if (!userLocation) return null;
+
+  if (
+    typeof experience.latitude !== "number" ||
+    typeof experience.longitude !== "number" ||
+    !Number.isFinite(experience.latitude) ||
+    !Number.isFinite(experience.longitude)
+  ) {
+    return null;
+  }
+
+  return haversineDistanceKm(userLocation, {
+    latitude: experience.latitude,
+    longitude: experience.longitude,
+  });
+}
+
+function compareFeaturedCandidates(
+  left: FeaturedCandidate,
+  right: FeaturedCandidate,
+): number {
+  const leftHasRating = left.rating !== null;
+  const rightHasRating = right.rating !== null;
+  if (leftHasRating !== rightHasRating) return leftHasRating ? -1 : 1;
+
+  if (left.rating !== null && right.rating !== null && right.rating !== left.rating) {
+    return right.rating - left.rating;
+  }
+
+  if (right.reviewCount !== left.reviewCount) {
+    return right.reviewCount - left.reviewCount;
+  }
+
+  const leftDistance = left.distanceKm ?? Number.POSITIVE_INFINITY;
+  const rightDistance = right.distanceKm ?? Number.POSITIVE_INFINITY;
+  if (leftDistance !== rightDistance) return leftDistance - rightDistance;
+
+  return left.feedIndex - right.feedIndex;
+}
+
+function pickBestCandidate(candidates: FeaturedCandidate[]): Experience | null {
+  if (candidates.length === 0) return null;
+  const sorted = [...candidates].sort(compareFeaturedCandidates);
+  return sorted[0]?.experience ?? null;
+}
+
+function pickFeaturedExperience(
+  experiences: Experience[],
+  userLocation: Coordinates | null,
+  userCountryCode: string | null,
+): Experience | null {
+  if (experiences.length === 0) return null;
+
+  const candidates: FeaturedCandidate[] = experiences.map((experience, feedIndex) => ({
+    experience,
+    feedIndex,
+    rating: toNumericRating(experience),
+    reviewCount: Math.max(0, experience.reviewCount ?? 0),
+    distanceKm: getDistanceToUserKm(experience, userLocation),
+  }));
+
+  if (userCountryCode) {
+    const sameCountry = candidates.filter(
+      (candidate) =>
+        normalizeCountryCode(candidate.experience.country) === userCountryCode,
+    );
+    const bestSameCountry = pickBestCandidate(sameCountry);
+    if (bestSameCountry) return bestSameCountry;
+
+    const userRegion = getRegionFromCountryCode(userCountryCode);
+    if (userRegion) {
+      const sameRegion = candidates.filter((candidate) => {
+        const expCountry = normalizeCountryCode(candidate.experience.country);
+        return getRegionFromCountryCode(expCountry) === userRegion;
+      });
+      const bestSameRegion = pickBestCandidate(sameRegion);
+      if (bestSameRegion) return bestSameRegion;
+    }
+  }
+
+  const nearbyCandidates = candidates.filter(
+    (candidate) => candidate.distanceKm !== null && candidate.distanceKm <= 500,
+  );
+  const bestNearby = pickBestCandidate(nearbyCandidates);
+  if (bestNearby) return bestNearby;
+
+  const ratedCandidates = candidates.filter((candidate) => candidate.rating !== null);
+  const bestRatedOverall = pickBestCandidate(ratedCandidates);
+  if (bestRatedOverall) return bestRatedOverall;
+
+  return experiences[0] ?? null;
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -92,6 +422,13 @@ export default function HomePage() {
     latitude: number;
     longitude: number;
   } | null>(null);
+
+  const userCountryHint = useMemo(() => getUserCountryHint(), []);
+
+  const featuredExperience = useMemo(
+    () => pickFeaturedExperience(experiences, homeUserLocation, userCountryHint),
+    [experiences, homeUserLocation, userCountryHint],
+  );
 
   const loadTrips = useCallback(async () => {
     const token = localStorage.getItem("cstp.auth.token");
@@ -312,38 +649,89 @@ export default function HomePage() {
   };
 
   return (
-    <main className="page-container">
-      <h1>Welcome to CrowdSourced Travel Planner</h1>
-      <p>Your authenticated travel dashboard.</p>
+    <main className="home-dashboard">
+      <section className="home-hero">
+        <div className="home-hero__copy">
+          <p className="home-hero__eyebrow">Community Travel Discovery</p>
+          <h1>Discover your next unforgettable trip</h1>
+          <p>
+            Explore community-built experiences, save favorites, and organize
+            them into custom trips.
+          </p>
+          <div className="home-hero__actions">
+            <button
+              className="home-btn home-btn--primary"
+              onClick={() => navigate(ClientRoutes.EXPERIENCE_CREATE)}
+            >
+              Create Experience
+            </button>
+            <button
+              className="home-btn home-btn--accent"
+              onClick={() => navigate(ClientRoutes.TRIP_CREATE)}
+            >
+              Create Trip
+            </button>
+            <button
+              className="home-btn home-btn--secondary"
+              onClick={() => navigate(ClientRoutes.EXPLORE)}
+            >
+              Explore Experiences
+            </button>
+          </div>
+        </div>
 
-      <div className="button-group">
-        <button
-          className="btn btn-experience"
-          onClick={() => navigate(ClientRoutes.EXPERIENCE_CREATE)}
+        <article
+          className="home-hero__visual"
+          onClick={() => {
+            if (!featuredExperience) return;
+            navigate(
+              ClientRoutes.EXPERIENCE_DETAILS.replace(
+                ":id",
+                featuredExperience.id.toString()
+              ),
+              { state: { experience: featuredExperience } }
+            );
+          }}
         >
-          + Create New Experience
-        </button>
-
-        <button
-          className="btn btn-trip"
-          onClick={() => navigate(ClientRoutes.TRIP_CREATE)}
-        >
-          + Create New Trip
-        </button>
-
-        <button
-          className="btn btn-interests"
-          onClick={() => navigate(ClientRoutes.INTERESTS)}
-        >
-          My Interests
-        </button>
-        <button
-          className="btn btn-my-trips"
-          onClick={() => navigate(ClientRoutes.MY_TRIPS)}
-        >
-          My Trips
-        </button>
-      </div>
+          <img
+            src={featuredExperience ? getExperienceImage(featuredExperience) : NO_IMAGE_PLACEHOLDER}
+            alt={featuredExperience ? featuredExperience.title : "Featured experience placeholder"}
+          />
+          <div className="hero-featured-overlay">
+            <p className="hero-featured-overlay__label">Featured Experience</p>
+            <div className="hero-featured-overlay__badges">
+              {featuredExperience && toRatingBadge(featuredExperience) ? (
+                <span className="home-chip home-chip--rating">
+                  {toRatingBadge(featuredExperience)}
+                </span>
+              ) : null}
+            </div>
+            <h2 className="hero-featured-overlay__title">
+              {featuredExperience ? `Featured: ${featuredExperience.title}` : "No featured experience yet"}
+            </h2>
+            <p className="hero-featured-overlay__meta">
+              {featuredExperience ? toLocationLabel(featuredExperience) : "Add experiences to populate this section."}
+            </p>
+            {featuredExperience ? (
+              <button
+                className="home-btn home-btn--primary hero-featured-overlay__cta"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  navigate(
+                    ClientRoutes.EXPERIENCE_DETAILS.replace(
+                      ":id",
+                      featuredExperience.id.toString()
+                    ),
+                    { state: { experience: featuredExperience } }
+                  );
+                }}
+              >
+                View Experience
+              </button>
+            ) : null}
+          </div>
+        </article>
+      </section>
 
       {(experiencesError || tripsError) && (
         <div className="home-api-error" role="alert">
@@ -359,124 +747,161 @@ export default function HomePage() {
         </div>
       )}
 
-      <h2>Your Experiences</h2>
+      <section className="home-section">
+        <div className="home-section__header">
+          <h2>For You</h2>
+          <button
+            className="home-link-btn"
+            onClick={() => navigate(ClientRoutes.EXPLORE)}
+          >
+            Explore all
+          </button>
+        </div>
 
-      {!experiencesLoaded ? (
-        <p>Loading experiences…</p>
-      ) : experiencesError ? null : experiences.length === 0 ? (
-        <p>No experiences found. Start by creating one!</p>
-      ) : (
-        <div>
-          {experiences.map((exp) => {
-            const liked = likedExperienceIds.has(exp.id);
-            return (
-              <div key={exp.id} className="card card--dashboard">
-                <div className="card-main">
-                  <h2
-                    className="card-title"
-                    onClick={() =>
-                      navigate(
-                        ClientRoutes.EXPERIENCE_DETAILS.replace(
-                          ":id",
-                          exp.id.toString()
-                        ),
-                        { state: { experience: exp } }
-                      )
-                    }
-                  >
-                    {exp.title}
-                  </h2>
-
-                  <div className="card-meta">
-                    {exp.city ? `${exp.city}, ` : ""}
-                    {exp.adminRegion ? `${exp.adminRegion}, ` : ""}
-                    {exp.country || "Global"} -{" "}
-                    {new Date(exp.dateCreated).toLocaleDateString()}
-                  </div>
-
-                  <p className="card-description">
-                    {exp.description && exp.description.length > 160
-                      ? `${exp.description.substring(0, 160)}...`
-                      : exp.description ||
-                        "Discover more about this hidden gem..."}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className={`dashboard-like-btn${liked ? " is-liked" : ""}`}
-                  disabled={likesLoading}
-                  title={liked ? "Remove from saved" : "Save experience"}
-                  aria-pressed={liked}
-                  aria-label={
-                    liked ? "Remove experience from saved" : "Save experience"
+        {!experiencesLoaded ? (
+          <p className="home-status">Loading experiences...</p>
+        ) : experiencesError ? null : experiences.length === 0 ? (
+          <p className="home-status">
+            No experiences found. Start by creating one!
+          </p>
+        ) : (
+          <div className="for-you-grid" data-testid="for-you-grid">
+            {experiences.map((exp) => {
+              const liked = likedExperienceIds.has(exp.id);
+              return (
+                <article
+                  key={exp.id}
+                  className="for-you-card"
+                  onClick={() =>
+                    navigate(
+                      ClientRoutes.EXPERIENCE_DETAILS.replace(
+                        ":id",
+                        exp.id.toString()
+                      ),
+                      { state: { experience: exp } }
+                    )
                   }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void toggleExperienceLike(exp.id);
-                  }}
                 >
-                  {liked ? "♥" : "♡"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <h2 className="section-title">Your Trips</h2>
-
-      {!tripsLoaded ? (
-        <p>Loading trips…</p>
-      ) : tripsError ? null : trips.length === 0 ? (
-        <p>No trips found. Create one!</p>
-      ) : (
-        <div>
-          {trips.map((trip) => {
-            const liked = likedTripIds.has(trip.id);
-            return (
-              <div key={trip.id} className="card card--dashboard">
-                <div className="card-main">
-                  <h2
-                    className="card-title"
-                    onClick={() =>
-                      navigate(
-                        ClientRoutes.TRIP_DETAILS.replace(
-                          ":id",
-                          trip.id.toString()
-                        )
-                      )
-                    }
-                  >
-                    {trip.title}
-                  </h2>
-
-                  <div className="card-meta">
-                    {new Date(trip.dateCreated).toLocaleDateString()}
+                  <div className="for-you-card__image-wrap">
+                    <img src={getExperienceImage(exp)} alt={exp.title} />
+                    <button
+                      type="button"
+                      className={`dashboard-like-btn for-you-card__like${
+                        liked ? " is-liked" : ""
+                      }`}
+                      disabled={likesLoading}
+                      title={liked ? "Remove from saved" : "Save experience"}
+                      aria-pressed={liked}
+                      aria-label={
+                        liked
+                          ? "Remove experience from saved"
+                          : "Save experience"
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void toggleExperienceLike(exp.id);
+                      }}
+                    >
+                      {liked ? "♥" : "♡"}
+                    </button>
                   </div>
 
-                  <p className="card-description">
-                    {trip.description || "Plan your next adventure."}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className={`dashboard-like-btn${liked ? " is-liked" : ""}`}
-                  disabled={likesLoading}
-                  title={liked ? "Remove from saved" : "Save trip"}
-                  aria-pressed={liked}
-                  aria-label={liked ? "Remove trip from saved" : "Save trip"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void toggleTripLike(trip.id);
-                  }}
-                >
-                  {liked ? "♥" : "♡"}
-                </button>
-              </div>
-            );
-          })}
+                  <div className="for-you-card__content">
+                    <div className="for-you-card__badges">
+                      {toCategoryLabel(exp) ? (
+                        <span className="home-chip home-chip--category">
+                          {toCategoryLabel(exp)}
+                        </span>
+                      ) : null}
+                      {toRatingBadge(exp) ? (
+                        <span className="home-chip home-chip--rating">
+                          {toRatingBadge(exp)}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <h3 className="for-you-card__title">{exp.title}</h3>
+                    <p className="for-you-card__meta">
+                      {toLocationLabel(exp)}
+                      {toDisplayDate(exp.dateCreated)
+                        ? ` • ${toDisplayDate(exp.dateCreated)}`
+                        : ""}
+                    </p>
+                    <p className="for-you-card__description">
+                      {toDescriptionPreview(exp.description)}
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="home-section home-section--trips">
+        <div className="home-section__header">
+          <h2>Your Trips</h2>
+          <button
+            className="home-link-btn"
+            onClick={() => navigate(ClientRoutes.MY_TRIPS)}
+          >
+            View My Trips
+          </button>
         </div>
-      )}
+
+        {!tripsLoaded ? (
+          <p className="home-status">Loading trips...</p>
+        ) : tripsError ? null : trips.length === 0 ? (
+          <p className="home-status">No trips found. Create one!</p>
+        ) : (
+          <div className="trips-grid">
+            {trips.map((trip) => {
+              const liked = likedTripIds.has(trip.id);
+              return (
+                <article
+                  key={trip.id}
+                  className="trip-card"
+                  onClick={() =>
+                    navigate(
+                      ClientRoutes.TRIP_DETAILS.replace(
+                        ":id",
+                        trip.id.toString()
+                      )
+                    )
+                  }
+                >
+                  <div className="trip-card__head">
+                    <h3 className="trip-card__title">{trip.title}</h3>
+                    <button
+                      type="button"
+                      className={`dashboard-like-btn trip-card__like${
+                        liked ? " is-liked" : ""
+                      }`}
+                      disabled={likesLoading}
+                      title={liked ? "Remove from saved" : "Save trip"}
+                      aria-pressed={liked}
+                      aria-label={liked ? "Remove trip from saved" : "Save trip"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void toggleTripLike(trip.id);
+                      }}
+                    >
+                      {liked ? "♥" : "♡"}
+                    </button>
+                  </div>
+
+                  <p className="trip-card__meta">
+                    {toDisplayDate(trip.dateCreated) ?? "Date unavailable"}
+                  </p>
+                  <p className="trip-card__description">
+                    {toDescriptionPreview(trip.description, 120)}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

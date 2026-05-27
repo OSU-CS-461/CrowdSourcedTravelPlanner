@@ -5,6 +5,7 @@ import { ClientRoutes } from "../../../shared/clientRoutes";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { USER_STORAGE_KEY } from "../../auth/context/auth-context";
 import ExperienceList from "../components/ExperienceList"; // adjust path if needed
+import "./MyExperiencesPage.css";
 
 type ExperienceTag = {
   id: number;
@@ -109,19 +110,26 @@ export default function MyExperiencesPage() {
   }
 
   return (
-    <main style={{ maxWidth: "800px", margin: "0 auto", padding: "20px", textAlign: "left" }}>
-      <h1>My Experiences</h1>
-      <p>Experiences you created.</p>
+    <main className="my-experiences-page">
+      <header className="my-experiences-header">
+        <p className="my-experiences-header__eyebrow">Creator Workspace</p>
+        <h1>My Experiences</h1>
+        <p className="my-experiences-header__subtitle">Experiences you created.</p>
+      </header>
 
-      <button onClick={() => navigate(ClientRoutes.EXPERIENCE_CREATE)}>
+      <button
+        className="my-experiences-create-btn"
+        onClick={() => navigate(ClientRoutes.EXPERIENCE_CREATE)}
+      >
         + Create New Experience
       </button>
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="my-experiences-loading">Loading...</p>
       ) : (
         <ExperienceList
           experiences={experiences}
+          variant="card"
           emptyMessage="You haven't created any experiences yet."
           onExperienceClick={(id) =>
             navigate(ClientRoutes.EXPERIENCE_DETAILS.replace(":id", String(id)), {

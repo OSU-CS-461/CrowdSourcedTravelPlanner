@@ -213,27 +213,31 @@
   }
 }
 
-@media (prefers-color-scheme: light) {
-  .exp-form {
-    --surface: #ffffff;
-    --surface-border: rgba(22, 30, 47, 0.13);
-    --text-muted: rgba(17, 24, 39, 0.9);
-    --text-subtle: rgba(55, 65, 81, 0.78);
-    --chip-bg: #f5f7fb;
-  }
+:root[data-theme="light"] .exp-form,
+:root:not([data-theme]) .exp-form {
+  --surface: #ffffff;
+  --surface-border: rgba(22, 30, 47, 0.13);
+  --text-muted: rgba(17, 24, 39, 0.9);
+  --text-subtle: rgba(55, 65, 81, 0.78);
+  --chip-bg: #f5f7fb;
+}
 
-  .exp-form input,
-  .exp-form textarea,
-  .exp-form select {
-    background: #ffffff;
-  }
+:root[data-theme="light"] .exp-form input,
+:root[data-theme="light"] .exp-form textarea,
+:root[data-theme="light"] .exp-form select,
+:root:not([data-theme]) .exp-form input,
+:root:not([data-theme]) .exp-form textarea,
+:root:not([data-theme]) .exp-form select {
+  background: #ffffff;
+}
 
-  .exp-form-error {
-    color: #b91c1c;
-  }
+:root[data-theme="light"] .exp-form-error,
+:root:not([data-theme]) .exp-form-error {
+  color: #b91c1c;
+}
 
-  .exp-form-actions button[type="submit"] {
-    border-color: rgba(53, 89, 187, 0.55);
-    color: #3559bb;
-  }
+:root[data-theme="light"] .exp-form-actions button[type="submit"],
+:root:not([data-theme]) .exp-form-actions button[type="submit"] {
+  border-color: rgba(53, 89, 187, 0.55);
+  color: #3559bb;
 }

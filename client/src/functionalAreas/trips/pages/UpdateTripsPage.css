@@ -1,0 +1,134 @@
+.update-trip-page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 12px 14px 28px;
+  text-align: left;
+}
+
+.update-trip-header {
+  margin-bottom: 16px;
+  padding: 6px 8px 0;
+}
+
+.update-trip-header__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #3d6a9f;
+}
+
+.update-trip-header h1 {
+  margin: 8px 0 0;
+  font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+  line-height: 1.15;
+  color: #14345f;
+}
+
+.update-trip-header__subtitle {
+  margin: 10px 0 0;
+  color: #4d678a;
+  line-height: 1.48;
+  max-width: 72ch;
+}
+
+.update-trip-form-shell {
+  border: 1px solid #d6e4f4;
+  border-radius: 18px;
+  box-shadow: 0 12px 26px rgba(17, 61, 110, 0.1);
+  background: #ffffff;
+}
+
+.update-trip-page .exp-form {
+  max-width: none;
+  margin: 0;
+  padding: 20px;
+}
+
+.update-trip-page .exp-form-title {
+  margin: 0 0 14px;
+  color: #14345f;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.update-trip-page .exp-form-section {
+  margin: 0;
+  border: 1px solid #d8e5f4;
+  border-radius: 14px;
+  box-shadow: none;
+  background: #fbfdff;
+  padding: 18px;
+}
+
+.update-trip-page .exp-form-grid {
+  gap: 14px;
+}
+
+.update-trip-page .exp-form-field span {
+  color: #38597f;
+  font-weight: 700;
+}
+
+.update-trip-page .exp-form-field input,
+.update-trip-page .exp-form-field textarea {
+  border-color: #cdddee;
+  color: #14345f;
+}
+
+.update-trip-page .exp-form-field input:focus,
+.update-trip-page .exp-form-field textarea:focus {
+  border-color: #2d79e6;
+  box-shadow: 0 0 0 3px rgba(45, 121, 230, 0.15);
+}
+
+.update-trip-page .exp-form-actions {
+  margin-top: 14px;
+}
+
+.update-trip-page .exp-form-actions button {
+  border: 1px solid #1f7df8;
+  background: linear-gradient(180deg, #2f8cff 0%, #1b74e6 100%);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 0.62rem 1.15rem;
+  box-shadow: 0 10px 20px rgba(20, 104, 228, 0.22);
+}
+
+.update-trip-page .exp-form-actions button:hover {
+  background: linear-gradient(180deg, #4798ff 0%, #257ee8 100%);
+  color: #fff;
+  border-color: #4193ff;
+}
+
+.update-trip-status {
+  margin: 0;
+  border: 1px solid #d2e0f2;
+  border-radius: 14px;
+  background: #f9fcff;
+  padding: 16px;
+  color: #4a678d;
+}
+
+.update-trip-status--error {
+  border-color: #f0cad0;
+  background: #fff4f6;
+  color: #7a1f2a;
+}
+
+@media (max-width: 700px) {
+  .update-trip-page {
+    padding: 8px 10px 18px;
+  }
+
+  .update-trip-page .exp-form {
+    padding: 14px;
+  }
+
+  .update-trip-page .exp-form-section {
+    padding: 14px;
+  }
+}

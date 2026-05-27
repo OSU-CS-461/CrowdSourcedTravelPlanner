@@ -36,6 +36,14 @@ const requireAuth = async (
     req.user = { id: user.id };
     next();
   } catch (err) {
+    if (
+      err instanceof Error &&
+      (err.name === "JsonWebTokenError" ||
+        err.name === "TokenExpiredError" ||
+        err.name === "NotBeforeError")
+    ) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
     next(err);
   }
 };

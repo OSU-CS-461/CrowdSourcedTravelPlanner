@@ -66,6 +66,20 @@
   padding: 0.45rem 0.8rem;
 }
 
+.toolbar-add-trip {
+  border: 1px solid rgba(53, 89, 187, 0.6);
+  border-radius: 999px;
+  background: rgba(53, 89, 187, 0.18);
+  color: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.5rem 0.95rem;
+}
+
+.toolbar-add-trip:hover {
+  border-color: rgba(53, 89, 187, 0.82);
+}
+
 .toolbar-back:hover,
 .toolbar-edit:hover,
 .toolbar-delete:hover:not(:disabled) {
@@ -85,6 +99,131 @@
 .toolbar-delete:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.trip-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(14, 22, 38, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.trip-picker-modal {
+  width: min(620px, 100%);
+  max-height: min(82vh, 740px);
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgba(5, 12, 22, 0.35);
+}
+
+.trip-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--surface-border);
+  padding: 14px 16px;
+}
+
+.trip-picker-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.trip-picker-close {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.trip-picker-status {
+  margin: 0;
+  padding: 16px;
+  color: var(--text-muted);
+}
+
+.trip-picker-status--error {
+  display: grid;
+  gap: 10px;
+}
+
+.trip-picker-status p {
+  margin: 0;
+}
+
+.trip-picker-retry,
+.trip-picker-create {
+  justify-self: start;
+  border: 1px solid rgba(53, 89, 187, 0.55);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  padding: 0.42rem 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trip-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.trip-picker-item-btn {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  padding: 12px;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+}
+
+.trip-picker-item-btn:hover:not(:disabled) {
+  border-color: rgba(53, 89, 187, 0.65);
+  background: rgba(53, 89, 187, 0.08);
+}
+
+.trip-picker-item-btn:disabled {
+  opacity: 0.66;
+  cursor: not-allowed;
+}
+
+.trip-picker-item-title {
+  font-weight: 700;
+}
+
+.trip-picker-item-meta {
+  color: var(--text-subtle);
+  font-size: 0.85rem;
+}
+
+.trip-picker-item-desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.trip-picker-item-action {
+  margin-top: 3px;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.85rem;
 }
 
 .detail-status-card {
@@ -237,32 +376,38 @@ a.tag-pill-link:hover {
   .detail-body {
     padding: 1rem;
   }
+
+  .toolbar-actions {
+    flex-wrap: wrap;
+  }
 }
 
-@media (prefers-color-scheme: light) {
-  .experience-detail-page {
-    --surface: #ffffff;
-    --surface-border: rgba(22, 30, 47, 0.13);
-    --text-muted: rgba(17, 24, 39, 0.9);
-    --text-subtle: rgba(55, 65, 81, 0.78);
-    --chip-bg: #f5f7fb;
-    --accent: #3559bb;
-  }
+:root[data-theme="light"] .experience-detail-page,
+:root:not([data-theme]) .experience-detail-page {
+  --surface: #ffffff;
+  --surface-border: rgba(22, 30, 47, 0.13);
+  --text-muted: rgba(17, 24, 39, 0.9);
+  --text-subtle: rgba(55, 65, 81, 0.78);
+  --chip-bg: #f5f7fb;
+  --accent: #3559bb;
+}
 
-  .toolbar-edit {
-    border-color: rgba(53, 89, 187, 0.5);
-    color: #3559bb;
-  }
+:root[data-theme="light"] .toolbar-edit,
+:root:not([data-theme]) .toolbar-edit {
+  border-color: rgba(53, 89, 187, 0.5);
+  color: #3559bb;
+}
 
-  .toolbar-delete {
-    border-color: rgba(178, 47, 47, 0.58);
-    color: #9f2323;
-  }
+:root[data-theme="light"] .toolbar-delete,
+:root:not([data-theme]) .toolbar-delete {
+  border-color: rgba(178, 47, 47, 0.58);
+  color: #9f2323;
+}
 
-  .rating-chip {
-    background: rgba(53, 89, 187, 0.1);
-    color: #2f4eab;
-  }
+:root[data-theme="light"] .rating-chip,
+:root:not([data-theme]) .rating-chip {
+  background: rgba(53, 89, 187, 0.1);
+  color: #2f4eab;
 }
 
 .detail-title-group {
